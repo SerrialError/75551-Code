@@ -73,40 +73,82 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-pros::Motor input_motor(1);
-pros::Motor test_motor(2);
+pros::Motor test_motor(1);
 
 struct kappa_e_type {
-	double voltage[1000];
-	double angular_velocity[1000];
+	double voltage;
+	double angular_velocity;
 };
 
-kappa_e_type velocity_constant(int n) {
-	kappa_e_type result;
-	for (int i = 0; i < n; i++) {
-		result.voltage[i] = test_motor.get_voltage();
-		result.angular_velocity[i] = test_motor.get_actual_velocity();
-		pros::delay(10);
-	}
-	return result;	
-}
-void opcontrol() {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	int n = 500;
-	input_motor.move_voltage(6000);
-	kappa_e_type kappa_e = velocity_constant(n);
+struct kappa_tau_type {
+	double current;
+	double torque;
+};
 
-	input_motor.move_voltage(0);
-	printf("{");
-	for (int i = 0; i < n; i++) {
-		printf("(%lf", kappa_e.angular_velocity[i]*6000.f);
-		printf(", %lf", kappa_e.voltage[i]);
-		if (i == n-1) {
-		  printf(")}");
-		}
-		else {
-		  printf("), ");
-		}
-		pros::delay(5);
-	}
+std::vector<kappa_e_type> velocity_constant(int n, int settle_ms) {
+	std::vector<kappa_e_type> result;
+	for (int i = 1; i < 13; i++) {
+		test_motor.move_voltage(1000*i);
+		pros::delay(settle_ms);
+		double voltage_total{0.0};
+		double velocity_total{0.0};
+		for (int j = 0; j < n; j++) {
+			voltage_total += test_motor.get_voltage() / 1000.f;
+			velocity_total += test_motor.get_actual_velocity() * 2.f * M_PI / 60.f;
+			pros::delay(10);
+		};
+		double avg_voltage = voltage_total / n;
+		double avg_velocity = velocity_total / n;
+		result.push_back({avg_voltage, avg_velocity}); 
+	};
+	test_motor.move_voltage(0);
+
+	return result;	
+};
+
+std::vector<kappa_tau_type> torque_constant(int n, int settle_ms) {
+	std::vector<kappa_tau_type> result;
+	for (int i = 1; i < 13; i++) {
+		test_motor.move_voltage(1000*i);
+		pros::delay(settle_ms);
+		double current_total{0.0};
+		double torque_total{0.0};
+		for (int j = 0; j < n; j++) {
+			current_total += test_motor.get_current_draw() / 1000.f;
+			torque_total += test_motor.get_torque();
+			pros::delay(10);
+		};
+		double avg_current = current_total / n;
+		double avg_torque = torque_total / n;
+		result.push_back({avg_current, avg_torque}); 
+	};
+	test_motor.move_voltage(0);
+
+	return result;	
+};
+
+void print_vector(const std::vector<kappa_e_type>& vec) {
+    printf("{");
+    for (size_t i = 0; i < vec.size(); ++i) {
+        printf("(%.2f,%.2f)", vec[i].voltage, vec[i].angular_velocity);
+        if (i != vec.size() - 1) printf(",");
+    }
+    printf("}\n");
+}
+
+void print_vector(const std::vector<kappa_tau_type>& vec) {
+    printf("{");
+    for (size_t i = 0; i < vec.size(); ++i) {
+        printf("(%.2f,%.2f)", vec[i].current, vec[i].torque);
+        if (i != vec.size() - 1) printf(",");
+    }
+    printf("}\n");
+}
+
+void opcontrol() {
+	int n = 500;
+	std::vector<kappa_e_type> V_vs_w = velocity_constant(n, 800);
+	std::vector<kappa_tau_type> I_vs_tau = torque_constant(n, 800);
+	print_vector(V_vs_w);
+	print_vector(I_vs_tau);
 }
