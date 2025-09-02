@@ -112,8 +112,26 @@ void print_vector(const std::vector<input_output>& vec) {
     }
     printf("]\n");
 }
+class DCff {
+private:
+	const double K_a;
+	const double K_v;
+	const double K_s;
+	static double sign(double x) {
+		return (x > 0) - (x < 0);
+	}
+public:
+	DCff(double K_a_, double K_v_, double K_s_) : K_a(K_a_), K_v(K_v_), K_s(K_s_) {}
 
+	double compute_voltage(double alpha, double omega) const {
+		double u = K_a * alpha + K_v * omega + K_s * sign(omega);
+		return u;
+	}
+
+};
 void opcontrol() {
 	std::vector<input_output> u_vs_x = fopdt_system_identification(200);
 	print_vector(u_vs_x);
+	DCff feedforward(0.0, 0.0, 0.0);
+	double voltage = feedforward.compute_voltage(0.1, 0.0);
 }
