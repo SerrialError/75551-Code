@@ -80,81 +80,11 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-pros::Motor test_motor(1);
 
-
-struct input_output {
-    double u;
-    double x;
-};
-
-
-std::vector<input_output> fopdt_system_identification(int n) {
-    std::vector<input_output> result;
-    for (int i = -12; i < 13; i++) {
-        test_motor.move_voltage(1000*i);
-        for (int j = 0; j < n; j++) {            
-            double measured_mv = test_motor.get_voltage();           // mV
-                    double measured_rpm = test_motor.get_actual_velocity(); // RPM
-                    input_output sample;
-                    sample.u = measured_mv / 1000.f;             // V
-                    sample.x = measured_rpm * 2.f * M_PI / 60.f; // rad/s
-                    result.push_back(sample);
-            pros::delay(10);
-        };
-    };
-    test_motor.move_voltage(0);
-    return result;  
-};
-
-
-void print_vector(const std::vector<input_output>& vec) {
-    printf("U = [");
-    for (size_t i = 0; i < vec.size(); ++i) {
-        printf("%.6f", vec[i].u);
-        if (i != vec.size() - 1) printf(",");
-    }
-    printf("]\n");
-    printf("X = [");
-    for (size_t i = 0; i < vec.size(); ++i) {
-        printf("%.6f", vec[i].x);
-        if (i != vec.size() - 1) printf(",");
-    }
-    printf("]\n");
-}
-class DCff {
-private:
-    const double K_a;
-    const double K_v;
-    const double K_s;
-    static double sign(double x) {
-        return (x > 0) - (x < 0);
-    }
-public:
-    DCff(double K_a_, double K_v_, double K_s_) : K_a(K_a_), K_v(K_v_), K_s(K_s_) {}
-
-
-    double compute_voltage(double alpha /*rad/s^2*/, double omega /*rad/s*/) const {
-        double u = K_a * alpha + K_v * omega + K_s * sign(omega);
-        return u;
-    }
-
-
-};
-class drivetrain {
-private:
-    pros::Motor& m1;
-    pros::Motor& m2;
-    pros::Motor& o1;
-    pros::Motor& o2;
-    pros::Motor& m3;
-    pros::Motor& m4;
-public:
-    drivetrain(pros::Motor& m1_, pros::Motor& m2_, pros::Motor& o1_, pros::Motor& o2_, pros::Motor& m3_, pros::Motor& m4_) : m1(m1_), m2(m2_), o1(o1_), o2(o2_), m3(m3_), m4(m4_) {}
-
-};
 void opcontrol() {
-    // std::vector<input_output> u_vs_x = fopdt_system_identification(200);
+    pros::Motor test_motor(7);
+    // compute sysid(test_motor);
+    // std::vector<input_output> u_vs_x = sys.id.fopdt_system_identification(200);
     // print_vector(u_vs_x);
     pros::Motor m1(1, pros::v5::MotorGears::blue);
     pros::Motor m2(2, pros::v5::MotorGears::blue);

@@ -35,6 +35,8 @@
 #define PROS_USE_LITERALS
 
 #include "api.h"
+#include "drivetrain.hpp"
+#include "system-identification.hpp"
 
 /**
  * You should add more #includes here
