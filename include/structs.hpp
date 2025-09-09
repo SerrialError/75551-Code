@@ -38,4 +38,10 @@ struct wheel_vel_lims {
     wheel_vel_lim m4_limits;
 };
 
+struct ff_constants {
+    const double K_a;
+    const double K_v;
+    const double K_s;
+};
+
 #endif // STRUCTS_HPP

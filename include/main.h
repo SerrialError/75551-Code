@@ -35,8 +35,10 @@
 #define PROS_USE_LITERALS
 
 #include "api.h"
+#include "structs.hpp"
 #include "drivetrain.hpp"
 #include "system-identification.hpp"
+#include "ff-velocity-controller.hpp"
 
 /**
  * You should add more #includes here

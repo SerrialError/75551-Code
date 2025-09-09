@@ -84,7 +84,7 @@ void autonomous() {}
 void opcontrol() {
     pros::Motor test_motor(7);
     // compute sysid(test_motor);
-    // std::vector<input_output> u_vs_x = sys.id.fopdt_system_identification(200);
+    // std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
     // print_vector(u_vs_x);
     pros::Motor m1(1, pros::v5::MotorGears::blue);
     pros::Motor m2(2, pros::v5::MotorGears::blue);
@@ -92,8 +92,9 @@ void opcontrol() {
     pros::Motor o2(4, pros::v5::MotorGears::blue);
     pros::Motor m3(5, pros::v5::MotorGears::blue);
     pros::Motor m4(6, pros::v5::MotorGears::blue);
-    drivetrain mecanum(m1, m2, o1, o2, m3, m4, 1, 2);
-    DCff feedforward(0.00380743747817, 0.510097726504, 0.17033803784);
+    // drivetrain mecanum(m1, m2, o1, o2, m3, m4, .292100005, .29508135);
+    ff_constants test_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
+    DCff feedforward(test_motor_constants);
     double acceleration = 0.0;
     double prev_velocity = 0.0;
     std::vector<input_output> result;
