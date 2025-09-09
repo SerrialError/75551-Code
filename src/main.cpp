@@ -141,9 +141,28 @@ public:
 
 
 };
+class drivetrain {
+private:
+    pros::Motor& m1;
+    pros::Motor& m2;
+    pros::Motor& o1;
+    pros::Motor& o2;
+    pros::Motor& m3;
+    pros::Motor& m4;
+public:
+    drivetrain(pros::Motor& m1_, pros::Motor& m2_, pros::Motor& o1_, pros::Motor& o2_, pros::Motor& m3_, pros::Motor& m4_) : m1(m1_), m2(m2_), o1(o1_), o2(o2_), m3(m3_), m4(m4_) {}
+
+};
 void opcontrol() {
     // std::vector<input_output> u_vs_x = fopdt_system_identification(200);
     // print_vector(u_vs_x);
+    pros::Motor m1(1, pros::v5::MotorGears::blue);
+    pros::Motor m2(2, pros::v5::MotorGears::blue);
+    pros::Motor o1(3, pros::v5::MotorGears::blue);
+    pros::Motor o2(4, pros::v5::MotorGears::blue);
+    pros::Motor m3(5, pros::v5::MotorGears::blue);
+    pros::Motor m4(6, pros::v5::MotorGears::blue);
+    drivetrain mecanum(m1, m2, o1, o2, m3, m4);
     DCff feedforward(0.00380743747817, 0.510097726504, 0.17033803784);
     double acceleration = 0.0;
     double prev_velocity = 0.0;
