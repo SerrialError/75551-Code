@@ -92,7 +92,7 @@ void opcontrol() {
     pros::Motor o2(4, pros::v5::MotorGears::blue);
     pros::Motor m3(5, pros::v5::MotorGears::blue);
     pros::Motor m4(6, pros::v5::MotorGears::blue);
-    drivetrain mecanum(m1, m2, o1, o2, m3, m4);
+    drivetrain mecanum(m1, m2, o1, o2, m3, m4, 1, 2);
     DCff feedforward(0.00380743747817, 0.510097726504, 0.17033803784);
     double acceleration = 0.0;
     double prev_velocity = 0.0;

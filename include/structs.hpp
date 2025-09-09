@@ -9,4 +9,33 @@ struct input_output {
     double x;
 };
 
+struct wheel_vels {
+    double m1_vel;
+    double m2_vel;
+    double o1_vel;
+    double o2_vel;
+    double m3_vel;
+    double m4_vel;
+};
+
+struct pose_vels {
+    double x_vel;
+    double y_vel;
+    double theta_vel;
+};
+
+struct wheel_vel_lim {
+    double min;
+    double max;
+};
+
+struct wheel_vel_lims {
+    wheel_vel_lim m1_limits;
+    wheel_vel_lim m2_limits;
+    wheel_vel_lim o1_limits;
+    wheel_vel_lim o2_limits;
+    wheel_vel_lim m3_limits;
+    wheel_vel_lim m4_limits;
+};
+
 #endif // STRUCTS_HPP
