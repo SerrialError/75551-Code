@@ -1,5 +1,6 @@
 #include "main.h"
 
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -7,14 +8,15 @@
  * "I was pressed!" and nothing.
  */
 void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
+    static bool pressed = false;
+    pressed = !pressed;
+    if (pressed) {
+        pros::lcd::set_text(2, "I was pressed!");
+    } else {
+        pros::lcd::clear_line(2);
+    }
 }
+
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -23,11 +25,13 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
+    pros::lcd::initialize();
+    pros::lcd::set_text(1, "Hello PROS User!");
 
-	pros::lcd::register_btn1_cb(on_center_button);
+
+    pros::lcd::register_btn1_cb(on_center_button);
 }
+
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -35,6 +39,7 @@ void initialize() {
  * the robot is enabled, this task will exit.
  */
 void disabled() {}
+
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -46,6 +51,7 @@ void disabled() {}
  * starts.
  */
 void competition_initialize() {}
+
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -59,6 +65,7 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {}
+
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -75,28 +82,31 @@ void autonomous() {}
  */
 pros::Motor test_motor(1);
 
+
 struct input_output {
-	double u;
-	double x;
+    double u;
+    double x;
 };
 
+
 std::vector<input_output> fopdt_system_identification(int n) {
-	std::vector<input_output> result;
-	for (int i = -12; i < 13; i++) {
-		test_motor.move_voltage(1000*i);
-		for (int j = 0; j < n; j++) {            
-			double measured_mv = test_motor.get_voltage();           // mV
-            		double measured_rpm = test_motor.get_actual_velocity(); // RPM
-            		input_output sample;
-            		sample.u = measured_mv / 1000.f;             // V
-            		sample.x = measured_rpm * 2.f * M_PI / 60.f; // rad/s
-            		result.push_back(sample);
-			pros::delay(10);
-		};
-	};
-	test_motor.move_voltage(0);
-	return result;	
+    std::vector<input_output> result;
+    for (int i = -12; i < 13; i++) {
+        test_motor.move_voltage(1000*i);
+        for (int j = 0; j < n; j++) {            
+            double measured_mv = test_motor.get_voltage();           // mV
+                    double measured_rpm = test_motor.get_actual_velocity(); // RPM
+                    input_output sample;
+                    sample.u = measured_mv / 1000.f;             // V
+                    sample.x = measured_rpm * 2.f * M_PI / 60.f; // rad/s
+                    result.push_back(sample);
+            pros::delay(10);
+        };
+    };
+    test_motor.move_voltage(0);
+    return result;  
 };
+
 
 void print_vector(const std::vector<input_output>& vec) {
     printf("U = [");
@@ -114,24 +124,40 @@ void print_vector(const std::vector<input_output>& vec) {
 }
 class DCff {
 private:
-	const double K_a;
-	const double K_v;
-	const double K_s;
-	static double sign(double x) {
-		return (x > 0) - (x < 0);
-	}
+    const double K_a;
+    const double K_v;
+    const double K_s;
+    static double sign(double x) {
+        return (x > 0) - (x < 0);
+    }
 public:
-	DCff(double K_a_, double K_v_, double K_s_) : K_a(K_a_), K_v(K_v_), K_s(K_s_) {}
+    DCff(double K_a_, double K_v_, double K_s_) : K_a(K_a_), K_v(K_v_), K_s(K_s_) {}
 
-	double compute_voltage(double alpha, double omega) const {
-		double u = K_a * alpha + K_v * omega + K_s * sign(omega);
-		return u;
-	}
+
+    double compute_voltage(double alpha /*rad/s^2*/, double omega /*rad/s*/) const {
+        double u = K_a * alpha + K_v * omega + K_s * sign(omega);
+        return u;
+    }
+
 
 };
 void opcontrol() {
-	std::vector<input_output> u_vs_x = fopdt_system_identification(200);
-	print_vector(u_vs_x);
-	DCff feedforward(0.0, 0.0, 0.0);
-	double voltage = feedforward.compute_voltage(0.1, 0.0);
+    // std::vector<input_output> u_vs_x = fopdt_system_identification(200);
+    // print_vector(u_vs_x);
+    DCff feedforward(0.00380743747817, 0.510097726504, 0.17033803784);
+    double acceleration = 0.0;
+    double prev_velocity = 0.0;
+    std::vector<input_output> result;
+    for (int i = 1; i < 101; i++) {
+        input_output sample;
+        sample.u = feedforward.compute_voltage(acceleration, prev_velocity);
+        test_motor.move_voltage(sample.u * 1000);
+        acceleration += 6.6283;
+        prev_velocity = test_motor.get_actual_velocity() * 2.f * M_PI / 60.f;
+        sample.x = prev_velocity;
+        result.push_back(sample);
+        pros::delay(10);
+    }
+    test_motor.move_voltage(0);
+    print_vector(result);
 }
