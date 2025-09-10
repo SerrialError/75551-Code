@@ -3,6 +3,7 @@
 
 #include "api.h"
 #include "structs.hpp"
+#include "ff-velocity-controller.hpp"
 
 class drivetrain {
 private:
@@ -28,6 +29,7 @@ public:
         m1_constants(m1_constants_), m2_constants(m2_constants_), o1_constants(o1_constants_), o2_constants(o2_constants_), m3_constants(m3_constants_), m4_constants(m4_constants_)  {}
 
     wheel_vels calculate_wheel_vels(pose_vels desired_vels, wheel_vel_lims wheel_vel_limits);
+    void move_wheel_vels(wheel_vels wheel_velocities);
 };
 
 #endif // DRIVETRAIN_HPP

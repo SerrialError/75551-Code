@@ -53,3 +53,30 @@ wheel_vels drivetrain::calculate_wheel_vels(pose_vels desired_vels,
     result.o2_vel = sol[5];
     return result;
 }
+
+void drivetrain::move_wheel_vels(wheel_vels wheel_accelerations) {
+    DCff m1_feedforward(m1_constants);
+    DCff m2_feedforward(m2_constants);
+    DCff o1_feedforward(o1_constants);
+    DCff o2_feedforward(o2_constants);
+    DCff m3_feedforward(m3_constants);
+    DCff m4_feedforward(m4_constants);
+    double m1_velocity = m1.get_actual_velocity() * 2.f * M_PI / 60.f;
+    double m1_voltage = m1_feedforward.compute_voltage(wheel_accelerations.m1_vel, m1_velocity);
+    double m2_velocity = m2.get_actual_velocity() * 2.f * M_PI / 60.f;
+    double m2_voltage = m2_feedforward.compute_voltage(wheel_accelerations.m2_vel, m2_velocity);
+    double o1_velocity = o1.get_actual_velocity() * 2.f * M_PI / 60.f;
+    double o1_voltage = o1_feedforward.compute_voltage(wheel_accelerations.o1_vel, o1_velocity);
+    double o2_velocity = o2.get_actual_velocity() * 2.f * M_PI / 60.f;
+    double o2_voltage = o2_feedforward.compute_voltage(wheel_accelerations.m1_vel, m2_velocity);
+    double m3_velocity = m3.get_actual_velocity() * 2.f * M_PI / 60.f;
+    double m3_voltage = m3_feedforward.compute_voltage(wheel_accelerations.m3_vel, m3_velocity);
+    double m4_velocity = m4.get_actual_velocity() * 2.f * M_PI / 60.f;
+    double m4_voltage = m4_feedforward.compute_voltage(wheel_accelerations.m4_vel, m4_velocity);
+    m1.move_voltage(m1_voltage);
+    m2.move_voltage(m2_voltage);
+    o1.move_voltage(o1_voltage);
+    o2.move_voltage(o2_voltage);
+    m3.move_voltage(m3_voltage);
+    m4.move_voltage(m4_voltage);
+}

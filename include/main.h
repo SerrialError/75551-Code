@@ -39,6 +39,7 @@
 #include "drivetrain.hpp"
 #include "system-identification.hpp"
 #include "ff-velocity-controller.hpp"
+#include "motion-profiler.hpp"
 
 /**
  * You should add more #includes here
