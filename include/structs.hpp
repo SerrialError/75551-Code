@@ -9,19 +9,19 @@ struct input_output {
     double x;
 };
 
-struct wheel_vels {
-    double m1_vel;
-    double m2_vel;
-    double o1_vel;
-    double o2_vel;
-    double m3_vel;
-    double m4_vel;
+struct wheels {
+    double m1;
+    double m2;
+    double o1;
+    double o2;
+    double m3;
+    double m4;
 };
 
-struct pose_vels {
-    double x_vel;
-    double y_vel;
-    double theta_vel;
+struct pose {
+    double x;
+    double y;
+    double theta;
 };
 
 struct wheel_vel_lim {

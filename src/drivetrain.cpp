@@ -1,7 +1,7 @@
 #include "drivetrain.hpp"
 #include "simplex.hpp"
 
-wheel_vels drivetrain::calculate_wheel_vels(pose_vels desired_vels,
+wheels drivetrain::calculate_wheel_vels(pose desired_vels,
                                             wheel_vel_lims limits) {
     // Decision vars: [m1, m2, m3, m4, o1, o2]
     const int n = 6;
@@ -26,7 +26,7 @@ wheel_vels drivetrain::calculate_wheel_vels(pose_vels desired_vels,
     }
 
     // Angle constraint (linearized)
-    double t = std::tan(desired_vels.theta_vel);
+    double t = std::tan(desired_vels.theta);
     std::vector<double> a_ang = {1+t, 1-t, 1-t, 1+t, 1, 1};
     A.push_back(a_ang); b.push_back(0.0);
     for (double &v : a_ang) v = -v;
@@ -36,47 +36,45 @@ wheel_vels drivetrain::calculate_wheel_vels(pose_vels desired_vels,
     double L = wheelbase_length;
     double W = trackwidth_length;
     std::vector<double> a_tau = {-(L+W)/4, (L+W)/4, -(L+W)/4, (L+W)/4, -W/2, W/2};
-    A.push_back(a_tau); b.push_back(desired_vels.theta_vel);
+    A.push_back(a_tau); b.push_back(desired_vels.theta);
     for (double &v : a_tau) v = -v;
-    A.push_back(a_tau); b.push_back(desired_vels.theta_vel);
+    A.push_back(a_tau); b.push_back(desired_vels.theta);
 
     // Solve LP
     std::vector<double> sol = Simplex::solve(A, b, c);
 
-    // Map solution into wheel_vels
-    wheel_vels result;
-    result.m1_vel = sol[0];
-    result.m2_vel = sol[1];
-    result.m3_vel = sol[2];
-    result.m4_vel = sol[3];
-    result.o1_vel = sol[4];
-    result.o2_vel = sol[5];
+    // Map solution into wheels vels
+    wheels result;
+    result.m1 = sol[0];
+    result.m2 = sol[1];
+    result.m3 = sol[2];
+    result.m4 = sol[3];
+    result.o1 = sol[4];
+    result.o2 = sol[5];
     return result;
 }
 
-void drivetrain::move_wheel_vels(wheel_vels wheel_accelerations) {
-    DCff m1_feedforward(m1_constants);
-    DCff m2_feedforward(m2_constants);
-    DCff o1_feedforward(o1_constants);
-    DCff o2_feedforward(o2_constants);
-    DCff m3_feedforward(m3_constants);
-    DCff m4_feedforward(m4_constants);
+void drivetrain::move_wheel_accels(wheels wheel_accelerations) {
     double m1_velocity = m1.get_actual_velocity() * 2.f * M_PI / 60.f;
-    double m1_voltage = m1_feedforward.compute_voltage(wheel_accelerations.m1_vel, m1_velocity);
+    double m1_voltage = m1_ff.compute_voltage(wheel_accelerations.m1, m1_velocity);
     double m2_velocity = m2.get_actual_velocity() * 2.f * M_PI / 60.f;
-    double m2_voltage = m2_feedforward.compute_voltage(wheel_accelerations.m2_vel, m2_velocity);
+    double m2_voltage = m2_ff.compute_voltage(wheel_accelerations.m2, m2_velocity);
     double o1_velocity = o1.get_actual_velocity() * 2.f * M_PI / 60.f;
-    double o1_voltage = o1_feedforward.compute_voltage(wheel_accelerations.o1_vel, o1_velocity);
+    double o1_voltage = o1_ff.compute_voltage(wheel_accelerations.o1, o1_velocity);
     double o2_velocity = o2.get_actual_velocity() * 2.f * M_PI / 60.f;
-    double o2_voltage = o2_feedforward.compute_voltage(wheel_accelerations.m1_vel, m2_velocity);
+    double o2_voltage = o2_ff.compute_voltage(wheel_accelerations.m1, m2_velocity);
     double m3_velocity = m3.get_actual_velocity() * 2.f * M_PI / 60.f;
-    double m3_voltage = m3_feedforward.compute_voltage(wheel_accelerations.m3_vel, m3_velocity);
+    double m3_voltage = m3_ff.compute_voltage(wheel_accelerations.m3, m3_velocity);
     double m4_velocity = m4.get_actual_velocity() * 2.f * M_PI / 60.f;
-    double m4_voltage = m4_feedforward.compute_voltage(wheel_accelerations.m4_vel, m4_velocity);
+    double m4_voltage = m4_ff.compute_voltage(wheel_accelerations.m4, m4_velocity);
     m1.move_voltage(m1_voltage);
     m2.move_voltage(m2_voltage);
     o1.move_voltage(o1_voltage);
     o2.move_voltage(o2_voltage);
     m3.move_voltage(m3_voltage);
     m4.move_voltage(m4_voltage);
+}
+
+void field_oriented_holonomic_control(double x_1_axis, double y_1_axis, double x_2_axis, double y_2_axis) {
+
 }

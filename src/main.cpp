@@ -100,6 +100,8 @@ void opcontrol() {
     ff_constants m3_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
     pros::Motor m4(6, pros::v5::MotorGears::blue);
     ff_constants m4_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
-    drivetrain mecanum(m1, m2, o1, o2, m3, m4, .292100005, .29508135, m1_motor_constants, m2_motor_constants, o1_motor_constants, o2_motor_constants, m3_motor_constants, m4_motor_constants);
+    double wheelbase = .292100005; // m
+    double trackwidth = .29508135; // m
+    drivetrain mecanum(m1, m2, o1, o2, m3, m4, wheelbase, trackwidth, m1_motor_constants, m2_motor_constants, o1_motor_constants, o2_motor_constants, m3_motor_constants, m4_motor_constants);
 
 }
