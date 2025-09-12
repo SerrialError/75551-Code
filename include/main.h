@@ -24,7 +24,7 @@
  * E_CONTROLLER_MASTER is pedantically correct within the PROS styleguide, but
  * not convenient for most student programmers.
  */
-#define PROS_USE_SIMPLE_NAMES
+// #define PROS_USE_SIMPLE_NAMES
 
 /**
  * If defined, C++ literals will be available for use. All literals are in the

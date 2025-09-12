@@ -82,24 +82,22 @@ void autonomous() {}
  */
 
 void opcontrol() {
-    pros::Motor test_motor(7);
-    ff_constants test_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
-    // oned_motion_profiler(test_motor, test_motor_constants);
-    compute sysid(test_motor);
-    std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
-    print_vector(u_vs_x);
-    pros::Motor m1(1, pros::v5::MotorGears::blue);
-    ff_constants m1_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
-    pros::Motor m2(2, pros::v5::MotorGears::blue);
-    ff_constants m2_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
-    pros::Motor o1(3, pros::v5::MotorGears::blue);
-    ff_constants o1_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
-    pros::Motor o2(4, pros::v5::MotorGears::blue);
-    ff_constants o2_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
-    pros::Motor m3(5, pros::v5::MotorGears::blue);
-    ff_constants m3_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
-    pros::Motor m4(6, pros::v5::MotorGears::blue);
-    ff_constants m4_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
+    // compute sysid(m4);
+    // std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
+    // print_vector(u_vs_x);
+    // motor_angle_mp_test(m1, m1_motor_constants, 78.497928, 4700.12687931 * 0.8f, 2.f * M_PI * 10);
+    pros::Motor m1(3, pros::v5::MotorGears::blue);
+    ff_constants m1_motor_constants = {0.00126972964636, 0.15638764945, 0.273219119397};
+    pros::Motor m2(-13, pros::v5::MotorGears::blue);
+    ff_constants m2_motor_constants = {0.0102389892548, 0.160984984415, 0.6346622914};
+    pros::Motor o1(2, pros::v5::MotorGears::blue);
+    ff_constants o1_motor_constants = {0.0280821146715, 0.173093964818, 1.07228658995};
+    pros::Motor o2(-12, pros::v5::MotorGears::blue);
+    ff_constants o2_motor_constants = {0.00241235016359, 0.161022522912, 0.636826510544};
+    pros::Motor m3(1, pros::v5::MotorGears::blue);
+    ff_constants m3_motor_constants = {0.00961670602185, 0.170353286945, 0.984054974167};
+    pros::Motor m4(-11, pros::v5::MotorGears::blue);
+    ff_constants m4_motor_constants = {0.0249758005297, 0.180763155058, 0.750449736604};
     double wheelbase = .292100005; // m
     double trackwidth = .29508135; // m
     drivetrain mecanum(m1, m2, o1, o2, m3, m4, wheelbase, trackwidth, m1_motor_constants, m2_motor_constants, o1_motor_constants, o2_motor_constants, m3_motor_constants, m4_motor_constants);

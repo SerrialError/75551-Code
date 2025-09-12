@@ -53,15 +53,18 @@ void motor_angle_mp_test(pros::Motor& test_motor, ff_constants test_motor_consta
     double d_accel = calculate_d_accel(v_max, a_max);
     double d_coast = calculate_d_coast(angle, d_accel);
     double t_coast = calculate_t_coast(d_coast, v_max);
-    int total_t = static_cast<int>((t_accel * 2 + t_coast) * 100);
+    int total_t = static_cast<int>((t_accel * 2.f + t_coast) * 100.f); // 10 ms -> 1s
+    // int total_t = 1000;
+    // printf("%d", total_t);
     DCff feedforward(test_motor_constants);
     std::vector<input_output> result;
     for (int i = 1; i < total_t + 1; i++) {
         input_output sample;
-        double acceleration = oned_mp_accel(a_max, t_accel, t_coast, i * .01);
+        double acceleration = oned_mp_accel(a_max, t_accel, t_coast, i * 100.f);
         double prev_velocity = test_motor.get_actual_velocity() * 2.f * M_PI / 60.f;
-        sample.u = feedforward.compute_voltage(acceleration, prev_velocity);
-        test_motor.move_voltage(sample.u * 1000);
+        double voltage = feedforward.compute_voltage(acceleration, prev_velocity);
+        sample.u = i * 1.f;
+        test_motor.move_voltage(voltage * 1000);
         sample.x = prev_velocity;
         result.push_back(sample);
         pros::delay(10);

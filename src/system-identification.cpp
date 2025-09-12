@@ -18,7 +18,6 @@ std::vector<input_output> compute::fopdt_system_identification(int n) {
     return result;  
 };
 
-
 void print_vector(const std::vector<input_output>& vec) {
     printf("U = [");
     for (size_t i = 0; i < vec.size(); ++i) {

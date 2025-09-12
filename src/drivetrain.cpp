@@ -75,6 +75,6 @@ void drivetrain::move_wheel_accels(wheels wheel_accelerations) {
     m4.move_voltage(m4_voltage);
 }
 
-void field_oriented_holonomic_control(double x_1_axis, double y_1_axis, double x_2_axis, double y_2_axis) {
+void drivetrain::field_oriented_holonomic_control(double x_1_axis, double y_1_axis, double x_2_axis, double y_2_axis) {
 
 }
