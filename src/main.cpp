@@ -83,31 +83,23 @@ void autonomous() {}
 
 void opcontrol() {
     pros::Motor test_motor(7);
-    // compute sysid(test_motor);
-    // std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
-    // print_vector(u_vs_x);
-    pros::Motor m1(1, pros::v5::MotorGears::blue);
-    pros::Motor m2(2, pros::v5::MotorGears::blue);
-    pros::Motor o1(3, pros::v5::MotorGears::blue);
-    pros::Motor o2(4, pros::v5::MotorGears::blue);
-    pros::Motor m3(5, pros::v5::MotorGears::blue);
-    pros::Motor m4(6, pros::v5::MotorGears::blue);
-    // drivetrain mecanum(m1, m2, o1, o2, m3, m4, .292100005, .29508135);
     ff_constants test_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
-    DCff feedforward(test_motor_constants);
-    double acceleration = 0.0;
-    double prev_velocity = 0.0;
-    std::vector<input_output> result;
-    for (int i = 1; i < 101; i++) {
-        input_output sample;
-        sample.u = feedforward.compute_voltage(acceleration, prev_velocity);
-        test_motor.move_voltage(sample.u * 1000);
-        acceleration += 6.6283;
-        prev_velocity = test_motor.get_actual_velocity() * 2.f * M_PI / 60.f;
-        sample.x = prev_velocity;
-        result.push_back(sample);
-        pros::delay(10);
-    }
-    test_motor.move_voltage(0);
-    print_vector(result);
+    // oned_motion_profiler(test_motor, test_motor_constants);
+    compute sysid(test_motor);
+    std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
+    print_vector(u_vs_x);
+    pros::Motor m1(1, pros::v5::MotorGears::blue);
+    ff_constants m1_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
+    pros::Motor m2(2, pros::v5::MotorGears::blue);
+    ff_constants m2_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
+    pros::Motor o1(3, pros::v5::MotorGears::blue);
+    ff_constants o1_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
+    pros::Motor o2(4, pros::v5::MotorGears::blue);
+    ff_constants o2_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
+    pros::Motor m3(5, pros::v5::MotorGears::blue);
+    ff_constants m3_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
+    pros::Motor m4(6, pros::v5::MotorGears::blue);
+    ff_constants m4_motor_constants = {0.00380743747817, 0.510097726504, 0.17033803784};
+    drivetrain mecanum(m1, m2, o1, o2, m3, m4, .292100005, .29508135, m1_motor_constants, m2_motor_constants, o1_motor_constants, o2_motor_constants, m3_motor_constants, m4_motor_constants);
+
 }
