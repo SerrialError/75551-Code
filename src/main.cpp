@@ -87,19 +87,35 @@ void opcontrol() {
     // print_vector(u_vs_x);
     // motor_angle_mp_test(m1, m1_motor_constants, 78.497928, 4700.12687931 * 0.8f, 2.f * M_PI * 10);
     pros::Motor m1(3, pros::v5::MotorGears::blue);
-    ff_constants m1_motor_constants = {0.00126972964636, 0.15638764945, 0.273219119397};
     pros::Motor m2(-13, pros::v5::MotorGears::blue);
-    ff_constants m2_motor_constants = {0.0102389892548, 0.160984984415, 0.6346622914};
     pros::Motor o1(2, pros::v5::MotorGears::blue);
-    ff_constants o1_motor_constants = {0.0280821146715, 0.173093964818, 1.07228658995};
     pros::Motor o2(-12, pros::v5::MotorGears::blue);
-    ff_constants o2_motor_constants = {0.00241235016359, 0.161022522912, 0.636826510544};
     pros::Motor m3(1, pros::v5::MotorGears::blue);
-    ff_constants m3_motor_constants = {0.00961670602185, 0.170353286945, 0.984054974167};
     pros::Motor m4(-11, pros::v5::MotorGears::blue);
-    ff_constants m4_motor_constants = {0.0249758005297, 0.180763155058, 0.750449736604};
-    double wheelbase = .292100005; // m
-    double trackwidth = .29508135; // m
-    drivetrain mecanum(m1, m2, o1, o2, m3, m4, wheelbase, trackwidth, m1_motor_constants, m2_motor_constants, o1_motor_constants, o2_motor_constants, m3_motor_constants, m4_motor_constants);
 
+    const wheels<std::reference_wrapper<pros::Motor>> motors{
+        std::ref(m1),
+        std::ref(m2),
+        std::ref(o1),
+        std::ref(o2),
+        std::ref(m3),
+        std::ref(m4)
+    };
+
+    // kA, kV, kS
+    const wheels<ff_constants> consts{
+        {0.00126972964636, 0.15638764945, 0.273219119397}, // m1
+        {0.0102389892548, 0.160984984415, 0.6346622914},   // m2
+        {0.0280821146715, 0.173093964818, 1.07228658995},  // o1
+        {0.00241235016359, 0.161022522912, 0.636826510544}, // o2
+        {0.00961670602185, 0.170353286945, 0.984054974167}, // m3
+        {0.0249758005297, 0.180763155058, 0.750449736604}   // m4
+    };
+
+    const pros::Imu imu_sensor(4);
+
+    const double wheelbase = 0.292100005; // m
+    const double trackwidth = 0.29508135; // m
+
+    drivetrain dt(motors, imu_sensor, wheelbase, trackwidth, consts);
 }

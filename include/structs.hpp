@@ -4,18 +4,14 @@
 
 #include "api.h"
 
-struct input_output {
-    double u;
-    double x;
-};
-
+template<typename T>
 struct wheels {
-    double m1;
-    double m2;
-    double o1;
-    double o2;
-    double m3;
-    double m4;
+    T m1;
+    T m2;
+    T o1;
+    T o2;
+    T m3;
+    T m4;
 };
 
 struct pose {
@@ -24,24 +20,20 @@ struct pose {
     double theta;
 };
 
+struct ff_constants {
+    double K_a;
+    double K_v;
+    double K_s;
+};
+
 struct wheel_vel_lim {
     double min;
     double max;
 };
 
-struct wheel_vel_lims {
-    wheel_vel_lim m1_limits;
-    wheel_vel_lim m2_limits;
-    wheel_vel_lim o1_limits;
-    wheel_vel_lim o2_limits;
-    wheel_vel_lim m3_limits;
-    wheel_vel_lim m4_limits;
-};
-
-struct ff_constants {
-    const double K_a;
-    const double K_v;
-    const double K_s;
+struct input_output {
+    double u;
+    double x;
 };
 
 #endif // STRUCTS_HPP

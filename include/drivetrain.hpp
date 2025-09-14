@@ -7,38 +7,38 @@
 
 class drivetrain {
 private:
-    pros::Motor& m1;
-    pros::Motor& m2;
-    pros::Motor& o1;
-    pros::Motor& o2;
-    pros::Motor& m3;
-    pros::Motor& m4;
-    double wheelbase_length;
-    double trackwidth_length;
-    ff_constants m1_constants;
-    ff_constants m2_constants;
-    ff_constants o1_constants;
-    ff_constants o2_constants;
-    ff_constants m3_constants;
-    ff_constants m4_constants;
-    DCff m1_ff;
-    DCff m2_ff;
-    DCff o1_ff;
-    DCff o2_ff;
-    DCff m3_ff;
-    DCff m4_ff;
+    const pros::Controller master{pros::E_CONTROLLER_MASTER};
+    const wheels<std::reference_wrapper<pros::Motor>> motors;
+    const pros::Imu& imu;
+    const double wheelbase_length;
+    const double trackwidth_length;
+    const wheels<ff_constants> motor_constants;
+    const wheels<DCff> motor_ffs;
 
 public:
-    drivetrain(pros::Motor& m1_, pros::Motor& m2_, pros::Motor& o1_, pros::Motor& o2_, pros::Motor& m3_, pros::Motor& m4_, double wheelbase_length_, double trackwidth_length_, 
-    ff_constants m1_constants_, ff_constants m2_constants_, ff_constants o1_constants_, ff_constants o2_constants_, ff_constants m3_constants_, ff_constants m4_constants_)
-        : m1(m1_), m2(m2_), o1(o1_), o2(o2_), m3(m3_), m4(m4_), wheelbase_length(wheelbase_length_), trackwidth_length(trackwidth_length_), 
-        m1_constants(m1_constants_), m2_constants(m2_constants_), o1_constants(o1_constants_), o2_constants(o2_constants_), m3_constants(m3_constants_), m4_constants(m4_constants_), m1_ff(m1_constants_), m2_ff(m2_constants_), o1_ff(o1_constants_), o2_ff(o2_constants_), m3_ff(m3_constants_), m4_ff(m4_constants_) {}
+    drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
+              const pros::Imu& imu_,
+              const double wheelbase_length_,
+              const double trackwidth_length_,
+              const wheels<ff_constants>& motor_constants_)
+        : motors(motors_),
+          imu(imu_),
+          wheelbase_length(wheelbase_length_),
+          trackwidth_length(trackwidth_length_),
+          motor_constants(motor_constants_),
+          motor_ffs{ DCff(motor_constants_.m1),
+                     DCff(motor_constants_.m2),
+                     DCff(motor_constants_.o1),
+                     DCff(motor_constants_.o2),
+                     DCff(motor_constants_.m3),
+                     DCff(motor_constants_.m4) }
+    {}
 
-    wheels calculate_wheel_vels(pose desired_vels, wheel_vel_lims wheel_vel_limits);
+    wheels<double> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& wheel_vel_limits);
     
-    void move_wheel_accels(wheels wheel_accelerations);
+    void move_wheel_accels(const wheels<double>& wheel_accelerations);
     
-    void field_oriented_holonomic_control(double x_1_axis, double y_1_axis, double x_2_axis, double y_2_axis);
+    void field_oriented_holonomic_control();
 };
 
 #endif // DRIVETRAIN_HPP
