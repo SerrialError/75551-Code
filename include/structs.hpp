@@ -24,6 +24,8 @@ struct ff_constants {
     double K_a;
     double K_v;
     double K_s;
+    double max_ang_accel;
+    double max_ang_vel;
 };
 
 struct wheel_vel_lim {

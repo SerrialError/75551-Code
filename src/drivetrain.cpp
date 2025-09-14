@@ -74,6 +74,58 @@ void drivetrain::move_wheel_accels(const wheels<double>& wheel_accelerations) {
     motors.m4.get().move_voltage(static_cast<int>(std::lround(m4_voltage)));
 }
 
-void drivetrain::field_oriented_holonomic_control(void) {
+void drivetrain::field_oriented_holonomic_control(const double& dt) {
+    const double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
+    const double x_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
+    const double y_vel = joystick_to_vel(static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)) * 100.f / 127.f);
+    const double x_vel = joystick_to_vel(static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X)) * 100.f / 127.f);
+    double wanted_angle = atan2(y_right, x_right);
+    double cur_angle = get_standard_angle();
+    double angle_error = wanted_angle - cur_angle;
+    double theta_vel = angle_error; // need to add
+    pose wanted_vels = {x_vel, y_vel, theta_vel};
+    wheels<wheel_vel_lim> motor_vel_limits = get_motor_vel_limits(dt);
+    const wheels<double> wanted_motor_vels = calculate_wheel_vels(wanted_vels, motor_vel_limits);
+    const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
+    move_wheel_accels(wanted_motor_accels);
+}
 
+double drivetrain::get_standard_angle(void) {
+    double angle_rad = imu.get_rotation() * M_PI / 180.f; 
+    double standard_angle = -angle_rad + M_PI;
+    double offset_angle = standard_angle + initial_pose.theta;
+    double clamped_angle = fmod(offset_angle + M_PI, 2.f * M_PI) - M_PI;
+    return clamped_angle;
+}
+
+double drivetrain::joystick_to_vel(const double& joystick) {
+    return joystick; // need to add
+}
+
+wheels<wheel_vel_lim> drivetrain::get_motor_vel_limits(const double& dt) {
+    wheels<wheel_vel_lim> result{};
+    result.m1.min = motors.m1.get().get_actual_velocity() * 2.f * M_PI / 60.f - motor_constants.m1.max_ang_accel * dt;
+    result.m2.min = motors.m2.get().get_actual_velocity() * 2.f * M_PI / 60.f - motor_constants.m2.max_ang_accel * dt;
+    result.o1.min = motors.o1.get().get_actual_velocity() * 2.f * M_PI / 60.f - motor_constants.o1.max_ang_accel * dt;
+    result.o2.min = motors.o2.get().get_actual_velocity() * 2.f * M_PI / 60.f - motor_constants.o2.max_ang_accel * dt;
+    result.m3.min = motors.m3.get().get_actual_velocity() * 2.f * M_PI / 60.f - motor_constants.m3.max_ang_accel * dt;
+    result.m4.min = motors.m4.get().get_actual_velocity() * 2.f * M_PI / 60.f - motor_constants.m4.max_ang_accel * dt;
+    result.m1.max = motors.m1.get().get_actual_velocity() * 2.f * M_PI / 60.f + motor_constants.m1.max_ang_accel * dt;
+    result.m2.max = motors.m2.get().get_actual_velocity() * 2.f * M_PI / 60.f + motor_constants.m2.max_ang_accel * dt;
+    result.o1.max = motors.o1.get().get_actual_velocity() * 2.f * M_PI / 60.f + motor_constants.o1.max_ang_accel * dt;
+    result.o2.max = motors.o2.get().get_actual_velocity() * 2.f * M_PI / 60.f + motor_constants.o2.max_ang_accel * dt;
+    result.m3.max = motors.m3.get().get_actual_velocity() * 2.f * M_PI / 60.f + motor_constants.m3.max_ang_accel * dt;
+    result.m4.max = motors.m4.get().get_actual_velocity() * 2.f * M_PI / 60.f + motor_constants.m4.max_ang_accel * dt;
+    return result;
+}
+
+wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt) {
+    wheels<double> result{};
+    result.m1 = (motors.m1.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m1) / dt;
+    result.m2 = (motors.m2.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m2) / dt;
+    result.o1 = (motors.o1.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.o1) / dt;
+    result.o2 = (motors.o2.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.o2) / dt;
+    result.m1 = (motors.m1.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m1) / dt;
+    result.m2 = (motors.m2.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m2) / dt;
+    return result;
 }

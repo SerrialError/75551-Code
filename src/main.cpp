@@ -112,7 +112,7 @@ void opcontrol() {
         {0.0249758005297, 0.180763155058, 0.750449736604}   // m4
     };
 
-    const pros::Imu imu_sensor(4);
+    pros::Imu imu_sensor(4);
 
     const double wheelbase = 0.292100005; // m
     const double trackwidth = 0.29508135; // m

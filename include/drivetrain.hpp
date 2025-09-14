@@ -7,17 +7,18 @@
 
 class drivetrain {
 private:
-    const pros::Controller master{pros::E_CONTROLLER_MASTER};
+    pros::Controller master{pros::E_CONTROLLER_MASTER};
     const wheels<std::reference_wrapper<pros::Motor>> motors;
-    const pros::Imu& imu;
+    pros::Imu& imu;
     const double wheelbase_length;
     const double trackwidth_length;
     const wheels<ff_constants> motor_constants;
     const wheels<DCff> motor_ffs;
+    const pose initial_pose = {0, 0, 0};
 
 public:
     drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
-              const pros::Imu& imu_,
+              pros::Imu& imu_,
               const double wheelbase_length_,
               const double trackwidth_length_,
               const wheels<ff_constants>& motor_constants_)
@@ -38,7 +39,15 @@ public:
     
     void move_wheel_accels(const wheels<double>& wheel_accelerations);
     
-    void field_oriented_holonomic_control();
+    void field_oriented_holonomic_control(const double& dt);
+    
+    double get_standard_angle(void);
+    
+    double joystick_to_vel(const double& joystick);
+    
+    wheels<wheel_vel_lim> get_motor_vel_limits(const double& dt);
+    
+    wheels<double> get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt);
 };
 
 #endif // DRIVETRAIN_HPP
