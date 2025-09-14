@@ -55,17 +55,17 @@ wheels<double> drivetrain::calculate_wheel_vels(const pose& desired_vels, const 
 
 void drivetrain::move_wheel_accels(const wheels<double>& wheel_accelerations) {
     double m1_velocity = motors.m1.get().get_actual_velocity() * 2.f * M_PI / 60.f;
-    double m1_voltage = motor_ffs.m1.compute_voltage(wheel_accelerations.m1, m1_velocity);
+    double m1_voltage = motor_ffs.m1.compute_voltage(wheel_accelerations.m1, m1_velocity) * 1000.f;
     double m2_velocity = motors.m2.get().get_actual_velocity() * 2.f * M_PI / 60.f;
-    double m2_voltage = motor_ffs.m2.compute_voltage(wheel_accelerations.m2, m2_velocity);
+    double m2_voltage = motor_ffs.m2.compute_voltage(wheel_accelerations.m2, m2_velocity) * 1000.f;
     double o1_velocity = motors.o1.get().get_actual_velocity() * 2.f * M_PI / 60.f;
-    double o1_voltage = motor_ffs.o1.compute_voltage(wheel_accelerations.o1, o1_velocity);
+    double o1_voltage = motor_ffs.o1.compute_voltage(wheel_accelerations.o1, o1_velocity) * 1000.f;
     double o2_velocity = motors.o2.get().get_actual_velocity() * 2.f * M_PI / 60.f;
-    double o2_voltage = motor_ffs.o2.compute_voltage(wheel_accelerations.m1, m2_velocity);
+    double o2_voltage = motor_ffs.o2.compute_voltage(wheel_accelerations.m1, m2_velocity) * 1000.f;
     double m3_velocity = motors.m3.get().get_actual_velocity() * 2.f * M_PI / 60.f;
-    double m3_voltage = motor_ffs.m3.compute_voltage(wheel_accelerations.m3, m3_velocity);
+    double m3_voltage = motor_ffs.m3.compute_voltage(wheel_accelerations.m3, m3_velocity) * 1000.f;
     double m4_velocity = motors.m4.get().get_actual_velocity() * 2.f * M_PI / 60.f;
-    double m4_voltage = motor_ffs.m4.compute_voltage(wheel_accelerations.m4, m4_velocity);
+    double m4_voltage = motor_ffs.m4.compute_voltage(wheel_accelerations.m4, m4_velocity) * 1000.f;
     motors.m1.get().move_voltage(static_cast<int>(std::lround(m1_voltage)));
     motors.m2.get().move_voltage(static_cast<int>(std::lround(m2_voltage)));
     motors.o1.get().move_voltage(static_cast<int>(std::lround(o1_voltage)));
