@@ -4,9 +4,24 @@
 wheels<double> drivetrain::calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& limits) {
     // Decision vars: [m1, m2, m3, m4, o1, o2]
     const int n = 6;
+    std::vector<double> c{};
 
-    // Objective c^T x = 2*m2 + 2*m3 + o1 + o2
-    std::vector<double> c = {0, 2, 2, 0, 1, 1};
+    if (desired_vels.x > 0) {
+        if (desired_vels.y > 0) {
+    	    c = {0, 2, 2, 0, 1, 1};
+	}
+	else {
+    	    c = {-2, 0, 0, -2, -1, -1};
+	}
+    }
+    else {
+        if (desired_vels.y > 0) {
+    	    c = {2, 0, 0, 2, 1, 1};
+	}
+	else {
+	    c = {0, -2, -2, 0, -1, -1};
+	}
+    }
 
     // Constraint matrix A and vector b
     std::vector<std::vector<double>> A;
@@ -61,7 +76,7 @@ void drivetrain::move_wheel_accels(const wheels<double>& wheel_accelerations) {
     double o1_velocity = motors.o1.get().get_actual_velocity() * 2.f * M_PI / 60.f;
     double o1_voltage = motor_ffs.o1.compute_voltage(wheel_accelerations.o1, o1_velocity) * 1000.f;
     double o2_velocity = motors.o2.get().get_actual_velocity() * 2.f * M_PI / 60.f;
-    double o2_voltage = motor_ffs.o2.compute_voltage(wheel_accelerations.m1, m2_velocity) * 1000.f;
+    double o2_voltage = motor_ffs.o2.compute_voltage(wheel_accelerations.o2, o2_velocity) * 1000.f;
     double m3_velocity = motors.m3.get().get_actual_velocity() * 2.f * M_PI / 60.f;
     double m3_voltage = motor_ffs.m3.compute_voltage(wheel_accelerations.m3, m3_velocity) * 1000.f;
     double m4_velocity = motors.m4.get().get_actual_velocity() * 2.f * M_PI / 60.f;
