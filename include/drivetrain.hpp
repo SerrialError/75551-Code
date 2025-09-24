@@ -14,6 +14,8 @@ private:
     const double trackwidth_length;
     const wheels<ff_constants> motor_constants;
     const wheels<DCff> motor_ffs;
+    const double x_max_velocity;
+    const double y_max_velocity;
     const pose initial_pose = {0, 0, 0};
 
 public:
@@ -32,7 +34,9 @@ public:
                      DCff(motor_constants_.o1),
                      DCff(motor_constants_.o2),
                      DCff(motor_constants_.m3),
-                     DCff(motor_constants_.m4) }
+                     DCff(motor_constants_.m4) },
+          x_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.o1.max_ang_vel + motor_constants.o2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) / 6.f * 2.f * 0.0254f),
+          y_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.o1.max_ang_vel + motor_constants.o2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) / 6.f * 2.f * 0.0254f)
     {}
 
     wheels<double> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& wheel_vel_limits);

@@ -120,8 +120,8 @@ void opcontrol() {
     drivetrain dt(motors, imu_sensor, wheelbase, trackwidth, consts);
     
     while(true) {
-	const double dt_ = 0.01;
-	dt.field_oriented_holonomic_control(dt_);
-	pros::delay(10);
+	    const double dt_ = 0.01;
+	    dt.field_oriented_holonomic_control(dt_);
+	    pros::delay(10);
     }
 }

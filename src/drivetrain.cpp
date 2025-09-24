@@ -90,14 +90,17 @@ void drivetrain::move_wheel_accels(const wheels<double>& wheel_accelerations) {
 }
 
 void drivetrain::field_oriented_holonomic_control(const double& dt) {
+    const double theta_max_velocity = 34234.434;
     const double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
     const double x_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
-    const double y_vel = joystick_to_vel(static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)) * 100.f / 127.f);
-    const double x_vel = joystick_to_vel(static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X)) * 100.f / 127.f);
+    const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+    const double x_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X));
     double wanted_angle = atan2(y_right, x_right);
     double cur_angle = get_standard_angle();
     double angle_error = wanted_angle - cur_angle;
-    double theta_vel = angle_error; // need to add
+    double theta_vel = angle_error * theta_max_velocity / M_PI;
+    double x_vel = x_left * x_max_velocity / 127.f;
+    double y_vel = y_left * y_max_velocity / 127.f;
     pose wanted_vels = {x_vel, y_vel, theta_vel};
     wheels<wheel_vel_lim> motor_vel_limits = get_motor_vel_limits(dt);
     const wheels<double> wanted_motor_vels = calculate_wheel_vels(wanted_vels, motor_vel_limits);
@@ -111,10 +114,6 @@ double drivetrain::get_standard_angle(void) {
     double offset_angle = standard_angle + initial_pose.theta;
     double clamped_angle = fmod(offset_angle + M_PI, 2.f * M_PI) - M_PI;
     return clamped_angle;
-}
-
-double drivetrain::joystick_to_vel(const double& joystick) {
-    return joystick; // need to add
 }
 
 wheels<wheel_vel_lim> drivetrain::get_motor_vel_limits(const double& dt) {
