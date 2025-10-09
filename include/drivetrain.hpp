@@ -39,9 +39,11 @@ public:
           y_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.o1.max_ang_vel + motor_constants.o2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) / 6.f * 2.f * 0.0254f)
     {}
 
-    wheels<double> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& wheel_vel_limits);
+    wheels<wheel_vel_lim> calculate_wheel_vels_limits(const pose& desired_vels, const wheels<wheel_vel_lim>& wheel_vel_limits);
     
     void move_wheel_accels(const wheels<double>& wheel_accelerations);
+
+    void move_wheel_volts(const wheels<double>& wheel_voltages);
     
     void field_oriented_holonomic_control(const double& dt);
     
@@ -52,6 +54,8 @@ public:
     wheels<wheel_vel_lim> get_motor_vel_limits(const double& dt);
     
     wheels<double> get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt);
+
+    void tank_drive_control();
 };
 
 #endif // DRIVETRAIN_HPP

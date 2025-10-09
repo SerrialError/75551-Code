@@ -1,31 +1,20 @@
 #include "drivetrain.hpp"
 #include "simplex.hpp"
 
-wheels<double> drivetrain::calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& limits) {
+wheels<wheel_vel_lim> drivetrain::calculate_wheel_vels_limits(const pose& desired_vels, const wheels<wheel_vel_lim>& limits) {
     // Decision vars: [m1, m2, m3, m4, o1, o2]
     const int n = 6;
-    std::vector<double> c{};
-
-    if (desired_vels.x > 0) {
-        if (desired_vels.y > 0) {
-    	    c = {0, 2, 2, 0, 1, 1};
-	}
-	else {
-    	    c = {-2, 0, 0, -2, -1, -1};
-	}
-    }
-    else {
-        if (desired_vels.y > 0) {
-    	    c = {2, 0, 0, 2, 1, 1};
-	}
-	else {
-	    c = {0, -2, -2, 0, -1, -1};
-	}
-    }
-
-    // Constraint matrix A and vector b
-    std::vector<std::vector<double>> A;
-    std::vector<double> b;
+    const double L = wheelbase_length;
+    const double W = trackwidth_length;
+    std::vector<std::vector<double>> A = {
+        {1,         1,      1,        1,       1,    1  },
+        {1,         -1,     -1,       1,       0,    0  },
+        {-(L+W)/4, (L+W)/4, -(L+W)/4, (L+W)/4, -W/2, W/2},
+        {-1,        -1,      -1,      -1,      -1,   -1 },
+        {-1,        1,       1,       -1,      0,    0  },
+        {(L+W)/4, -(L+W)/4, (L+W)/4, -(L+W)/4, W/2, -W/2},
+    };
+    std::vector<double> b = {desired_vels.y, desired_vels.x, desired_vels.theta, -desired_vels.y, -desired_vels.x, -desired_vels.theta};
 
     // Add bounds: F_i <= max, -F_i <= -min
     std::vector<wheel_vel_lim> lims = {
@@ -39,32 +28,22 @@ wheels<double> drivetrain::calculate_wheel_vels(const pose& desired_vels, const 
         row[i] = -1.0; A.push_back(row); b.push_back(-lims[i].min);
     }
 
-    // Angle constraint (linearized)
-    double t = std::tan(desired_vels.theta);
-    std::vector<double> a_ang = {1+t, 1-t, 1-t, 1+t, 1, 1};
-    A.push_back(a_ang); b.push_back(0.0);
-    for (double &v : a_ang) v = -v;
-    A.push_back(a_ang); b.push_back(0.0);
-
-    // Torque constraint
-    double L = wheelbase_length;
-    double W = trackwidth_length;
-    std::vector<double> a_tau = {-(L+W)/4, (L+W)/4, -(L+W)/4, (L+W)/4, -W/2, W/2};
-    A.push_back(a_tau); b.push_back(desired_vels.theta);
-    for (double &v : a_tau) v = -v;
-    A.push_back(a_tau); b.push_back(desired_vels.theta);
-
-    // Solve LP
-    std::vector<double> sol = Simplex::solve(A, b, c);
-
     // Map solution into wheels vels
-    wheels<double> result;
-    result.m1 = sol[0];
-    result.m2 = sol[1];
-    result.m3 = sol[2];
-    result.m4 = sol[3];
-    result.o1 = sol[4];
-    result.o2 = sol[5];
+    std::vector<double> max_result(n, 0.f);
+    for (int j = 0; j < n; j++) {
+        std::vector<double> c(n, 0.f);
+        c[j] = 1;
+        std::vector<double> sol = Simplex::solve(A, b, c);
+        max_result[j] = sol[j];
+    }
+    std::vector<double> min_result(n, 0.f);
+    for (int j = 0; j < n; j++) {
+        std::vector<double> c(n, 0.f);
+        c[j] = -1;
+        std::vector<double> sol = Simplex::solve(A, b, c);
+        min_result[j] = sol[j];
+    }
+    wheels<wheel_vel_lim> result = {{min_result[0], max_result[0]}, {min_result[1], max_result[1]}, {min_result[4], max_result[4]}, {min_result[5], max_result[5]}, {min_result[2], max_result[2]}, {min_result[3], max_result[3]}};
     return result;
 }
 
@@ -89,6 +68,15 @@ void drivetrain::move_wheel_accels(const wheels<double>& wheel_accelerations) {
     motors.m4.get().move_voltage(static_cast<int>(std::lround(m4_voltage)));
 }
 
+void drivetrain::move_wheel_volts(const wheels<double>& wheel_voltages) {
+    motors.m1.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m1)));
+    motors.m2.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m2)));
+    motors.o1.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.o1)));
+    motors.o2.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.o2)));
+    motors.m3.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m3)));
+    motors.m4.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m4)));
+}
+
 void drivetrain::field_oriented_holonomic_control(const double& dt) {
     const double theta_max_velocity = 34234.434;
     const double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
@@ -103,9 +91,9 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
     double y_vel = y_left * y_max_velocity / 127.f;
     pose wanted_vels = {x_vel, y_vel, theta_vel};
     wheels<wheel_vel_lim> motor_vel_limits = get_motor_vel_limits(dt);
-    const wheels<double> wanted_motor_vels = calculate_wheel_vels(wanted_vels, motor_vel_limits);
-    const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
-    move_wheel_accels(wanted_motor_accels);
+    // const wheels<double> wanted_motor_vels = calculate_wheel_vels(wanted_vels, motor_vel_limits);
+    // const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
+    // move_wheel_accels(wanted_motor_accels);
 }
 
 double drivetrain::get_standard_angle(void) {
@@ -142,4 +130,13 @@ wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& wanted_
     result.m1 = (motors.m1.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m1) / dt;
     result.m2 = (motors.m2.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m2) / dt;
     return result;
+}
+
+void drivetrain::tank_drive_control() {
+    const double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
+    const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+    const double left_voltage = -y_left / 127.f * 12.f * 1000.f;
+    const double right_voltage = -y_right / 127.f * 12.f * 1000.f;
+    const wheels<double> wanted_motor_voltages = {left_voltage, right_voltage, left_voltage, right_voltage, left_voltage, right_voltage};
+    move_wheel_volts(wanted_motor_voltages);
 }
