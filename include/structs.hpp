@@ -14,6 +14,14 @@ struct wheels {
     T m4;
 };
 
+template<typename T>
+struct rollers {
+    T fb; // front bottom
+    T ft; // front top
+    T bb; // back bottom
+    T bt; // back top
+};
+
 struct pose {
     double x;
     double y;
@@ -36,6 +44,19 @@ struct wheel_vel_lim {
 struct input_output {
     double u;
     double x;
+};
+
+enum rollerStateType {
+    off,
+    intakeOnly,
+    bottomScore,
+    midScore,
+    topScore
+};
+
+union motorStateType {
+    bool boolValue;
+    char charValue;
 };
 
 #endif // STRUCTS_HPP

@@ -93,7 +93,7 @@ void opcontrol() {
     pros::Motor m3(4, pros::v5::MotorGears::blue);
     pros::Motor m4(-15, pros::v5::MotorGears::blue);
 
-    const wheels<std::reference_wrapper<pros::Motor>> motors{
+    const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
         std::ref(m1),
         std::ref(m2),
         std::ref(o1),
@@ -117,7 +117,7 @@ void opcontrol() {
     const double wheelbase = 0.292100005; // m
     const double trackwidth = 0.29508135; // m
 
-    drivetrain dt(motors, imu_sensor, wheelbase, trackwidth, consts);
+    drivetrain dt(driveMotors, imu_sensor, wheelbase, trackwidth, consts);
     
     while(true) {
 	    // const double dt_ = 0.01;

@@ -127,8 +127,8 @@ wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& wanted_
     result.m2 = (motors.m2.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m2) / dt;
     result.o1 = (motors.o1.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.o1) / dt;
     result.o2 = (motors.o2.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.o2) / dt;
-    result.m1 = (motors.m1.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m1) / dt;
-    result.m2 = (motors.m2.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m2) / dt;
+    result.m3 = (motors.m3.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m3) / dt;
+    result.m4 = (motors.m4.get().get_actual_velocity() * 2.f * M_PI / 60.f - wanted_motor_vels.m4) / dt;
     return result;
 }
 
