@@ -1,5 +1,13 @@
 #include "intake.hpp"
 
+double intake::get_motor_max_accel(pros::Motor motor, const ff_constants motor_constants_) {
+    double motor_velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
+    double motor_voltage = motor.get_voltage() * 1000.0;
+    double motor_max_acceleration = (motor_voltage - motor_velocity * motor_constants_.K_v - sgn(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a;
+    double result = motor_max_acceleration;
+    return result;
+}
+
 void intake::move_wheel_accels(const rollers<double>& wheel_accelerations) {
     double fb_velocity = motors.fb.get().get_actual_velocity() * 2.f * M_PI / 60.f;
     double fb_voltage = motor_ffs.fb.compute_voltage(wheel_accelerations.fb, fb_velocity) * 1000.f;
@@ -48,15 +56,58 @@ rollers<motorStateType> intake::get_roller_states(void) {
     rollers<motorStateType> result;
     switch (intakeState) {
         case off:
-            result = {false, false, false, false};
+            result = {off, off, off, off};
             break;
-        case intakeOnly:
-            result = {'R', true, 'R', true};
+        
+	case intakeOnly:
+            result = {reverse, forward, hold, forward};
+            break;
+        
+	case bottomScore:
+            result = {forward, off, reverse, off};
+            break;
+        
+	case midScore:
+            result = {reverse, reverse, reverse, forward};
+            break;
+	
+	case topScore:
+            result = {reverse, forward, reverse, forward};
             break;
     
         default:
-            result = {0, 0, 0, 0};
+            result = {off, off, off, off};
             break;
     }
     return result;
+}
+
+double intake::get_wanted_motor_vel(pros::Motor motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt) { 
+    double motor_velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
+    double motor_wanted_velocity;
+    switch (wanted_roller_state) {
+	case off:
+	   fb_wanted_velocity = 0; 
+	case forward:
+	   fb_wanted_velocity = motor_constants_.max_ang_vel;
+	case reverse:
+	   fb_wanted_velocity = -motor_constants_.max_ang_vel;
+	case hold:
+	   fb_wanted_velocity = 0;
+    }
+    double motor_velocity_delta = fb_velocity - fb_wanted_velocity;
+    double motor_wanted_velocity_bounded;
+    if (fb_velocity_delta > 0) {
+	double motor_max_velocity = get_motor_max_accel(motor, motor_constants_) * dt;
+	motor_wanted_velocity_bounded = fmin(motor_max_velocity, motor_wanted_velocity);
+    }
+    else if (fb_velocity_delta < 0) {
+	double motor_min_velocity = -get_motor_max_accel(motor, motor_constants_) * dt;
+	motor_wanted_velocity_bounded = fmax(motor_min_velocity, motor_wanted_velocity);
+
+    }
+    else {
+	motor_wanted_velocity = 0;
+    }
+    double wanted_motor_vels = fb_wanted_velocity_bounded;
 }

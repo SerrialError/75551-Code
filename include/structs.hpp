@@ -54,9 +54,11 @@ enum rollerStateType {
     topScore
 };
 
-union motorStateType {
-    bool boolValue;
-    char charValue;
+enum motorStateType {
+    forward
+    backwards
+    hold
+    off
 };
 
 #endif // STRUCTS_HPP

@@ -30,10 +30,12 @@ public:
                      DCff(motor_constants_.bt) }
     {}
     
+    rollers<double> get_motor_max_accel(void);
+
     void move_wheel_accels(const rollers<double>& wheel_accelerations);
 
     void move_wheel_volts(const rollers<double>& wheel_voltages);
-
+    
     rollers<wheel_vel_lim> get_motor_vel_limits(const double& dt);
     
     rollers<double> get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt);
