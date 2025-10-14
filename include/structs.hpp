@@ -47,7 +47,7 @@ struct input_output {
 };
 
 enum rollerStateType {
-    off,
+    intakeOff,
     intakeOnly,
     bottomScore,
     midScore,
@@ -55,9 +55,9 @@ enum rollerStateType {
 };
 
 enum motorStateType {
-    forward
-    backwards
-    hold
+    forward,
+    reverse,
+    hold,
     off
 };
 

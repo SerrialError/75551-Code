@@ -103,7 +103,7 @@ void opcontrol() {
     };
 
     // kA, kV, kS
-    const wheels<ff_constants> consts{
+    const wheels<ff_constants> dtConsts{
         {0.00126972964636, 0.15638764945, 0.273219119397, 4700.12687931 * 0.9, 78.497928},  // m1
         {0.0102389892548, 0.160984984415, 0.6346622914, 72.130967 * 0.9, 11.963},   	    // m2
         {0.0280821146715, 0.173093964818, 1.07228658995, 188.531268637 * 0.9, 63.020349},   // o1
@@ -117,7 +117,31 @@ void opcontrol() {
     const double wheelbase = 0.292100005; // m
     const double trackwidth = 0.29508135; // m
 
-    drivetrain dt(driveMotors, imu_sensor, wheelbase, trackwidth, consts);
+    drivetrain dt(driveMotors, imu_sensor, wheelbase, trackwidth, dtConsts);
+    
+    pros::Motor fb(8, pros::v5::MotorGears::blue);
+    pros::Motor ft(-17, pros::v5::MotorGears::blue);
+    pros::Motor bb(6, pros::v5::MotorGears::blue);
+    pros::Motor bt(-19, pros::v5::MotorGears::blue);
+
+    const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
+        std::ref(fb),
+        std::ref(ft),
+        std::ref(bb),
+        std::ref(bt)
+    };
+
+    pros::Optical optical(6);
+    const wheels<ff_constants> intakeConsts {
+        {0.00126972964636, 0.15638764945, 0.273219119397, 4700.12687931 * 0.9, 78.497928},  // m1
+        {0.0102389892548, 0.160984984415, 0.6346622914, 72.130967 * 0.9, 11.963},   	    // m2
+        {0.0280821146715, 0.173093964818, 1.07228658995, 188.531268637 * 0.9, 63.020349},   // o1
+        {0.00241235016359, 0.161022522912, 0.636826510544, 2339.87040104 * 0.9, 72.947781}, // o2
+        {0.00961670602185, 0.170353286945, 0.984054974167, 538.435146208 * 0.9, 63.460172}, // m3
+        {0.0249758005297, 0.180763155058, 0.750449736604, 224.087917624 * 0.9, 64.674921}   // m4
+    };
+
+    intake Intake(intakeMotors, optical, intakeConsts);
     
     while(true) {
 	    // const double dt_ = 0.01;

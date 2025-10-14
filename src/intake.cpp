@@ -55,23 +55,23 @@ rollers<double> intake::get_wanted_motor_accels(const rollers<double>& wanted_mo
 rollers<motorStateType> intake::get_roller_states(void) {
     rollers<motorStateType> result;
     switch (intakeState) {
-        case off:
+        case intakeOff:
             result = {off, off, off, off};
             break;
         
-	case intakeOnly:
+	    case intakeOnly:
             result = {reverse, forward, hold, forward};
             break;
         
-	case bottomScore:
+	    case bottomScore:
             result = {forward, off, reverse, off};
             break;
         
-	case midScore:
+	    case midScore:
             result = {reverse, reverse, reverse, forward};
             break;
 	
-	case topScore:
+	    case topScore:
             result = {reverse, forward, reverse, forward};
             break;
     
@@ -86,28 +86,37 @@ double intake::get_wanted_motor_vel(pros::Motor motor, const ff_constants motor_
     double motor_velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
     double motor_wanted_velocity;
     switch (wanted_roller_state) {
-	case off:
-	   fb_wanted_velocity = 0; 
-	case forward:
-	   fb_wanted_velocity = motor_constants_.max_ang_vel;
-	case reverse:
-	   fb_wanted_velocity = -motor_constants_.max_ang_vel;
-	case hold:
-	   fb_wanted_velocity = 0;
+	    case off:
+	        motor_wanted_velocity = 0; 
+	    case forward:
+	        motor_wanted_velocity = motor_constants_.max_ang_vel;
+	    case reverse:
+	        motor_wanted_velocity = -motor_constants_.max_ang_vel;
+	    case hold:
+	        motor_wanted_velocity = 0;
     }
-    double motor_velocity_delta = fb_velocity - fb_wanted_velocity;
+    double motor_velocity_delta = motor_velocity - motor_wanted_velocity;
     double motor_wanted_velocity_bounded;
-    if (fb_velocity_delta > 0) {
-	double motor_max_velocity = get_motor_max_accel(motor, motor_constants_) * dt;
-	motor_wanted_velocity_bounded = fmin(motor_max_velocity, motor_wanted_velocity);
-    }
-    else if (fb_velocity_delta < 0) {
-	double motor_min_velocity = -get_motor_max_accel(motor, motor_constants_) * dt;
-	motor_wanted_velocity_bounded = fmax(motor_min_velocity, motor_wanted_velocity);
-
+    if (motor_velocity_delta > 0) {
+	    double motor_max_velocity = get_motor_max_accel(motor, motor_constants_) * dt;
+	    motor_wanted_velocity_bounded = fmin(motor_max_velocity, motor_wanted_velocity);
+    } else if (motor_velocity_delta < 0) {
+	    double motor_min_velocity = -get_motor_max_accel(motor, motor_constants_) * dt;
+	    motor_wanted_velocity_bounded = fmax(motor_min_velocity, motor_wanted_velocity);
     }
     else {
-	motor_wanted_velocity = 0;
+	    motor_wanted_velocity = 0;
     }
-    double wanted_motor_vels = fb_wanted_velocity_bounded;
+    double wanted_motor_vels = motor_wanted_velocity_bounded;
+}
+
+double intake::update_intake_state(const double& dt) { 
+    rollers<motorStateType> roller_states = get_roller_states();
+    double fb_motor_velocity = get_wanted_motor_vel(motors.fb.get(), motor_constants.fb, roller_states.fb, dt);
+    double ft_motor_velocity = get_wanted_motor_vel(motors.ft.get(), motor_constants.ft, roller_states.ft, dt);
+    double bb_motor_velocity = get_wanted_motor_vel(motors.bb.get(), motor_constants.bb, roller_states.bb, dt);
+    double bt_motor_velocity = get_wanted_motor_vel(motors.bt.get(), motor_constants.bt, roller_states.bt, dt);
+    rollers<double> motor_velocities = {fb_motor_velocity, ft_motor_velocity, bb_motor_velocity, bt_motor_velocity};
+    rollers<double> motor_accelerations = get_wanted_motor_accels(motor_velocities, dt);
+    move_wheel_accels(motor_accelerations);
 }

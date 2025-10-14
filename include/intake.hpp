@@ -12,14 +12,11 @@ private:
     pros::Optical& optical;
     const rollers<ff_constants> motor_constants;
     const rollers<DCff> motor_ffs;
-    rollerStateType intakeState;
     motorStateType motorState;
 
 public:
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_,
               pros::Optical& optical_,
-              const double wheelbase_length_,
-              const double trackwidth_length_,
               const rollers<ff_constants>& motor_constants_)
         : motors(motors_),
           optical(optical_),
@@ -29,7 +26,16 @@ public:
                      DCff(motor_constants_.bb),
                      DCff(motor_constants_.bt) }
     {}
-    
+    rollerStateType intakeState;
+    double sgn(double x) {
+        if (x > 0) {
+            return 1.0;
+        } else if (x < 0) {
+            return -1.0;
+        } else {
+            return 0.0;
+        }
+    }
     rollers<double> get_motor_max_accel(void);
 
     void move_wheel_accels(const rollers<double>& wheel_accelerations);
@@ -38,9 +44,15 @@ public:
     
     rollers<wheel_vel_lim> get_motor_vel_limits(const double& dt);
     
-    rollers<double> get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt);
+    double get_motor_max_accel(pros::Motor motor, const ff_constants motor_constants_);
 
+    double get_wanted_motor_vel(pros::Motor motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt);
+    
     rollers<motorStateType> get_roller_states(void);
+    
+    rollers<double> get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt);
+    
+    double update_intake_state(const double& dt);
 };
 
 #endif // INTAKE_HPP
