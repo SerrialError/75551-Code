@@ -143,8 +143,8 @@ wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& wanted_
 void drivetrain::tank_drive_control() {
     const double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
     const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
-    const double left_voltage = -y_left / 127.0 * 12.0 * 1000.0;
-    const double right_voltage = -y_right / 127.0 * 12.0 * 1000.0;
+    const double left_voltage = y_left / 127.0 * 12.0 * 1000.0;
+    const double right_voltage = y_right / 127.0 * 12.0 * 1000.0;
     const wheels<double> wanted_motor_voltages = {left_voltage, right_voltage, left_voltage, right_voltage, left_voltage, right_voltage};
     move_wheel_volts(wanted_motor_voltages);
 }

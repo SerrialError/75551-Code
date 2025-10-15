@@ -81,16 +81,16 @@ void autonomous() {}
  */
 
 void opcontrol() {
-    // compute sysid(m3);
+    // compute sysid(bt);
     // std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
     // print_vector(u_vs_x);
     // motor_angle_mp_test(m1, m1_motor_constants, 78.497928, 4700.12687931 * 0.8f, 2.f * M_PI * 10);
-    pros::Motor m1(8, pros::v5::MotorGears::blue);
-    pros::Motor m2(-17, pros::v5::MotorGears::blue);
-    pros::Motor o1(6, pros::v5::MotorGears::blue);
-    pros::Motor o2(-19, pros::v5::MotorGears::blue);
-    pros::Motor m3(4, pros::v5::MotorGears::blue);
-    pros::Motor m4(-15, pros::v5::MotorGears::blue);
+    pros::Motor m1(-8, pros::v5::MotorGears::blue);
+    pros::Motor m2(17, pros::v5::MotorGears::blue);
+    pros::Motor o1(-6, pros::v5::MotorGears::blue);
+    pros::Motor o2(19, pros::v5::MotorGears::blue);
+    pros::Motor m3(-4, pros::v5::MotorGears::blue);
+    pros::Motor m4(15, pros::v5::MotorGears::blue);
 
     const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
         std::ref(m1),
@@ -118,10 +118,10 @@ void opcontrol() {
 
     drivetrain dt(driveMotors, imu_sensor, wheelbase, trackwidth, dtConsts);
     
-    pros::Motor fb(8, pros::v5::MotorGears::blue);
-    pros::Motor ft(-17, pros::v5::MotorGears::blue);
-    pros::Motor bb(6, pros::v5::MotorGears::blue);
-    pros::Motor bt(-19, pros::v5::MotorGears::blue);
+    pros::Motor fb(11, pros::v5::MotorGears::blue);
+    pros::Motor ft(9, pros::v5::MotorGears::blue);
+    pros::Motor bb(10, pros::v5::MotorGears::blue);
+    pros::Motor bt(18, pros::v5::MotorGears::blue);
 
     const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
         std::ref(fb),
@@ -132,21 +132,20 @@ void opcontrol() {
 
     pros::Optical optical(6);
     const rollers<ff_constants> intakeConsts {
-        {0.00126972964636, 0.15638764945, 0.273219119397, 4700.12687931},
-        {0.0102389892548, 0.160984984415, 0.6346622914, 72.130967},   	 
-        {0.0280821146715, 0.173093964818, 1.07228658995, 188.531268637},
-        {0.00241235016359, 0.161022522912, 0.636826510544, 2339.87040104}
+        {0.00137114193463, 0.305061227315, 0.305061227315, 23.4293},
+        {0.00681526983289, 0.276443936704, 0.23522177916, 27.590165},   	 
+        {0.00291077896309, 0.26137479893, 0.0463373039661, 31.360076},
+        {0.00744674908847, 0.265135278752, 0.17548243974, 27.646015}
     };
 
     intake Intake(intakeMotors, optical, intakeConsts);
-    
 	const double dt_ = 0.01;
     while(true) {
-		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-			Intake.intakeState = intakeOnly; 			
-			Intake.update_intake_state(dt_);
-		}
-	    // dt.field_oriented_holonomic_control(dt_);
+	    if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+	        Intake.intakeState = intakeOnly; 			
+	 		Intake.update_intake_state(dt_);
+	    }
+	    dt.field_oriented_holonomic_control(dt_);
 	    dt.tank_drive_control();
         pros::delay(static_cast<int>(dt_*100.0));
     }

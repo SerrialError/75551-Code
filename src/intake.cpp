@@ -79,23 +79,31 @@ rollers<motorStateType> intake::get_roller_states(void) {
             result = {off, off, off, off};
             break;
     }
+    
     return result;
 }
 
 double intake::get_wanted_motor_vel(pros::Motor motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt) { 
     double motor_velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double motor_wanted_velocity;
+    double motor_wanted_velocity{0.0};
     switch (wanted_roller_state) {
 	    case off:
-	        motor_wanted_velocity = 0; 
+	        motor_wanted_velocity = 0;
+            break;
 	    case forward:
 	        motor_wanted_velocity = motor_constants_.max_ang_vel;
+            break;
 	    case reverse:
 	        motor_wanted_velocity = -motor_constants_.max_ang_vel;
+            break;
 	    case hold:
 	        motor_wanted_velocity = 0;
+            break;
+        default:
+	        motor_wanted_velocity = 0;
+            break;
     }
-    double motor_velocity_delta = motor_velocity - motor_wanted_velocity;
+    double motor_velocity_delta = motor_wanted_velocity - motor_velocity;
     double motor_wanted_velocity_bounded;
     if (motor_velocity_delta > 0) {
 	    double motor_max_velocity = get_motor_max_accel(motor, motor_constants_) * dt;
