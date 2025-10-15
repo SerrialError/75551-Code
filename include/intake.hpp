@@ -52,7 +52,7 @@ public:
     
     rollers<double> get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt);
     
-    void update_intake_state(const double& dt);
+    double update_intake_state(const double& dt);
 };
 
 #endif // INTAKE_HPP
