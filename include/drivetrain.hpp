@@ -7,7 +7,6 @@
 
 class drivetrain {
 private:
-    pros::Controller master{pros::E_CONTROLLER_MASTER};
     const wheels<std::reference_wrapper<pros::Motor>> motors;
     pros::Imu& imu;
     const double wheelbase_length;
@@ -39,7 +38,20 @@ public:
           y_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.o1.max_ang_vel + motor_constants.o2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) / 6.f * 2.f * 0.0254f)
     {}
 
-    wheels<wheel_vel_lim> calculate_wheel_vels_limits(const pose& desired_vels, const wheels<wheel_vel_lim>& wheel_vel_limits);
+    pros::Controller master{pros::E_CONTROLLER_MASTER};
+    
+    double sgn(double x) {
+        if (x > 0) {
+            return 1.0;
+        } else if (x < 0) {
+            return -1.0;
+        } else {
+            return 0.0;
+        }
+    }
+	wheels<wheel_vel_lim> calculate_wheel_vels_limits(const pose& desired_vels, const wheels<wheel_vel_lim>& wheel_vel_limits);
+
+	double get_motor_max_accel(pros::Motor motor, const ff_constants motor_constants_);
     
     void move_wheel_accels(const wheels<double>& wheel_accelerations);
 

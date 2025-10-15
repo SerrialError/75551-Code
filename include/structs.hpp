@@ -2,8 +2,6 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 
-#include "api.h"
-
 template<typename T>
 struct wheels {
     T m1;
@@ -32,7 +30,6 @@ struct ff_constants {
     double K_a;
     double K_v;
     double K_s;
-    double max_ang_accel;
     double max_ang_vel;
 };
 
