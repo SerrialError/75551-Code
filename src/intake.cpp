@@ -1,6 +1,6 @@
 #include "intake.hpp"
 
-double intake::get_motor_max_accel(pros::Motor motor, const ff_constants motor_constants_) {
+double intake::get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_) {
     double motor_velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
     double motor_voltage = motor.get_voltage() * 1000.0;
     double motor_max_acceleration = (motor_voltage - motor_velocity * motor_constants_.K_v - sgn(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
@@ -45,10 +45,10 @@ rollers<wheel_vel_lim> intake::get_motor_vel_limits(const double& dt) {
 
 rollers<double> intake::get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt) {
     rollers<double> result{};
-    result.fb = (motors.fb.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.fb) / dt;
-    result.ft = (motors.ft.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.ft) / dt;
-    result.bb = (motors.bb.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.bb) / dt;
-    result.bt = (motors.bt.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.bt) / dt;
+    result.fb = (wanted_motor_vels.fb - motors.fb.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
+    result.ft = (wanted_motor_vels.ft - motors.ft.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
+    result.bb = (wanted_motor_vels.bb - motors.bb.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
+    result.bt = (wanted_motor_vels.bt - motors.bt.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
     return result;
 }
 
@@ -83,7 +83,7 @@ rollers<motorStateType> intake::get_roller_states(void) {
     return result;
 }
 
-double intake::get_wanted_motor_vel(pros::Motor motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt) { 
+double intake::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt) { 
     double motor_velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
     double motor_wanted_velocity{0.0};
     switch (wanted_roller_state) {
