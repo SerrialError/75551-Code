@@ -44,15 +44,15 @@ public:
     
     rollers<wheel_vel_lim> get_motor_vel_limits(const double& dt);
     
-    double get_motor_max_accel(pros::Motor motor, const ff_constants motor_constants_);
+    double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_);
 
-    double get_wanted_motor_vel(pros::Motor motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt);
+    double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt);
     
     rollers<motorStateType> get_roller_states(void);
     
     rollers<double> get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt);
     
-    double update_intake_state(const double& dt);
+    void update_intake_state(const double& dt);
 };
 
 #endif // INTAKE_HPP
