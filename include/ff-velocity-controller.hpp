@@ -19,4 +19,17 @@ public:
     }
 };
 
+class pd {
+private:
+    double r; //setpoint(desired velocity)
+    double u; //control input
+    double e; //error(aceleration)
+    double y; //output(measured velocity)
+
+    double e = r - y;
+        // error is the difference of desired velocity and measured velocity
+    
+public:
+
+}
 #endif // ff-velocity-controller.hpp
