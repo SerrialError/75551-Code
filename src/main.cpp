@@ -145,6 +145,10 @@ void opcontrol() {
 	        Intake.intakeState = intakeOnly; 			
 	 		Intake.update_intake_state(dt_);
 	    }
+        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+	        Intake.intakeState = intakeOff; 			
+	 		Intake.update_intake_state(dt_);
+	    }
 	    dt.field_oriented_holonomic_control(dt_);
 	    dt.tank_drive_control();
         pros::delay(static_cast<int>(dt_*100.0));
