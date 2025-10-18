@@ -105,10 +105,11 @@ double intake::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor
     }
     double motor_velocity_delta = motor_wanted_velocity - motor_velocity;
     double motor_wanted_velocity_bounded;
-    if (motor_velocity_delta > 0) {
+    
+    if (motor_velocity_delta < 0) {
 	    double motor_max_velocity = get_motor_max_accel(motor, motor_constants_) * dt;
 	    motor_wanted_velocity_bounded = fmin(motor_max_velocity, motor_wanted_velocity);
-    } else if (motor_velocity_delta < 0) {
+    } else if (motor_velocity_delta > 0) {
 	    double motor_min_velocity = -get_motor_max_accel(motor, motor_constants_) * dt;
 	    motor_wanted_velocity_bounded = fmax(motor_min_velocity, motor_wanted_velocity);
     }
