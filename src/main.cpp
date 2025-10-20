@@ -85,12 +85,12 @@ void opcontrol() {
     // std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
     // print_vector(u_vs_x);
     // motor_angle_mp_test(m1, m1_motor_constants, 78.497928, 4700.12687931 * 0.8f, 2.f * M_PI * 10);
-    pros::Motor m1(-8, pros::v5::MotorGears::blue);
+    pros::Motor m1(-6, pros::v5::MotorGears::blue);
     pros::Motor m2(17, pros::v5::MotorGears::blue);
-    pros::Motor o1(-6, pros::v5::MotorGears::blue);
-    pros::Motor o2(19, pros::v5::MotorGears::blue);
-    pros::Motor m3(-4, pros::v5::MotorGears::blue);
-    pros::Motor m4(15, pros::v5::MotorGears::blue);
+    pros::Motor o1(-4, pros::v5::MotorGears::blue);
+    pros::Motor o2(18, pros::v5::MotorGears::blue);
+    pros::Motor m3(-2, pros::v5::MotorGears::blue);
+    pros::Motor m4(11, pros::v5::MotorGears::blue);
 
     const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
         std::ref(m1),
@@ -118,10 +118,10 @@ void opcontrol() {
 
     drivetrain dt(driveMotors, imu_sensor, wheelbase, trackwidth, dtConsts);
     
-    pros::Motor fb(11, pros::v5::MotorGears::blue);
+    pros::Motor fb(10, pros::v5::MotorGears::blue);
     pros::Motor ft(9, pros::v5::MotorGears::blue);
-    pros::Motor bb(10, pros::v5::MotorGears::blue);
-    pros::Motor bt(18, pros::v5::MotorGears::blue);
+    pros::Motor bb(8, pros::v5::MotorGears::blue);
+    pros::Motor bt(19, pros::v5::MotorGears::blue);
 
     const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
         std::ref(fb),
@@ -141,10 +141,19 @@ void opcontrol() {
     intake Intake(intakeMotors, optical, intakeConsts);
 	const double dt_ = 0.01;
     while(true) {
-	    if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+	    if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+	        Intake.intakeState = topScore; 			
+	    }
+        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+	        Intake.intakeState = midScore; 			
+	    }
+        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+	        Intake.intakeState = bottomScore; 			
+	    }
+        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
 	        Intake.intakeState = intakeOnly; 			
 	    }
-        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 	        Intake.intakeState = intakeOff; 			
 	    }
 	 	Intake.update_intake_state(dt_);
