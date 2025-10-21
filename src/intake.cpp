@@ -2,10 +2,15 @@
 #include <algorithm>
 #include <cstdlib>
 
-double intake::get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_) {
+double intake::get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction) {
     double motor_velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double motor_voltage = motor.get_voltage() * 1000.0;
-    double motor_max_acceleration = (motor_voltage - motor_velocity * motor_constants_.K_v - sgn(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
+    double motor_max_acceleration = 0.0;
+    if (motor_velocity == 0.0) {
+        motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - direction * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
+    }
+    else {
+        motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - sgn(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
+    }
     double result = motor_max_acceleration;
     return result;
 }
@@ -30,19 +35,6 @@ void intake::move_wheel_volts(const rollers<double>& wheel_voltages) {
     motors.ft.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.ft)));
     motors.bb.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.bb)));
     motors.bt.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.bt)));
-}
-
-rollers<wheel_vel_lim> intake::get_motor_vel_limits(const double& dt) {
-    rollers<wheel_vel_lim> result{};
-    result.fb.min = motors.fb.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.fb.get(), motor_constants.fb) * dt;
-    result.ft.min = motors.ft.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.ft.get(), motor_constants.ft) * dt;
-    result.bb.min = motors.bb.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.bb.get(), motor_constants.bb) * dt;
-    result.bt.min = motors.bt.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.bt.get(), motor_constants.bt) * dt;
-    result.fb.max = motors.fb.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.fb.get(), motor_constants.fb) * dt;
-    result.ft.max = motors.ft.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.ft.get(), motor_constants.ft) * dt;
-    result.bb.max = motors.bb.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.bb.get(), motor_constants.bb) * dt;
-    result.bt.max = motors.bt.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.bt.get(), motor_constants.bt) * dt;
-    return result;
 }
 
 rollers<double> intake::get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt) {
@@ -105,20 +97,23 @@ double intake::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor
 	        wanted_velocity = 0.0;
             break;
     }
-	double max_velocity_change = get_motor_max_accel(motor, motor_constants_) * dt;
+	double max_velocity_change = get_motor_max_accel(motor, motor_constants_, sgn(wanted_velocity)) * dt;
+    printf("Current Velocity: %.6f\n", velocity);
+    printf("Max Velocity Change: %.6f\n", max_velocity_change);
+    printf("Wanted Velocity (END): %.6f\n", wanted_velocity);
     double max_velocity = velocity + max_velocity_change;
     double min_velocity = velocity - max_velocity_change;
 	double wanted_velocity_bounded = std::clamp(wanted_velocity, min_velocity, max_velocity);
-
+    
 	const double ZERO_DEADBAND_RAD_PER_S = 1.2 * motor_constants_.K_s / motor_constants_.K_v;
 
 	if (std::abs(wanted_velocity_bounded) < ZERO_DEADBAND_RAD_PER_S) {
-		wanted_velocity = 0.0;
+		wanted_velocity_bounded = 0.0;
 	}
 	return wanted_velocity_bounded;
 }
 
-void intake::update_intake_state(const double& dt) { 
+void intake::update_intake_state(const double& dt) {
     rollers<motorStateType> roller_states = get_roller_states();
     double fb_motor_velocity = get_wanted_motor_vel(motors.fb.get(), motor_constants.fb, roller_states.fb, dt);
     double ft_motor_velocity = get_wanted_motor_vel(motors.ft.get(), motor_constants.ft, roller_states.ft, dt);

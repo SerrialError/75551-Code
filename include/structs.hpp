@@ -31,6 +31,7 @@ struct ff_constants {
     double K_v;
     double K_s;
     double max_ang_vel;
+    double max_voltage;
 };
 
 struct wheel_vel_lim {

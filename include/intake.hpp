@@ -42,9 +42,7 @@ public:
 
     void move_wheel_volts(const rollers<double>& wheel_voltages);
     
-    rollers<wheel_vel_lim> get_motor_vel_limits(const double& dt);
-    
-    double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_);
+    double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction);
 
     double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt);
     
