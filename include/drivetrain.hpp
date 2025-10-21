@@ -49,7 +49,9 @@ public:
             return 0.0;
         }
     }
-	wheels<wheel_vel_lim> calculate_wheel_vels_limits(const pose& desired_vels, const wheels<wheel_vel_lim>& wheel_vel_limits);
+	wheels<wheel_vel_lim> calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_lim>& in_bounds);
+
+	wheels<double> calculate_wheel_vels(const wheels<wheel_vel_lim>& bounds);
 
 	double get_motor_max_accel(pros::Motor motor, const ff_constants motor_constants_);
     

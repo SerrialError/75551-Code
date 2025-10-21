@@ -1,50 +1,186 @@
 #include "drivetrain.hpp"
 #include "simplex.hpp"
 
-wheels<wheel_vel_lim> drivetrain::calculate_wheel_vels_limits(const pose& desired_vels, const wheels<wheel_vel_lim>& limits) {
-    // Decision vars: [m1, m2, m3, m4, o1, o2]
-    const int n = 6;
-    const double L = wheelbase_length;
-    const double W = trackwidth_length;
-    std::vector<std::vector<double>> A = {
-        {1,         1,      1,        1,       1,    1  },
-        {1,         -1,     -1,       1,       0,    0  },
-        {-(L+W)/4, (L+W)/4, -(L+W)/4, (L+W)/4, -W/2, W/2},
-        {-1,        -1,      -1,      -1,      -1,   -1 },
-        {-1,        1,       1,       -1,      0,    0  },
-        {(L+W)/4, -(L+W)/4, (L+W)/4, -(L+W)/4, W/2, -W/2},
+wheels<wheel_vel_lim> drivetrain::calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_lim>& in_bounds) {
+    // Map pose fields to the variables used in the derivation
+    const double f_x   = desired_vels.x;
+    const double f_y   = desired_vels.y;
+    const double tau_r = desired_vels.theta;
+	const double L = wheelbase_length;
+	const double W = trackwidth_length;
+
+    // Derived constants
+    const double K     = 2.0 * tau_r / (L + W); // m2+m4-m1-m3
+    const double D     = tau_r / L;             // o2 - o1
+    const double alpha = (K + f_x) / 2.0;       // m4 - m3
+    const double beta  = (f_x - K) / 2.0;       // m1 - m2
+
+    // Input o-bounds
+    const double o1_in_min = in_bounds.o1.min;
+    const double o1_in_max = in_bounds.o1.max;
+    const double o2_in_min = in_bounds.o2.min;
+    const double o2_in_max = in_bounds.o2.max;
+
+    // Feasible o1 interval from intersection:
+    // o1 in [ o_min1, o_max1 ] and o2 = o1 + D in [ o_min2, o_max2 ]
+    const double o1_low_candidate  = std::max(o1_in_min, o2_in_min - D);
+    const double o1_high_candidate = std::min(o1_in_max, o2_in_max - D);
+
+    // If no feasible o1 interval, return input bounds (no feasible solution)
+    if (o1_low_candidate > o1_high_candidate) {
+        return in_bounds;
+    }
+
+    // We'll evaluate feasibility at the endpoints of the o1 interval and aggregate results.
+    const double o1_candidates[2] = { o1_low_candidate, o1_high_candidate };
+
+    // Prepare output with reversed infinities so we can aggregate mins/maxes.
+    wheels<wheel_vel_lim> out;
+    auto set_inf = [&](wheel_vel_lim &w) {
+        w.min =  std::numeric_limits<double>::infinity();
+        w.max = -std::numeric_limits<double>::infinity();
     };
-    std::vector<double> b = {desired_vels.y, desired_vels.x, desired_vels.theta, -desired_vels.y, -desired_vels.x, -desired_vels.theta};
+    set_inf(out.m1); set_inf(out.m2); set_inf(out.o1); set_inf(out.o2);
+    set_inf(out.m3); set_inf(out.m4);
 
-    // Add bounds: F_i <= max, -F_i <= -min
-    std::vector<wheel_vel_lim> lims = {
-        limits.m1, limits.m2, limits.m3,
-        limits.m4, limits.o1, limits.o2
+    bool found_any_feasible = false;
+
+    // Helper: original m bounds
+    const double m1_in_min = in_bounds.m1.min;
+    const double m1_in_max = in_bounds.m1.max;
+    const double m2_in_min = in_bounds.m2.min;
+    const double m2_in_max = in_bounds.m2.max;
+    const double m3_in_min = in_bounds.m3.min;
+    const double m3_in_max = in_bounds.m3.max;
+    const double m4_in_min = in_bounds.m4.min;
+    const double m4_in_max = in_bounds.m4.max;
+
+    for (double o1_cand : o1_candidates) {
+        double o2_cand = o1_cand + D;
+        // S_m = m1 + m2 + m3 + m4 = f_y - o1 - o2
+        double S_m = f_y - o1_cand - o2_cand; // = f_y - 2*o1_cand - D
+
+        // Build P and Q bounds from individual m bounds and alpha,beta
+        // P = m1 + m2 ; Q = m3 + m4 ; P+Q = S_m
+
+        // P constraints from m1,m2:
+        double P_min_from_m1 = 2.0 * m1_in_min - beta;
+        double P_max_from_m1 = 2.0 * m1_in_max - beta;
+        double P_min_from_m2 = 2.0 * m2_in_min + beta;
+        double P_max_from_m2 = 2.0 * m2_in_max + beta;
+
+        double P_min = std::max(P_min_from_m1, P_min_from_m2);
+        double P_max = std::min(P_max_from_m1, P_max_from_m2);
+
+        // Q constraints from m3,m4:
+        double Q_min_from_m3 = 2.0 * m3_in_min + alpha;
+        double Q_max_from_m3 = 2.0 * m3_in_max + alpha;
+        double Q_min_from_m4 = 2.0 * m4_in_min - alpha;
+        double Q_max_from_m4 = 2.0 * m4_in_max - alpha;
+
+        double Q_min = std::max(Q_min_from_m3, Q_min_from_m4);
+        double Q_max = std::min(Q_max_from_m3, Q_max_from_m4);
+
+        // Intersect P with the constraint P = S_m - Q, so:
+        // S_m - Q_max <= P <= S_m - Q_min
+        double P_low  = std::max(P_min, S_m - Q_max);
+        double P_high = std::min(P_max, S_m - Q_min);
+
+        // If infeasible for this o1 candidate, skip
+        if (P_low > P_high) {
+            continue;
+        }
+
+        // Now compute ranges for m_n from P_low/P_high (affine maps)
+        double m1_low = (P_low + beta) / 2.0;
+        double m1_high= (P_high + beta) / 2.0;
+
+        double m2_low = (P_low - beta) / 2.0;
+        double m2_high= (P_high - beta) / 2.0;
+
+        // Q = S_m - P ; m3 = (Q - alpha)/2 = (S_m - P - alpha)/2
+        double m3_low = (S_m - P_high - alpha) / 2.0;
+        double m3_high= (S_m - P_low  - alpha) / 2.0;
+
+        double m4_low = (S_m - P_high + alpha) / 2.0;
+        double m4_high= (S_m - P_low  + alpha) / 2.0;
+
+        // Clip each to the input bounds (conservative intersection)
+        m1_low = std::max(m1_low, m1_in_min);  m1_high = std::min(m1_high, m1_in_max);
+        m2_low = std::max(m2_low, m2_in_min);  m2_high = std::min(m2_high, m2_in_max);
+        m3_low = std::max(m3_low, m3_in_min);  m3_high = std::min(m3_high, m3_in_max);
+        m4_low = std::max(m4_low, m4_in_min);  m4_high = std::min(m4_high, m4_in_max);
+
+        // If clipping made any variable infeasible, skip this candidate
+        if (m1_low > m1_high || m2_low > m2_high || m3_low > m3_high || m4_low > m4_high) {
+            continue;
+        }
+
+        // Aggregate results across candidates
+        out.m1.min = std::min(out.m1.min, m1_low);
+        out.m1.max = std::max(out.m1.max, m1_high);
+
+        out.m2.min = std::min(out.m2.min, m2_low);
+        out.m2.max = std::max(out.m2.max, m2_high);
+
+        out.m3.min = std::min(out.m3.min, m3_low);
+        out.m3.max = std::max(out.m3.max, m3_high);
+
+        out.m4.min = std::min(out.m4.min, m4_low);
+        out.m4.max = std::max(out.m4.max, m4_high);
+
+        // o1 and o2 ranges (conservative): will be the intersection we computed earlier,
+        // but aggregate as well (use clipped values)
+        double o1_clipped_low  = std::max(o1_cand, o1_in_min);
+        double o1_clipped_high = std::min(o1_cand, o1_in_max);
+        // Note: because we used candidates that are endpoints, o1_clipped_low==o1_clipped_high here;
+        // aggregation below produces the full [o1_low_candidate, o1_high_candidate] intersection.
+        out.o1.min = std::min(out.o1.min, o1_clipped_low);
+        out.o1.max = std::max(out.o1.max, o1_clipped_high);
+
+        double o2_clipped_low  = std::max(o2_cand, o2_in_min);
+        double o2_clipped_high = std::min(o2_cand, o2_in_max);
+        out.o2.min = std::min(out.o2.min, o2_clipped_low);
+        out.o2.max = std::max(out.o2.max, o2_clipped_high);
+
+        found_any_feasible = true;
+    }
+
+    // If nothing feasible at endpoints (rare if input is consistent), return input bounds as fallback.
+    if (!found_any_feasible) {
+        return in_bounds;
+    }
+
+    // After aggregation, it's possible some mins are +inf (if e.g. only o-aggregation produced values).
+    // Replace any still-inf mins/max with sensible clipped values (fallback to input bounds).
+    auto sanitize = [&](wheel_vel_lim &out_w, const wheel_vel_lim &in_w) {
+        if (!std::isfinite(out_w.min) || !std::isfinite(out_w.max) || out_w.min > out_w.max) {
+            out_w.min = in_w.min;
+            out_w.max = in_w.max;
+        } else {
+            // final defensive clip into original input bounds
+            out_w.min = std::max(out_w.min, in_w.min);
+            out_w.max = std::min(out_w.max, in_w.max);
+            if (out_w.min > out_w.max) { // if clip broke it, fallback
+                out_w.min = in_w.min;
+                out_w.max = in_w.max;
+            }
+        }
     };
 
-    for (int i = 0; i < n; i++) {
-        std::vector<double> row(n, 0.0);
-        row[i] = 1.0; A.push_back(row); b.push_back(lims[i].max);
-        row[i] = -1.0; A.push_back(row); b.push_back(-lims[i].min);
-    }
+    sanitize(out.m1, in_bounds.m1);
+    sanitize(out.m2, in_bounds.m2);
+    sanitize(out.m3, in_bounds.m3);
+    sanitize(out.m4, in_bounds.m4);
+    sanitize(out.o1, in_bounds.o1);
+    sanitize(out.o2, in_bounds.o2);
 
-    // Map solution into wheels vels
-    std::vector<double> max_result(n, 0.f);
-    for (int j = 0; j < n; j++) {
-        std::vector<double> c(n, 0.f);
-        c[j] = 1;
-        std::vector<double> sol = Simplex::solve(A, b, c);
-        max_result[j] = sol[j];
-    }
-    std::vector<double> min_result(n, 0.f);
-    for (int j = 0; j < n; j++) {
-        std::vector<double> c(n, 0.f);
-        c[j] = -1;
-        std::vector<double> sol = Simplex::solve(A, b, c);
-        min_result[j] = sol[j];
-    }
-    wheels<wheel_vel_lim> result = {{min_result[0], max_result[0]}, {min_result[1], max_result[1]}, {min_result[4], max_result[4]}, {min_result[5], max_result[5]}, {min_result[2], max_result[2]}, {min_result[3], max_result[3]}};
-    return result;
+    return out;
+}
+
+wheels<double> drivetrain::calculate_wheel_vels(const wheels<wheel_vel_lim>& bounds) {
+	wheels<double> result = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+	return result;
 }
 
 void drivetrain::move_wheel_accels(const wheels<double>& wheel_accelerations) {
