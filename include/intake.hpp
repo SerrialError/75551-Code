@@ -13,18 +13,21 @@ private:
     const rollers<ff_constants> motor_constants;
     const rollers<DCff> motor_ffs;
     motorStateType motorState;
+    const color allianceColor;
 
 public:
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_,
               pros::Optical& optical_,
-              const rollers<ff_constants>& motor_constants_)
+              const rollers<ff_constants>& motor_constants_,
+              color allianceColor_)
         : motors(motors_),
           optical(optical_),
           motor_constants(motor_constants_),
           motor_ffs{ DCff(motor_constants_.fb),
                      DCff(motor_constants_.ft),
                      DCff(motor_constants_.bb),
-                     DCff(motor_constants_.bt) }
+                     DCff(motor_constants_.bt) },
+          allianceColor(allianceColor_)
     {}
     rollerStateType intakeState;
     double sgn(double x) {
@@ -50,6 +53,8 @@ public:
     
     rollers<double> get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt);
     
+    bool is_correct_color(void);
+
     void update_intake_state(const double& dt);
 };
 

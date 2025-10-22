@@ -98,9 +98,6 @@ double intake::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor
             break;
     }
 	double max_velocity_change = get_motor_max_accel(motor, motor_constants_, sgn(wanted_velocity)) * dt;
-    printf("Current Velocity: %.6f\n", velocity);
-    printf("Max Velocity Change: %.6f\n", max_velocity_change);
-    printf("Wanted Velocity (END): %.6f\n", wanted_velocity);
     double max_velocity = velocity + max_velocity_change;
     double min_velocity = velocity - max_velocity_change;
 	double wanted_velocity_bounded = std::clamp(wanted_velocity, min_velocity, max_velocity);
@@ -122,4 +119,8 @@ void intake::update_intake_state(const double& dt) {
     rollers<double> motor_velocities = {fb_motor_velocity, ft_motor_velocity, bb_motor_velocity, bt_motor_velocity};
     rollers<double> motor_accelerations = get_wanted_motor_accels(motor_velocities, dt);
     move_wheel_accels(motor_accelerations);
+}
+
+bool intake::is_correct_color(void) {
+    color blockColor = 
 }

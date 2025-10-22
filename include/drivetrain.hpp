@@ -39,7 +39,6 @@ public:
     {}
 
     pros::Controller master{pros::E_CONTROLLER_MASTER};
-    
     double sgn(double x) {
         if (x > 0) {
             return 1.0;
