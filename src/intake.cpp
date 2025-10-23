@@ -110,7 +110,21 @@ double intake::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor
 	return wanted_velocity_bounded;
 }
 
+void intake::get_intake_state() {
+	if (colorSorting) {
+		if (!is_correct_color()) {
+			if (intakeState == midScore) {
+				intakeState = topScore;
+			}
+			else {
+				intakeState = midScore;
+			}
+		}
+	}
+}
+
 void intake::update_intake_state(const double& dt) {
+	get_intake_state();
     rollers<motorStateType> roller_states = get_roller_states();
     double fb_motor_velocity = get_wanted_motor_vel(motors.fb.get(), motor_constants.fb, roller_states.fb, dt);
     double ft_motor_velocity = get_wanted_motor_vel(motors.ft.get(), motor_constants.ft, roller_states.ft, dt);
@@ -122,5 +136,27 @@ void intake::update_intake_state(const double& dt) {
 }
 
 bool intake::is_correct_color(void) {
-    color blockColor = 
+    color blockColor = get_block_color();
+	if (blockColor == allianceColor) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+color intake::get_block_color(void) {
+	double hue = optical.get_hue();
+	double redAngularDistance = angularDistance(hue, redHue);
+	double blueAngularDistance = angularDistance(hue, redHue);
+	if (redAngularDistance < hueUncertainty) {
+		return red;
+	}
+	else if (blueAngularDistance < hueUncertainty) {
+		return blue;
+	}
+	else {
+		return none;
+	}
+
 }

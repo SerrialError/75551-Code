@@ -138,7 +138,7 @@ void opcontrol() {
         {0.00744674908847, 0.265135278752, 0.17548243974, 27.646015, 7.294}
     };
 
-    intake Intake(intakeMotors, optical, intakeConsts);
+    intake Intake(intakeMotors, optical, intakeConsts, red);
     pros::delay(100);
     const double dt_ = 0.01;
     

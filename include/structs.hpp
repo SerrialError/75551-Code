@@ -44,7 +44,7 @@ struct input_output {
     double x;
 };
 
-enum class rollerStateType {
+enum rollerStateType {
     intakeOff,
     intakeOnly,
     bottomScore,
@@ -61,7 +61,8 @@ enum motorStateType {
 
 enum color {
     red,
-    blue
+    blue,
+	none
 };
 
 #endif // STRUCTS_HPP

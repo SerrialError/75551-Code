@@ -14,6 +14,9 @@ private:
     const rollers<DCff> motor_ffs;
     motorStateType motorState;
     const color allianceColor;
+	const double redHue = 0.0;
+	const double blueHue = 180.0;
+	const double hueUncertainty = 10.0;
 
 public:
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_,
@@ -29,7 +32,8 @@ public:
                      DCff(motor_constants_.bt) },
           allianceColor(allianceColor_)
     {}
-    rollerStateType intakeState;
+    rollerStateType intakeState = intakeOff;
+	bool colorSorting = true;
     double sgn(double x) {
         if (x > 0) {
             return 1.0;
@@ -55,7 +59,16 @@ public:
     
     bool is_correct_color(void);
 
+	color get_block_color(void);
+
     void update_intake_state(const double& dt);
+	
+	double angularDistance(double a, double b) {
+    	double d = fabs(a - b);
+    	if (d > 180.0) d = 360.0 - d;
+    	return d;
+	}
+	void get_intake_state(void);
 };
 
 #endif // INTAKE_HPP
