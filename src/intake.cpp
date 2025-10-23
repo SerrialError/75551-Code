@@ -153,10 +153,10 @@ color intake::get_block_color(void) {
     master.clear();
 	double redAngularDistance = angularDistance(hue, redHue);
 	double blueAngularDistance = angularDistance(hue, redHue);
-	if (redAngularDistance < hueUncertainty) {
+	if (redAngularDistance < redHueUncertainty) {
 		return red;
 	}
-	else if (blueAngularDistance < hueUncertainty) {
+	else if (blueAngularDistance < blueHueUncertainty) {
 		return blue;
 	}
 	else {
