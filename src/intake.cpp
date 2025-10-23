@@ -111,20 +111,22 @@ double intake::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor
 }
 
 void intake::get_intake_state() {
-	if (colorSorting) {
-		if (!is_correct_color()) {
-			if (intakeState == midScore) {
-				intakeState = topScore;
-			}
-			else {
-				intakeState = midScore;
-			}
-		}
-	}
+    if (intakeState != intakeOff) {
+        if (!is_correct_color()) {
+            if (intakeState == midScore) {
+                intakeState = topScore;
+            }
+            else {
+                intakeState = midScore;
+            }
+        }
+    }
 }
 
 void intake::update_intake_state(const double& dt) {
-	get_intake_state();
+	if (colorSorting) {
+        get_intake_state();
+    }
     rollers<motorStateType> roller_states = get_roller_states();
     double fb_motor_velocity = get_wanted_motor_vel(motors.fb.get(), motor_constants.fb, roller_states.fb, dt);
     double ft_motor_velocity = get_wanted_motor_vel(motors.ft.get(), motor_constants.ft, roller_states.ft, dt);
@@ -137,7 +139,7 @@ void intake::update_intake_state(const double& dt) {
 
 bool intake::is_correct_color(void) {
     color blockColor = get_block_color();
-	if (blockColor == allianceColor) {
+	if (blockColor == allianceColor || blockColor == none) {
 		return true;
 	}
 	else {
@@ -147,6 +149,8 @@ bool intake::is_correct_color(void) {
 
 color intake::get_block_color(void) {
 	double hue = optical.get_hue();
+    master.print(0, 0, "%.6f", hue);
+    master.clear();
 	double redAngularDistance = angularDistance(hue, redHue);
 	double blueAngularDistance = angularDistance(hue, redHue);
 	if (redAngularDistance < hueUncertainty) {

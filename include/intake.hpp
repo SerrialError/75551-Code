@@ -9,14 +9,13 @@ class intake {
 private:
     pros::Controller master{pros::E_CONTROLLER_MASTER};
     const rollers<std::reference_wrapper<pros::Motor>> motors;
-    pros::Optical& optical;
     const rollers<ff_constants> motor_constants;
     const rollers<DCff> motor_ffs;
     motorStateType motorState;
     const color allianceColor;
-	const double redHue = 0.0;
-	const double blueHue = 180.0;
-	const double hueUncertainty = 10.0;
+	const double redHue = 4.0;
+	const double blueHue = 220.0;
+	const double hueUncertainty = 7.0;
 
 public:
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_,
@@ -32,6 +31,7 @@ public:
                      DCff(motor_constants_.bt) },
           allianceColor(allianceColor_)
     {}
+    pros::Optical& optical;
     rollerStateType intakeState = intakeOff;
 	bool colorSorting = true;
     double sgn(double x) {

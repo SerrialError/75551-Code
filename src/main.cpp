@@ -130,7 +130,7 @@ void opcontrol() {
         std::ref(bt)
     };
 
-    pros::Optical optical(6);
+    pros::Optical optical(16);
     const rollers<ff_constants> intakeConsts {
         {0.00137114193463, 0.305061227315, 0.305061227315, 23.4293, 7.06},
         {0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},   	 
@@ -139,6 +139,8 @@ void opcontrol() {
     };
 
     intake Intake(intakeMotors, optical, intakeConsts, red);
+    Intake.optical.set_led_pwm(75);
+    Intake.optical.set_integration_time(10.0);
     pros::delay(100);
     const double dt_ = 0.01;
     
