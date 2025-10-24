@@ -37,17 +37,18 @@ void intake::move_wheel_volts(const rollers<double>& wheel_voltages) {
     motors.bt.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.bt)));
 }
 
-rollers<double> intake::get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt) {
-    rollers<double> result{};
-    result.fb = (wanted_motor_vels.fb - motors.fb.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
-    result.ft = (wanted_motor_vels.ft - motors.ft.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
-    result.bb = (wanted_motor_vels.bb - motors.bb.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
-    result.bt = (wanted_motor_vels.bt - motors.bt.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
-    return result;
+motorVelocityType intake::get_wanted_motor_accel(pros::Motor& motor, const motorVelocityType& wanted_motor_vel, const double& dt) {
+    if (std::holds_alternative<double>(wanted_motor_vel)) {
+        return (std::get<double>(wanted_motor_vel) - motor.get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
+    }
+    else {
+        return wanted_motor_vel;
+    }
 }
 
 rollers<motorStateType> intake::get_roller_states(void) {
     rollers<motorStateType> result;
+    using enum motorStateType;
     switch (intakeState) {
         case intakeOff:
             result = {off, off, off, off};
@@ -77,9 +78,10 @@ rollers<motorStateType> intake::get_roller_states(void) {
     return result;
 }
 
-double intake::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt) { 
+motorVelocityType intake::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt) { 
     double velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double wanted_velocity = 0.0;
+    motorVelocityType wanted_velocity = 0.0;
+    using enum motorStateType; 
     switch (wanted_roller_state) {
 	    case off:
 	        wanted_velocity = 0.0;
@@ -91,7 +93,7 @@ double intake::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor
 	        wanted_velocity = -motor_constants_.max_ang_vel;
             break;
 	    case hold:
-	        wanted_velocity = 0.0;
+	        wanted_velocity = motorVelocityType.hold;
             break;
         default:
 	        wanted_velocity = 0.0;
@@ -128,12 +130,12 @@ void intake::update_intake_state(const double& dt) {
         get_intake_state();
     }
     rollers<motorStateType> roller_states = get_roller_states();
-    double fb_motor_velocity = get_wanted_motor_vel(motors.fb.get(), motor_constants.fb, roller_states.fb, dt);
+    motorVelocityType fb_motor_velocity = get_wanted_motor_vel(motors.fb.get(), motor_constants.fb, roller_states.fb, dt);
     double ft_motor_velocity = get_wanted_motor_vel(motors.ft.get(), motor_constants.ft, roller_states.ft, dt);
     double bb_motor_velocity = get_wanted_motor_vel(motors.bb.get(), motor_constants.bb, roller_states.bb, dt);
     double bt_motor_velocity = get_wanted_motor_vel(motors.bt.get(), motor_constants.bt, roller_states.bt, dt);
     rollers<double> motor_velocities = {fb_motor_velocity, ft_motor_velocity, bb_motor_velocity, bt_motor_velocity};
-    rollers<double> motor_accelerations = get_wanted_motor_accels(motor_velocities, dt);
+    motorVelocityType motor_accelerations = get_wanted_motor_accel(motors.fb.get(), motor_velocities, dt);
     move_wheel_accels(motor_accelerations);
 }
 

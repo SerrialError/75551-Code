@@ -2,6 +2,8 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 
+#include "api.h"
+
 template<typename T>
 struct wheels {
     T m1;
@@ -52,7 +54,7 @@ enum rollerStateType {
     topScore
 };
 
-enum motorStateType {
+enum class motorStateType {
     forward,
     reverse,
     hold,
@@ -64,5 +66,11 @@ enum color {
     blue,
 	none
 };
+
+enum class holdType {
+    hold
+};
+
+typedef std::variant<double, holdType> motorVelocityType;
 
 #endif // STRUCTS_HPP

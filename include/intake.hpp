@@ -14,8 +14,9 @@ private:
     motorStateType motorState;
     const color allianceColor;
 	const double redHue = 4.0;
-	const double blueHue = 220.0;
-	const double hueUncertainty = 7.0;
+	const double blueHue = 200.0;
+	const double redHueUncertainty = 7.0;
+    const double blueHueUncertainty = 20.0;
 
 public:
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_,
@@ -55,7 +56,7 @@ public:
     
     rollers<motorStateType> get_roller_states(void);
     
-    rollers<double> get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt);
+    motorVelocityType get_wanted_motor_accel(pros::Motor& motor, const motorVelocityType& wanted_motor_vels, const double& dt);
     
     bool is_correct_color(void);
 
