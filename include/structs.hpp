@@ -67,10 +67,9 @@ enum color {
 	none
 };
 
-enum class holdType {
-    hold
+struct motorVelocityType {
+    double velocity;
+    pros::motor_brake_mode_e  brakeMode;
 };
-
-typedef std::variant<double, holdType> motorVelocityType;
 
 #endif // STRUCTS_HPP

@@ -34,7 +34,7 @@ public:
     {}
     pros::Optical& optical;
     rollerStateType intakeState = intakeOff;
-	bool colorSorting = true;
+	bool colorSorting = false;
     double sgn(double x) {
         if (x > 0) {
             return 1.0;
@@ -46,17 +46,17 @@ public:
     }
     rollers<double> get_motor_max_accel(void);
 
-    void move_wheel_accels(const rollers<double>& wheel_accelerations);
+    void move_wheel_accels(const rollers<motorVelocityType>& wheel_accelerations);
 
     void move_wheel_volts(const rollers<double>& wheel_voltages);
     
     double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction);
 
-    double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt);
+    motorVelocityType get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, motorStateType wanted_roller_state, const double& dt);
     
     rollers<motorStateType> get_roller_states(void);
     
-    motorVelocityType get_wanted_motor_accel(pros::Motor& motor, const motorVelocityType& wanted_motor_vels, const double& dt);
+    rollers<double> get_wanted_motor_accels(const rollers<double>& wanted_motor_vels, const double& dt);
     
     bool is_correct_color(void);
 

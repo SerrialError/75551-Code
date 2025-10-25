@@ -81,9 +81,7 @@ void autonomous() {}
  */
 
 void opcontrol() {
-    // compute sysid(bt);
-    // std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
-    // print_vector(u_vs_x);
+
     // motor_angle_mp_test(m1, m1_motor_constants, 78.497928, 4700.12687931 * 0.8f, 2.f * M_PI * 10);
     pros::Motor m1(-6, pros::v5::MotorGears::blue);
     pros::Motor m2(17, pros::v5::MotorGears::blue);
@@ -129,10 +127,12 @@ void opcontrol() {
         std::ref(bb),
         std::ref(bt)
     };
-
+    // compute sysid(fb);
+    // std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
+    // print_vector(u_vs_x);
     pros::Optical optical(16);
     const rollers<ff_constants> intakeConsts {
-        {0.00137114193463, 0.305061227315, 0.305061227315, 23.4293, 7.06},
+        {0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},
         {0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},   	 
         {0.00291077896309, 0.26137479893, 0.0463373039661, 31.360076, 7.585},
         {0.00744674908847, 0.265135278752, 0.17548243974, 27.646015, 7.294}
@@ -141,7 +141,6 @@ void opcontrol() {
     intake Intake(intakeMotors, optical, intakeConsts, red);
     Intake.optical.set_led_pwm(75);
     Intake.optical.set_integration_time(10.0);
-    pros::delay(100);
     const double dt_ = 0.01;
     
     while(true) {
