@@ -48,7 +48,7 @@ public:
             return 0.0;
         }
     }
-	wheels<wheel_vel_lim> calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_lim>& in_bounds);
+	wheels<wheel_vel_lim> calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);
 
 	wheels<double> calculate_wheel_vels(const wheels<wheel_vel_lim>& bounds);
 
