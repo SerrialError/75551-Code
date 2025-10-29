@@ -54,7 +54,7 @@ public:
 
 	wheels<double> calculate_wheel_vels(const wheels<wheel_vel_lim>& bounds);
 
-	double get_motor_max_accel(pros::Motor motor, const ff_constants motor_constants_);
+	double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction);
     
     void move_wheel_accels(const wheels<double>& wheel_accelerations);
 

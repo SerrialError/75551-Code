@@ -135,12 +135,16 @@ void drivetrain::move_wheel_accels(const wheels<double>& wheel_accelerations) {
     motors.m4.get().move_voltage(static_cast<int>(std::lround(m4_voltage)));
 }
 
-double drivetrain::get_motor_max_accel(pros::Motor motor, const ff_constants motor_constants_) {
+double drivetrain::get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction) {
     double motor_velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double motor_voltage = motor.get_voltage() * 1000.0;
-    double motor_max_acceleration = (motor_voltage - motor_velocity * motor_constants_.K_v - sgn(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a;
-    double result = motor_max_acceleration;
-    return result;
+    double motor_max_acceleration = 0.0;
+    if (motor_velocity == 0.0) {
+        motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - direction * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
+    }
+    else {
+        motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - sgn(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
+    }
+    return motor_max_acceleration;
 }
 
 void drivetrain::move_wheel_volts(const wheels<double>& wheel_voltages) {
@@ -153,14 +157,17 @@ void drivetrain::move_wheel_volts(const wheels<double>& wheel_voltages) {
 }
 
 void drivetrain::field_oriented_holonomic_control(const double& dt) {
-    const double theta_max_velocity = 34234.434;
+    const double L = wheelbase_length;
+    const double W = trackwidth_length;
+    const double theta_max_velocity = (L+W)/4.0*(motor_constants.m2.max_ang_vel + motor_constants.m4.max_ang_vel - motor_constants.m1.max_ang_vel - motor_constants.m3.max_ang_vel) + W/2.0*(motor_constants.m2.max_ang_vel - motor_constants.o1.max_ang_vel);
     const double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
     const double x_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
     const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
     const double x_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X));
     double wanted_angle = atan2(y_right, x_right);
     double cur_angle = get_standard_angle();
-    double angle_error = wanted_angle - cur_angle;
+    double angle_error = wanted_angle;
+
     double theta_vel = angle_error * theta_max_velocity / M_PI;
     double x_vel = x_left * x_max_velocity / 127.0;
     double y_vel = y_left * y_max_velocity / 127.0;
@@ -181,29 +188,29 @@ double drivetrain::get_standard_angle(void) {
 
 wheels<wheel_vel_lim> drivetrain::get_motor_vel_limits(const double& dt) {
     wheels<wheel_vel_lim> result{};
-    result.m1.min = motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m1.get(), motor_constants.m1) * dt;
-    result.m2.min = motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.o1.get(), motor_constants.o1) * dt;
-    result.o1.min = motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.o1.get(), motor_constants.o1) * dt;
-    result.o2.min = motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.o2.get(), motor_constants.o2) * dt;
-    result.m3.min = motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m3.get(), motor_constants.m3) * dt;
-    result.m4.min = motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m4.get(), motor_constants.m4) * dt;
-    result.m1.max = motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m1.get(), motor_constants.m1) * dt;
-    result.m2.max = motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m2.get(), motor_constants.m2) * dt;
-    result.o1.max = motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.o1.get(), motor_constants.o1) * dt;
-    result.o2.max = motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.o2.get(), motor_constants.o2) * dt;
-    result.m3.max = motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m3.get(), motor_constants.m3) * dt;
-    result.m4.max = motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m4.get(), motor_constants.m4) * dt;
+    result.m1.min = motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m1.get(), motor_constants.m1, 1) * dt;
+    result.m2.min = motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.o1.get(), motor_constants.o1, 1) * dt;
+    result.o1.min = motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.o1.get(), motor_constants.o1, 1) * dt;
+    result.o2.min = motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.o2.get(), motor_constants.o2, 1) * dt;
+    result.m3.min = motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m3.get(), motor_constants.m3, 1) * dt;
+    result.m4.min = motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m4.get(), motor_constants.m4, 1) * dt;
+    result.m1.max = motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m1.get(), motor_constants.m1, 1) * dt;
+    result.m2.max = motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m2.get(), motor_constants.m2, 1) * dt;
+    result.o1.max = motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.o1.get(), motor_constants.o1, 1) * dt;
+    result.o2.max = motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.o2.get(), motor_constants.o2, 1) * dt;
+    result.m3.max = motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m3.get(), motor_constants.m3, 1) * dt;
+    result.m4.max = motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m4.get(), motor_constants.m4, 1) * dt;
     return result;
 }
 
 wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt) {
     wheels<double> result{};
-    result.m1 = (motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.m1) / dt;
-    result.m2 = (motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.m2) / dt;
-    result.o1 = (motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.o1) / dt;
-    result.o2 = (motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.o2) / dt;
-    result.m3 = (motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.m3) / dt;
-    result.m4 = (motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - wanted_motor_vels.m4) / dt;
+    result.m1 = (wanted_motor_vels.m1 - motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
+    result.m2 = (wanted_motor_vels.m2 - motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 ) / dt;
+    result.o1 = (wanted_motor_vels.o1 - motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
+    result.o2 = (wanted_motor_vels.o2 - motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
+    result.m3 = (wanted_motor_vels.m3 - motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
+    result.m4 = (wanted_motor_vels.m4 - motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
     return result;
 }
 
@@ -219,14 +226,15 @@ void drivetrain::tank_drive_control() {
 void drivetrain::test_control(const double& dt) {
     const double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
     const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
-    const double left_decimal = y_left / 127.0 * 12.0;
-	wheels<double> wanted_motor_vels = {(1.0 * motor_constants.m1.max_ang_vel) * 0.9 * left_decimal, (-0.5 * motor_constants.m2.max_ang_vel) * 0.9 * left_decimal, (1.0 * motor_constants.o1.max_ang_vel) * 0.9 * left_decimal, (1.0 * motor_constants.o2.max_ang_vel) * 0.9 * left_decimal, (-0.5 * motor_constants.m3.max_ang_vel) * 0.9 * left_decimal, (1.0 * motor_constants.m4.max_ang_vel) * 0.9 * left_decimal};
+    const double left_decimal = y_left / 127.0;
+    wheels<double> wanted_motor_vels = {(1.0 * motor_constants.m1.max_ang_vel) * 0.9 * left_decimal, (-0.5 * motor_constants.m2.max_ang_vel) * 0.9 * left_decimal, (1.0 * motor_constants.o1.max_ang_vel) * 0.9 * left_decimal, (1.0 * motor_constants.o2.max_ang_vel) * 0.9 * left_decimal, (-0.5 * motor_constants.m3.max_ang_vel) * 0.9 * left_decimal, (1.0 * motor_constants.m4.max_ang_vel) * 0.9 * left_decimal};
     double m1_wanted_motor_vel = get_wanted_motor_vel(motors.m1.get(), motor_constants.m1, wanted_motor_vels.m1, dt);
     double m2_wanted_motor_vel = get_wanted_motor_vel(motors.m2.get(), motor_constants.m2, wanted_motor_vels.m2, dt);
     double o1_wanted_motor_vel = get_wanted_motor_vel(motors.o1.get(), motor_constants.o1, wanted_motor_vels.o1, dt);
     double o2_wanted_motor_vel = get_wanted_motor_vel(motors.o2.get(), motor_constants.o2, wanted_motor_vels.o2, dt);
     double m3_wanted_motor_vel = get_wanted_motor_vel(motors.m3.get(), motor_constants.m3, wanted_motor_vels.m3, dt);
     double m4_wanted_motor_vel = get_wanted_motor_vel(motors.m4.get(), motor_constants.m4, wanted_motor_vels.m4, dt);
+    
 	wheels<double> wanted_motor_vels_bounded = { m1_wanted_motor_vel, m2_wanted_motor_vel, o1_wanted_motor_vel, o2_wanted_motor_vel, m3_wanted_motor_vel, m4_wanted_motor_vel};
     const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
     move_wheel_accels(wanted_motor_accels);
@@ -234,7 +242,7 @@ void drivetrain::test_control(const double& dt) {
 
 double drivetrain::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt) {
     double velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
-	double max_velocity_change = get_motor_max_accel(motor, motor_constants_) * dt;
+	double max_velocity_change = get_motor_max_accel(motor, motor_constants_, sgn(wanted_velocity)) * dt;
     double max_velocity = velocity + max_velocity_change;
     double min_velocity = velocity - max_velocity_change;
 	double wanted_velocity_bounded = std::clamp(wanted_velocity, min_velocity, max_velocity);
