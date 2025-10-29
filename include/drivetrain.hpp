@@ -71,6 +71,10 @@ public:
     wheels<double> get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt);
 
     void tank_drive_control();
+	
+	void test_control(const double& dt);
+	
+	double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt);
 };
 
 #endif // DRIVETRAIN_HPP

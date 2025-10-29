@@ -215,3 +215,34 @@ void drivetrain::tank_drive_control() {
     const wheels<double> wanted_motor_voltages = {left_voltage, right_voltage, left_voltage, right_voltage, left_voltage, right_voltage};
     move_wheel_volts(wanted_motor_voltages);
 }
+
+void drivetrain::test_control(const double& dt) {
+    const double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
+    const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+    const double left_decimal = y_left / 127.0 * 12.0;
+	wheels<double> wanted_motor_vels = {(1.0 * motor_constants.m1.max_ang_vel) * 0.9 * left_decimal, (-0.5 * motor_constants.m2.max_ang_vel) * 0.9 * left_decimal, (1.0 * motor_constants.o1.max_ang_vel) * 0.9 * left_decimal, (1.0 * motor_constants.o2.max_ang_vel) * 0.9 * left_decimal, (-0.5 * motor_constants.m3.max_ang_vel) * 0.9 * left_decimal, (1.0 * motor_constants.m4.max_ang_vel) * 0.9 * left_decimal};
+    double m1_wanted_motor_vel = get_wanted_motor_vel(motors.m1.get(), motor_constants.m1, wanted_motor_vels.m1, dt);
+    double m2_wanted_motor_vel = get_wanted_motor_vel(motors.m2.get(), motor_constants.m2, wanted_motor_vels.m2, dt);
+    double o1_wanted_motor_vel = get_wanted_motor_vel(motors.o1.get(), motor_constants.o1, wanted_motor_vels.o1, dt);
+    double o2_wanted_motor_vel = get_wanted_motor_vel(motors.o2.get(), motor_constants.o2, wanted_motor_vels.o2, dt);
+    double m3_wanted_motor_vel = get_wanted_motor_vel(motors.m3.get(), motor_constants.m3, wanted_motor_vels.m3, dt);
+    double m4_wanted_motor_vel = get_wanted_motor_vel(motors.m4.get(), motor_constants.m4, wanted_motor_vels.m4, dt);
+	wheels<double> wanted_motor_vels_bounded = { m1_wanted_motor_vel, m2_wanted_motor_vel, o1_wanted_motor_vel, o2_wanted_motor_vel, m3_wanted_motor_vel, m4_wanted_motor_vel};
+    const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
+    move_wheel_accels(wanted_motor_accels);
+}
+
+double drivetrain::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt) {
+    double velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
+	double max_velocity_change = get_motor_max_accel(motor, motor_constants_) * dt;
+    double max_velocity = velocity + max_velocity_change;
+    double min_velocity = velocity - max_velocity_change;
+	double wanted_velocity_bounded = std::clamp(wanted_velocity, min_velocity, max_velocity);
+    
+	const double ZERO_DEADBAND_RAD_PER_S = 1.2 * motor_constants_.K_s / motor_constants_.K_v;
+
+	if (std::abs(wanted_velocity_bounded) < ZERO_DEADBAND_RAD_PER_S) {
+		wanted_velocity_bounded = 0.0;
+	}
+	return wanted_velocity_bounded;
+}
