@@ -49,8 +49,68 @@ wheels<wheel_vel_lim> drivetrain::calculate_wheel_vels_bounds(const pose& desire
     return result;
 }
 
-wheels<double> drivetrain::calculate_wheel_vels(const wheels<wheel_vel_lim>& bounds) {
-	wheels<double> result = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+wheels<double> drivetrain::calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& limits) {
+	const int n = 6;
+	const int n2 = 2 * n;
+
+	const std::vector<double> x_nom = {motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0, motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0, motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0, motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0, motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0, motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0};
+
+    const double L = wheelbase_length;
+    const double W = trackwidth_length;
+    std::vector<std::vector<double>> A = {
+        {1,         1,      1,        1,       1,    1  , 0, 0, 0, 0, 0, 0},
+        {1,         -1,     -1,       1,       0,    0  , 0, 0, 0, 0, 0, 0},
+        {-(L+W)/4, (L+W)/4, -(L+W)/4, (L+W)/4, -W/2, W/2, 0, 0, 0, 0, 0, 0},
+        {-1,        -1,      -1,      -1,      -1,   -1 , 0, 0, 0, 0, 0, 0},
+        {-1,        1,       1,       -1,      0,    0  , 0, 0, 0, 0, 0, 0},
+        {(L+W)/4, -(L+W)/4, (L+W)/4, -(L+W)/4, W/2, -W/2, 0, 0, 0, 0, 0, 0},
+        {-(L+W)/4, (L+W)/4, -(L+W)/4, (L+W)/4, -W/2, W/2, 0, 0, 0, 0, 0, 0},
+        {(L+W)/4, -(L+W)/4, (L+W)/4, -(L+W)/4, W/2, -W/2, 0, 0, 0, 0, 0, 0}
+    };
+    std::vector<double> b = {desired_vels.y, desired_vels.x, desired_vels.theta, -desired_vels.y, -desired_vels.x, -desired_vels.theta, 0.0, 0.0};
+
+    // Add bounds: F_i <= max, -F_i <= -min
+    std::vector<wheel_vel_lim> lims = {
+        limits.m1,  limits.m2,  limits.m3,
+        limits.m4,  limits.o1,  limits.o2,
+		{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},
+		{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}
+    };
+
+    for (int i = 0; i < n; i++) {
+        std::vector<double> row(n2, 0.0);
+        row[i] = 1.0; A.push_back(row); b.push_back(lims[i].max);
+        row[i] = -1.0; A.push_back(row); b.push_back(-lims[i].min);
+    }
+
+	// 2) for each j: x_j - d_j <= x_nom_j  => [ e_j , -e_j ] <= x_nom_j
+	for (int j = 0; j < n; ++j) {
+		std::vector<double> row(n2, 0.0);
+		row[j] = 1.0;         // x_j
+		row[n + j] = -1.0;    // -d_j
+		A.push_back(row);
+		b.push_back(x_nom[j]);
+		// -x_j - d_j <= -x_nom_j
+		std::vector<double> row2(n2, 0.0);
+		row2[j] = -1.0;
+		row2[n + j] = -1.0;
+		A.push_back(row2);
+		b.push_back(-x_nom[j]);
+	}
+
+	// Objective: minimize sum d_j  => maximize -sum d_j
+	std::vector<double> c(n2, 0.0);
+	for (int j = 0; j < n; ++j) c[n + j] = -1.0;
+
+	std::vector<double> optimal;
+	optimal = Simplex::solve(A, b, c);
+
+	// extract x
+	std::vector<double> x_sol(n, 0.0);
+	for (int j = 0; j < n; ++j) x_sol[j] = optimal[j];
+
+    wheels<double> result = {optimal[0], optimal[1], optimal[4], optimal[5], optimal[2], optimal[3]};
+
 	return result;
 }
 
@@ -106,9 +166,9 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
     double y_vel = y_left * y_max_velocity / 127.0;
     pose wanted_vels = {x_vel, y_vel, theta_vel};
     wheels<wheel_vel_lim> motor_vel_limits = get_motor_vel_limits(dt);
-    // const wheels<double> wanted_motor_vels = calculate_wheel_vels(wanted_vels, motor_vel_limits);
-    // const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
-    // move_wheel_accels(wanted_motor_accels);
+    const wheels<double> wanted_motor_vels = calculate_wheel_vels(wanted_vels, motor_vel_limits);
+    const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
+    move_wheel_accels(wanted_motor_accels);
 }
 
 double drivetrain::get_standard_angle(void) {
