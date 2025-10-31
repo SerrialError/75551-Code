@@ -34,8 +34,8 @@ public:
                      DCff(motor_constants_.o2),
                      DCff(motor_constants_.m3),
                      DCff(motor_constants_.m4) },
-          x_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.o1.max_ang_vel + motor_constants.o2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) / 6.f * 2.f * 0.0254f),
-          y_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.o1.max_ang_vel + motor_constants.o2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) / 6.f * 2.f * 0.0254f)
+          x_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) * 2.0 * 0.0254),
+          y_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.o1.max_ang_vel + motor_constants.o2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) * 2.0 * 0.0254)
     {}
 
     pros::Controller master{pros::E_CONTROLLER_MASTER};
