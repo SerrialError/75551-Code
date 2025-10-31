@@ -169,8 +169,8 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
     double angle_error = wanted_angle;
 
     double theta_vel = angle_error * theta_max_velocity / M_PI;
-    double x_vel = x_left * x_max_velocity / 127.0;
-    double y_vel = y_left * y_max_velocity / 127.0;
+    double x_vel = x_left * (x_max_velocity / 2.0 / 0.0254) / 127.0;
+    double y_vel = y_left * (y_max_velocity / 2.0 / 0.0254) / 127.0;
     pose wanted_vels = {x_vel, y_vel, theta_vel};
     wheels<wheel_vel_lim> motor_vel_limits = get_motor_vel_limits(dt);
     const wheels<double> wanted_motor_vels = calculate_wheel_vels(wanted_vels, motor_vel_limits);
