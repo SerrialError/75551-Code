@@ -58,16 +58,23 @@ wheels<double> drivetrain::calculate_wheel_vels(const pose& desired_vels, const 
     const double L = wheelbase_length;
     const double W = trackwidth_length;
     std::vector<std::vector<double>> A = {
-        {1,         1,      1,        1,       1,    1  , 0, 0, 0, 0, 0, 0},
-        {1,         -1,     -1,       1,       0,    0  , 0, 0, 0, 0, 0, 0},
-        {-(L+W)/4, (L+W)/4, -(L+W)/4, (L+W)/4, -W/2, W/2, 0, 0, 0, 0, 0, 0},
-        {-1,        -1,      -1,      -1,      -1,   -1 , 0, 0, 0, 0, 0, 0},
-        {-1,        1,       1,       -1,      0,    0  , 0, 0, 0, 0, 0, 0},
-        {(L+W)/4, -(L+W)/4, (L+W)/4, -(L+W)/4, W/2, -W/2, 0, 0, 0, 0, 0, 0},
-        {-(L+W)/4, (L+W)/4, -(L+W)/4, (L+W)/4, -W/2, W/2, 0, 0, 0, 0, 0, 0},
-        {(L+W)/4, -(L+W)/4, (L+W)/4, -(L+W)/4, W/2, -W/2, 0, 0, 0, 0, 0, 0}
+        {1,         1,       1,         1,       1,    1  , 0,  0,  0,  0,  0,  0},
+        {1,         -1,      -1,        1,       0,    0  , 0,  0,  0,  0,  0,  0},
+        {-(L+W)/4,  (L+W)/4, -(L+W)/4, (L+W)/4,  -W/2, W/2, 0,  0,  0,  0,  0,  0},
+        {-1,        -1,      -1,       -1,       -1,   -1 , 0,  0,  0,  0,  0,  0},
+        {-1,        1,       1,        -1,       0,    0  , 0,  0,  0,  0,  0,  0},
+        {(L+W)/4,  -(L+W)/4, (L+W)/4,  -(L+W)/4, W/2, -W/2, 0,  0,  0,  0,  0,  0},
+        {-(L+W)/4, (L+W)/4,  -(L+W)/4, (L+W)/4,  -W/2, W/2, 0,  0,  0,  0,  0,  0},
+        {(L+W)/4,  -(L+W)/4, (L+W)/4,  -(L+W)/4, W/2, -W/2, 0,  0,  0,  0,  0,  0}
+		
     };
     std::vector<double> b = {desired_vels.y, desired_vels.x, desired_vels.theta, -desired_vels.y, -desired_vels.x, -desired_vels.theta, 0.0, 0.0};
+	for (int j = 0; j < n; ++j) {
+		std::vector<double> row(n2, 0.0);
+		row[n + j] = -1.0;  // -d_j
+		A.push_back(row);
+		b.push_back(0.0);
+	}
 
     // Add bounds: F_i <= max, -F_i <= -min
     std::vector<wheel_vel_lim> lims = {
@@ -104,10 +111,6 @@ wheels<double> drivetrain::calculate_wheel_vels(const pose& desired_vels, const 
 
 	std::vector<double> optimal;
 	optimal = Simplex::solve(A, b, c);
-
-	// extract x
-	std::vector<double> x_sol(n, 0.0);
-	for (int j = 0; j < n; ++j) x_sol[j] = optimal[j];
 
     wheels<double> result = {optimal[0], optimal[1], optimal[4], optimal[5], optimal[2], optimal[3]};
 
