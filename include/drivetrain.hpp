@@ -49,10 +49,8 @@ public:
         }
     }
 	wheels<wheel_vel_lim> calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);
-	wheels<double> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);
 
-
-	wheels<double> calculate_wheel_vels(const wheels<wheel_vel_lim>& bounds);
+    std::optional<wheels<double>> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);
 
 	double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction);
     
@@ -67,6 +65,8 @@ public:
     double joystick_to_vel(const double& joystick);
     
     wheels<wheel_vel_lim> get_motor_vel_limits(const double& dt);
+    
+    wheels<wheel_vel_lim> get_total_motor_vel_limits();
     
     wheels<double> get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt);
 

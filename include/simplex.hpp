@@ -10,7 +10,7 @@ public:
     // b: length m
     // c: length n
     // returns optimal x (length n) corresponding to original variables (not split ones)
-    static std::vector<double> solve(const std::vector<std::vector<double>>& A_in,
+    static std::optional<std::vector<double>> solve(const std::vector<std::vector<double>>& A_in,
                                      const std::vector<double>& b_in,
                                      const std::vector<double>& c_in) {
         const double EPS = 1e-9;
@@ -189,7 +189,8 @@ public:
             // recall: Phase I objective w* = -phase1_obj
             if (phase1_obj < -EPS) {
                 // phase1_obj negative means w* > 0 => infeasible
-                throw std::runtime_error("LP is infeasible (Phase I found positive artificial sum)");
+                // throw std::runtime_error("LP is infeasible (Phase I found positive artificial sum)");
+                return std::nullopt;
             }
 
             // Remove artificial columns from tableau.
