@@ -1,4 +1,5 @@
 #include "drivetrain.hpp"
+#include "helper-functions.hpp"
 #include "simplex.hpp"
 
 wheels<wheel_vel_lim> drivetrain::calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_lim>& limits) {
@@ -168,7 +169,7 @@ double drivetrain::get_motor_max_accel(pros::Motor& motor, const ff_constants mo
         motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - direction * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
     }
     else {
-        motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - sgn(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
+        motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - sign(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
     }
     return motor_max_acceleration;
 }
@@ -203,7 +204,7 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
 		x_left = 0.0;
 	}
     double wanted_angle = atan2(y_right, x_right);
-    double cur_angle = get_standard_angle();
+    double cur_angle = DEG_TO_RAD_NORM(imu.get_rotation());
     // double angle_error = wanted_angle - cur_angle;
     double angle_error = wanted_angle;
     // double angle_error = 0.0;
@@ -238,14 +239,6 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
     wheels<double> wanted_bounded_motor_vels = {bounded_wanted_m1_vel, bounded_wanted_m2_vel, bounded_wanted_o1_vel, bounded_wanted_o2_vel, bounded_wanted_m3_vel, bounded_wanted_m4_vel};
     const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_bounded_motor_vels, dt);
     move_wheel_accels(wanted_motor_accels);
-}
-
-double drivetrain::get_standard_angle(void) {
-    double angle_rad = imu.get_rotation() * M_PI / 180.0; 
-    double standard_angle = -angle_rad + M_PI;
-    double offset_angle = standard_angle; // relate to initial pose of theta
-    double clamped_angle = fmod(offset_angle + M_PI, 2.0 * M_PI) - M_PI;
-    return clamped_angle;
 }
 
 wheels<wheel_vel_lim> drivetrain::get_total_motor_vel_limits() {
@@ -321,7 +314,7 @@ void drivetrain::test_control(const double& dt) {
 
 double drivetrain::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt) {
     double velocity = motor.get_actual_velocity() * 2.0 * M_PI / 60.0;
-	double max_velocity_change = get_motor_max_accel(motor, motor_constants_, sgn(wanted_velocity)) * dt;
+	double max_velocity_change = get_motor_max_accel(motor, motor_constants_, sign(wanted_velocity)) * dt;
     double max_velocity = velocity + max_velocity_change;
     double min_velocity = velocity - max_velocity_change;
 	double wanted_velocity_bounded = std::clamp(wanted_velocity, min_velocity, max_velocity);

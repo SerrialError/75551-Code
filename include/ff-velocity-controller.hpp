@@ -3,13 +3,11 @@
 
 #include "api.h"
 #include "structs.hpp"
+#include "helper-functions.hpp"
 
 class DCff {
 private:
     ff_constants constants;
-    static double sign(double x) {
-        return (x > 0) - (x < 0);
-    }
 public:
     DCff(ff_constants constants_) : constants(constants_) {}
     

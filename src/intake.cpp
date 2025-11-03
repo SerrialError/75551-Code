@@ -9,7 +9,7 @@ double intake::get_motor_max_accel(pros::Motor& motor, const ff_constants motor_
         motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - direction * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
     }
     else {
-        motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - sgn(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
+        motor_max_acceleration = (motor_constants_.max_voltage - motor_velocity * motor_constants_.K_v - sign(motor_velocity) * motor_constants_.K_s) / motor_constants_.K_a * 0.9;
     }
     double result = motor_max_acceleration;
     return result;
@@ -132,7 +132,7 @@ motorVelocityType intake::get_wanted_motor_vel(pros::Motor& motor, const ff_cons
             wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
             break;
     }
-	double max_velocity_change = get_motor_max_accel(motor, motor_constants_, sgn(wanted_velocity)) * dt;
+	double max_velocity_change = get_motor_max_accel(motor, motor_constants_, sign(wanted_velocity)) * dt;
     double max_velocity = velocity + max_velocity_change;
     double min_velocity = velocity - max_velocity_change;
 	double wanted_velocity_bounded = std::clamp(wanted_velocity, min_velocity, max_velocity);

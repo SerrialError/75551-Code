@@ -4,6 +4,7 @@
 #include "api.h"
 #include "structs.hpp"
 #include "ff-velocity-controller.hpp"
+#include "helper-functions.hpp"
 
 class drivetrain {
 private:
@@ -34,15 +35,6 @@ public:
     {}
 
     pros::Controller master{pros::E_CONTROLLER_MASTER};
-    double sgn(double x) {
-        if (x > 0) {
-            return 1.0;
-        } else if (x < 0) {
-            return -1.0;
-        } else {
-            return 0.0;
-        }
-    }
 	wheels<wheel_vel_lim> calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);
 
     std::optional<wheels<double>> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);

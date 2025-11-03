@@ -1,9 +1,10 @@
-#ifndef DRIVETRAIN_HPP
-#define DRIVETRAIN_HPP
+#ifndef LOCALIZATION_HPP
+#define LOCALIZATION_HPP
 
 #include "api.h"
 #include "structs.hpp"
 #include "ff-velocity-controller.hpp"
+#include "helper-functions.hpp"
 
 class localization {
 private:
@@ -29,4 +30,4 @@ public:
     void calculate_pose(void);
 };
 
-#endif // DRIVETRAIN_HPP
+#endif // LOCALIZATION_HPP

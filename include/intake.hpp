@@ -4,6 +4,7 @@
 #include "api.h"
 #include "structs.hpp"
 #include "ff-velocity-controller.hpp"
+#include "helper-functions.hpp"
 
 class intake {
 private:
@@ -35,15 +36,6 @@ public:
     pros::Optical& optical;
     rollerStateType intakeState = intakeOff;
 	bool colorSorting = false;
-    double sgn(double x) {
-        if (x > 0) {
-            return 1.0;
-        } else if (x < 0) {
-            return -1.0;
-        } else {
-            return 0.0;
-        }
-    }
     rollers<double> get_motor_max_accel(void);
 
     void move_wheel_accels(const rollers<motorVelocityType>& wheel_accelerations);
