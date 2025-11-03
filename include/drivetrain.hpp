@@ -35,6 +35,7 @@ public:
     {}
 
     pros::Controller master{pros::E_CONTROLLER_MASTER};
+	
 	wheels<wheel_vel_lim> calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);
 
     std::optional<wheels<double>> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);
@@ -62,6 +63,10 @@ public:
 	void test_control(const double& dt);
 	
 	double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt);
+
+	wheels<double> differential_vels_to_wheel_vels(differentialVels robot_velocity);
+	
+	void move_wheel_vels(std::vector<wheels<double>> wheel_vels);
 };
 
 #endif // DRIVETRAIN_HPP

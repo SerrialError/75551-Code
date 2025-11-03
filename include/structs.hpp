@@ -72,4 +72,9 @@ struct motorVelocityType {
     pros::motor_brake_mode_e  brakeMode;
 };
 
+struct differentialVels {
+    double linear;
+    double angular;
+};
+
 #endif // STRUCTS_HPP
