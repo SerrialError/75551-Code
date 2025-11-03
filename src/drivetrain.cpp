@@ -206,8 +206,8 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
     double wanted_angle = atan2(y_right, x_right);
     double cur_angle = DEG_TO_RAD_NORM(imu.get_rotation());
     // double angle_error = wanted_angle - cur_angle;
-    double angle_error = wanted_angle;
-    // double angle_error = 0.0;
+    // double angle_error = wanted_angle;
+    double angle_error = 0.0;
     wheels<wheel_vel_lim> motor_vel_limits = get_total_motor_vel_limits();
 	double x_max_velocity = motor_vel_limits.m1.max * wheel_radius - motor_vel_limits.m2.min * wheel_radius - motor_vel_limits.m3.min * wheel_radius + motor_vel_limits.m4.max * wheel_radius;
 	double y_max_velocity = motor_vel_limits.m1.max * wheel_radius + motor_vel_limits.m2.max * wheel_radius + motor_vel_limits.m3.max * wheel_radius + motor_vel_limits.m4.max * wheel_radius + motor_vel_limits.o1.max * wheel_radius + motor_vel_limits.o2.max * wheel_radius;
@@ -291,7 +291,16 @@ void drivetrain::tank_drive_control() {
     const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
     const double left_voltage = y_left / 127.0 * 12.0 * 1000.0;
     const double right_voltage = y_right / 127.0 * 12.0 * 1000.0;
-    const wheels<double> wanted_motor_voltages = {left_voltage, right_voltage, left_voltage, right_voltage, left_voltage, right_voltage};
+    const double m1_voltage = left_voltage;
+    const double m3_voltage = left_voltage;
+    const double m2_voltage = right_voltage;
+    const double m4_voltage = right_voltage;
+    const double L = wheelbase_length;
+    const double W = trackwidth_length;
+    const double o_delta = (L+W)/(2.0*W)*(2.0*left_voltage-(2.0*right_voltage));
+    const double o1_voltage = (1.0 / 2.0) * o_delta;
+    const double o2_voltage = -(1.0 / 2.0) * o_delta;
+    const wheels<double> wanted_motor_voltages = {m1_voltage, m2_voltage, o1_voltage, o2_voltage, m3_voltage, m4_voltage};
     move_wheel_volts(wanted_motor_voltages);
 }
 
