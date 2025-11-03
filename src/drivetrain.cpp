@@ -71,7 +71,7 @@ std::optional<wheels<double>> drivetrain::calculate_wheel_vels(const pose& desir
 	const int n = 6;
 	const int n2 = 2 * n;
 
-	const std::vector<double> x_nom = {motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * 2.0 * 0.0254, motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * 2.0 * 0.0254, motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * 2.0 * 0.0254, motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * 2.0 * 0.0254, motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * 2.0 * 0.0254, motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * 2.0 * 0.0254};
+	const std::vector<double> x_nom = {motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius};
 
     const double L = wheelbase_length;
     const double W = trackwidth_length;
@@ -137,7 +137,7 @@ std::optional<wheels<double>> drivetrain::calculate_wheel_vels(const pose& desir
     }
     std::vector<double> optimal = *sol;
 
-    wheels<double> result = {optimal[0] / 2.0 / 0.0254, optimal[1] / 2.0 / 0.0254, optimal[4] / 2.0 / 0.0254, optimal[5] / 2.0 / 0.0254, optimal[2] / 2.0 / 0.0254, optimal[3] / 2.0 / 0.0254};
+    wheels<double> result = {optimal[0] / wheel_radius, optimal[1] / wheel_radius, optimal[4] / wheel_radius, optimal[5] / wheel_radius, optimal[2] / wheel_radius, optimal[3] / wheel_radius};
 	return result;
 }
 
@@ -186,7 +186,7 @@ void drivetrain::move_wheel_volts(const wheels<double>& wheel_voltages) {
 void drivetrain::field_oriented_holonomic_control(const double& dt) {
     const double L = wheelbase_length;
     const double W = trackwidth_length;
-    const double ZERO_DEADBAND = 3;
+    const double ZERO_DEADBAND = 1.0;
     double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
 	if (std::abs(y_right) < ZERO_DEADBAND) {
 		y_right = 0.0;
@@ -209,9 +209,9 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
     double angle_error = wanted_angle;
     // double angle_error = 0.0;
     wheels<wheel_vel_lim> motor_vel_limits = get_total_motor_vel_limits();
-	double x_max_velocity = motor_vel_limits.m1.max * 2.0 * 0.0254 - motor_vel_limits.m2.min * 2.0 * 0.0254 - motor_vel_limits.m3.min * 2.0 * 0.0254 + motor_vel_limits.m4.max * 2.0 * 0.0254;
-	double y_max_velocity = motor_vel_limits.m1.max * 2.0 * 0.0254 + motor_vel_limits.m2.max * 2.0 * 0.0254 + motor_vel_limits.m3.max * 2.0 * 0.0254 + motor_vel_limits.m4.max * 2.0 * 0.0254 + motor_vel_limits.o1.max * 2.0 * 0.0254 + motor_vel_limits.o2.max * 2.0 * 0.0254;
-    double theta_max_velocity = (L+W)/4.0*(motor_vel_limits.m2.max * 2.0 * 0.0254 + motor_vel_limits.m4.max * 2.0 * 0.0254 - motor_vel_limits.m1.min * 2.0 * 0.0254 - motor_vel_limits.m3.min * 2.0 * 0.0254) + W/2.0*(motor_vel_limits.o2.max * 2.0 * 0.0254 - motor_vel_limits.o1.min * 2.0 * 0.0254);
+	double x_max_velocity = motor_vel_limits.m1.max * wheel_radius - motor_vel_limits.m2.min * wheel_radius - motor_vel_limits.m3.min * wheel_radius + motor_vel_limits.m4.max * wheel_radius;
+	double y_max_velocity = motor_vel_limits.m1.max * wheel_radius + motor_vel_limits.m2.max * wheel_radius + motor_vel_limits.m3.max * wheel_radius + motor_vel_limits.m4.max * wheel_radius + motor_vel_limits.o1.max * wheel_radius + motor_vel_limits.o2.max * wheel_radius;
+    double theta_max_velocity = (L+W)/4.0*(motor_vel_limits.m2.max * wheel_radius + motor_vel_limits.m4.max * wheel_radius - motor_vel_limits.m1.min * wheel_radius - motor_vel_limits.m3.min * wheel_radius) + W/2.0*(motor_vel_limits.o2.max * wheel_radius - motor_vel_limits.o1.min * wheel_radius);
     double theta_vel = angle_error * theta_max_velocity / M_PI;
     double x_vel = x_left * (x_max_velocity) / 127.0;
     double y_vel = y_left * (y_max_velocity) / 127.0;
@@ -243,18 +243,18 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
 
 wheels<wheel_vel_lim> drivetrain::get_total_motor_vel_limits() {
     wheels<wheel_vel_lim> result{};
-    result.m1.min = -1.0 * (motor_constants.m1.max_ang_vel) * 2.0 * 0.0254;
-    result.m2.min = -1.0 * (motor_constants.m2.max_ang_vel) * 2.0 * 0.0254;
-    result.o1.min = -1.0 * (motor_constants.o1.max_ang_vel) * 2.0 * 0.0254;
-    result.o2.min = -1.0 * (motor_constants.o2.max_ang_vel) * 2.0 * 0.0254;
-    result.m3.min = -1.0 * (motor_constants.m3.max_ang_vel) * 2.0 * 0.0254;
-    result.m4.min = -1.0 * (motor_constants.m4.max_ang_vel) * 2.0 * 0.0254;
-    result.m1.max = 1.0 * (motor_constants.m1.max_ang_vel) * 2.0 * 0.0254;
-    result.m2.max = 1.0 * (motor_constants.m2.max_ang_vel) * 2.0 * 0.0254;
-    result.o1.max = 1.0 * (motor_constants.o1.max_ang_vel) * 2.0 * 0.0254;
-    result.o2.max = 1.0 * (motor_constants.o2.max_ang_vel) * 2.0 * 0.0254;
-    result.m3.max = 1.0 * (motor_constants.m3.max_ang_vel) * 2.0 * 0.0254;
-    result.m4.max = 1.0 * (motor_constants.m4.max_ang_vel) * 2.0 * 0.0254;
+    result.m1.min = -1.0 * (motor_constants.m1.max_ang_vel) * wheel_radius;
+    result.m2.min = -1.0 * (motor_constants.m2.max_ang_vel) * wheel_radius;
+    result.o1.min = -1.0 * (motor_constants.o1.max_ang_vel) * wheel_radius;
+    result.o2.min = -1.0 * (motor_constants.o2.max_ang_vel) * wheel_radius;
+    result.m3.min = -1.0 * (motor_constants.m3.max_ang_vel) * wheel_radius;
+    result.m4.min = -1.0 * (motor_constants.m4.max_ang_vel) * wheel_radius;
+    result.m1.max = 1.0 * (motor_constants.m1.max_ang_vel) * wheel_radius;
+    result.m2.max = 1.0 * (motor_constants.m2.max_ang_vel) * wheel_radius;
+    result.o1.max = 1.0 * (motor_constants.o1.max_ang_vel) * wheel_radius;
+    result.o2.max = 1.0 * (motor_constants.o2.max_ang_vel) * wheel_radius;
+    result.m3.max = 1.0 * (motor_constants.m3.max_ang_vel) * wheel_radius;
+    result.m4.max = 1.0 * (motor_constants.m4.max_ang_vel) * wheel_radius;
     return result;
 }
 

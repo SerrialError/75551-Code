@@ -14,6 +14,7 @@ private:
     const double trackwidth_length;
     const wheels<ff_constants> motor_constants;
     const wheels<DCff> motor_ffs;
+	const double wheel_radius = 2.0 / 2.0 * 0.0254;
 
 public:
     drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
