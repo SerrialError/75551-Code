@@ -13,9 +13,6 @@ private:
     const double trackwidth_length;
     const wheels<ff_constants> motor_constants;
     const wheels<DCff> motor_ffs;
-    const double x_max_velocity;
-    const double y_max_velocity;
-    const pose initial_pose = {0, 0, 0};
 
 public:
     drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
@@ -33,9 +30,7 @@ public:
                      DCff(motor_constants_.o1),
                      DCff(motor_constants_.o2),
                      DCff(motor_constants_.m3),
-                     DCff(motor_constants_.m4) },
-          x_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) * 2.0 * 0.0254),
-          y_max_velocity((motor_constants.m1.max_ang_vel + motor_constants.m2.max_ang_vel + motor_constants.o1.max_ang_vel + motor_constants.o2.max_ang_vel + motor_constants.m3.max_ang_vel + motor_constants.m4.max_ang_vel) * 2.0 * 0.0254)
+                     DCff(motor_constants_.m4) }
     {}
 
     pros::Controller master{pros::E_CONTROLLER_MASTER};
