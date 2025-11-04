@@ -36,7 +36,7 @@ struct ff_constants {
     double max_voltage;
 };
 
-struct wheel_vel_lim {
+struct wheel_vel_bounds {
     double min;
     double max;
 };

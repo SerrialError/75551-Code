@@ -161,7 +161,7 @@ void opcontrol() {
 	    }
 	 	Intake.update_intake_state(dt_);
 	    // dt.field_oriented_holonomic_control(dt_);
-	    dt.tank_drive_control();
+	    dt.tank_drive_control(dt_);
         // dt.test_control(dt_);
         pros::delay(static_cast<int>(dt_*100.0));
     }

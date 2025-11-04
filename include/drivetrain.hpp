@@ -37,9 +37,9 @@ public:
 
     pros::Controller master{pros::E_CONTROLLER_MASTER};
 	
-	wheels<wheel_vel_lim> calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);
+	wheels<wheel_vel_bounds> calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_bounds>& bounds);
 
-    std::optional<wheels<double>> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_lim>& limits);
+    std::optional<wheels<double>> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_bounds>& bounds);
 
 	double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction);
     
@@ -53,19 +53,15 @@ public:
     
     double joystick_to_vel(const double& joystick);
     
-    wheels<wheel_vel_lim> get_motor_vel_limits(const double& dt);
-    
-    wheels<wheel_vel_lim> get_total_motor_vel_limits();
+    wheels<wheel_vel_bounds> get_wheel_vel_bounds(const double& dt);
     
     wheels<double> get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt);
 
-    void tank_drive_control();
-	
-	void test_control(const double& dt);
+    void tank_drive_control(const double& dt);
 	
 	double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt);
 
-	wheels<double> differential_vels_to_wheel_vels(differentialVels robot_velocity);
+	wheels<double> differential_vels_to_motor_vels(differentialVels robot_velocity);
 	
 	void move_wheel_vels(std::vector<wheels<double>> wheel_vels);
 };
