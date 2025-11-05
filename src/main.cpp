@@ -83,12 +83,12 @@ void autonomous() {}
 void opcontrol() {
 
     // motor_angle_mp_test(m1, m1_motor_constants, 78.497928, 4700.12687931 * 0.8f, 2.f * M_PI * 10);
-    pros::Motor m1(-6, pros::v5::MotorGears::blue);
-    pros::Motor m2(17, pros::v5::MotorGears::blue);
-    pros::Motor o1(-4, pros::v5::MotorGears::blue);
-    pros::Motor o2(18, pros::v5::MotorGears::blue);
-    pros::Motor m3(-2, pros::v5::MotorGears::blue);
-    pros::Motor m4(11, pros::v5::MotorGears::blue);
+    pros::Motor m1(-13, pros::v5::MotorGears::blue);
+    pros::Motor m2(18, pros::v5::MotorGears::blue);
+    pros::Motor o1(-10, pros::v5::MotorGears::blue);
+    pros::Motor o2(19, pros::v5::MotorGears::blue);
+    pros::Motor m3(-11, pros::v5::MotorGears::blue);
+    pros::Motor m4(20, pros::v5::MotorGears::blue);
 
     const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
         std::ref(m1),
@@ -109,17 +109,17 @@ void opcontrol() {
         {0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012}
     };
 
-    pros::Imu imu_sensor(4);
+    pros::Imu imu_sensor(3);
 
     const double wheelbase = 0.292100005; // m
     const double trackwidth = 0.29508135; // m
 
     drivetrain dt(driveMotors, imu_sensor, wheelbase, trackwidth, dtConsts);
     
-    pros::Motor fb(10, pros::v5::MotorGears::blue);
-    pros::Motor ft(9, pros::v5::MotorGears::blue);
-    pros::Motor bb(8, pros::v5::MotorGears::blue);
-    pros::Motor bt(19, pros::v5::MotorGears::blue);
+    pros::Motor fb(8, pros::v5::MotorGears::blue);
+    pros::Motor ft(2, pros::v5::MotorGears::blue);
+    pros::Motor bb(1, pros::v5::MotorGears::blue);
+    pros::Motor bt(10, pros::v5::MotorGears::blue);
 
     const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
         std::ref(fb),
@@ -130,7 +130,7 @@ void opcontrol() {
     // compute sysid(fb);
     // std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
     // print_vector(u_vs_x);
-    pros::Optical optical(16);
+    pros::Optical optical(4);
     const rollers<ff_constants> intakeConsts {
         {0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},
         {0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},   	 
