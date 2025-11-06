@@ -13,7 +13,6 @@ private:
     const rollers<ff_constants> motor_constants;
     const rollers<DCff> motor_ffs;
     motorStateType motorState;
-    const color allianceColor;
 	const double redHue = 4.0;
 	const double blueHue = 200.0;
 	const double redHueUncertainty = 7.0;
@@ -22,17 +21,16 @@ private:
 public:
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_,
               pros::Optical& optical_,
-              const rollers<ff_constants>& motor_constants_,
-              color allianceColor_)
+              const rollers<ff_constants>& motor_constants_)
         : motors(motors_),
           optical(optical_),
           motor_constants(motor_constants_),
           motor_ffs{ DCff(motor_constants_.fb),
                      DCff(motor_constants_.ft),
                      DCff(motor_constants_.bb),
-                     DCff(motor_constants_.bt) },
-          allianceColor(allianceColor_)
+                     DCff(motor_constants_.bt) }
     {}
+    color allianceColor = red;
     pros::Optical& optical;
     rollerStateType intakeState = intakeOff;
 	bool colorSorting = false;

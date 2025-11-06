@@ -22,4 +22,8 @@ constexpr static double DEG_TO_RAD_NORM(double deg_cw) {
     return rad;
 }
 
+constexpr static double sinc(float x) {
+    return (std::fabs(x) < 1e-5f) ? 1.0f : std::sin(x) / x;
+}
+
 #endif // HELPER_FUNCTIONS_HPP

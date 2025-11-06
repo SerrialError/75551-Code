@@ -205,7 +205,7 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
 		x_left = 0.0;
 	}
     double wanted_angle = atan2(y_right, x_right);
-    double cur_angle = DEG_TO_RAD_NORM(imu.get_rotation());
+    double cur_angle = DEG_TO_RAD_NORM(localization.Pose.theta);
     // double angle_error = wrapToPi(wanted_angle - cur_angle);
     // double angle_error = wanted_angle;
     double angle_error = 0.0;
@@ -318,4 +318,56 @@ wheels<double> drivetrain::differential_vels_to_motor_vels(differentialVels robo
 	const double o1_velocity = (robot_velocity.linear - (3.0*robot_velocity.angular)/(W)) / wheel_radius;
 	const double o2_velocity = (robot_velocity.linear + (3.0*robot_velocity.angular)/(W)) / wheel_radius;
 	return {m1_velocity, m2_velocity, o1_velocity, o2_velocity, m3_velocity, m4_velocity};
+}
+
+void drivetrain::move_differential_robot_vels(std::vector<differentialVels> robot_vels, double& dt) {
+	for (int i = 0; i < robot_vels.size(); i++) {
+		wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(robot_vels[i]);
+		const double m1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m1.get(), motor_constants.m1, wanted_motor_vels.m1, dt);
+		const double m2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m2.get(), motor_constants.m2, wanted_motor_vels.m2, dt);
+		const double o1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o1.get(), motor_constants.o1, wanted_motor_vels.o1, dt);
+		const double o2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o2.get(), motor_constants.o2, wanted_motor_vels.o2, dt);
+		const double m3_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m3.get(), motor_constants.m3, wanted_motor_vels.m3, dt);
+		const double m4_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m4.get(), motor_constants.m4, wanted_motor_vels.m4, dt);
+		const wheels<double> wanted_motor_vels_bounded = {m1_wanted_motor_vel_bounded, m2_wanted_motor_vel_bounded, o1_wanted_motor_vel_bounded, o2_wanted_motor_vel_bounded, m3_wanted_motor_vel_bounded, m4_wanted_motor_vel_bounded};
+		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels_bounded, dt);
+		move_wheel_accels(wanted_motor_accels);
+        pros::delay(static_cast<int>(dt*100.0));
+	}
+}
+
+differentialVels drivetrain::ramsete(pose wanted_pose, differentialVels wanted_vels) {
+	 // Compute errors in robot frame
+    double error_theta = wrapToPi(wanted_pose.theta - localization.Pose.theta);
+    double dx = wanted_pose.x - localization.Pose.x;
+    double dy = wanted_pose.y - localization.Pose.y;
+    double cos_t = std::cos(localization.Pose.theta);
+    double sin_t = std::sin(localization.Pose.theta);
+    double error_x =  sin_t * dy + cos_t * dx;
+    double error_y =  cos_t * dy - sin_t * dx;
+
+    // Gains
+    double k2 = std::sqrt(wanted_vels.angular * wanted_vels.angular + (b_gain * wanted_vels.linear) * (b_gain * wanted_vels.linear));
+
+    // Compute control outputs
+    double linear_out  = wanted_vels.linear * std::cos(error_theta) + b_gain * error_x;
+    double angular_out = wanted_vels.angular + k2 * sinc(error_theta) * error_y + b_gain * error_theta;
+	return {linear_out, angular_out};
+}
+
+void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose> wanted_pose, double& dt) {
+	for (int i = 0; i < robot_vels.size(); i++) {
+		differentialVels corrected_robot_vels = ramsete(wanted_pose[i], robot_vels[i]); 
+		wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(corrected_robot_vels);
+		const double m1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m1.get(), motor_constants.m1, wanted_motor_vels.m1, dt);
+		const double m2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m2.get(), motor_constants.m2, wanted_motor_vels.m2, dt);
+		const double o1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o1.get(), motor_constants.o1, wanted_motor_vels.o1, dt);
+		const double o2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o2.get(), motor_constants.o2, wanted_motor_vels.o2, dt);
+		const double m3_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m3.get(), motor_constants.m3, wanted_motor_vels.m3, dt);
+		const double m4_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m4.get(), motor_constants.m4, wanted_motor_vels.m4, dt);
+		const wheels<double> wanted_motor_vels_bounded = {m1_wanted_motor_vel_bounded, m2_wanted_motor_vel_bounded, o1_wanted_motor_vel_bounded, o2_wanted_motor_vel_bounded, m3_wanted_motor_vel_bounded, m4_wanted_motor_vel_bounded};
+		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels_bounded, dt);
+		move_wheel_accels(wanted_motor_accels);
+        pros::delay(static_cast<int>(dt*100.0));
+	}
 }

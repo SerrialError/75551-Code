@@ -1,7 +1,7 @@
 #include "localization.hpp"
 #include "helper-functions.hpp"
 
-void localization::calculate_pose(void) {
+void Localization::calculate_pose(void) {
     double delta_angle = DEG_TO_RAD_NORM(imu.get_rotation()) - prev_angle;
     double delta_linear_wheel = linear_wheel.get_angle() * 2.0 * 0.0254 - prev_linear_wheel;
     double delta_x = ((delta_linear_wheel) / (DEG_TO_RAD_NORM(imu.get_rotation()) - prev_angle)) * (cos((delta_angle)) + 1.0); 

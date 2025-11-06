@@ -4,26 +4,30 @@
 #include "api.h"
 #include "structs.hpp"
 #include "ff-velocity-controller.hpp"
+#include "localization.hpp"
 #include "helper-functions.hpp"
 
 class drivetrain {
 private:
     const wheels<std::reference_wrapper<pros::Motor>> motors;
-    pros::Imu& imu;
     const double wheelbase_length;
     const double trackwidth_length;
     const wheels<ff_constants> motor_constants;
     const wheels<DCff> motor_ffs;
+	Localization localization;
 	const double wheel_radius = 2.0 / 2.0 * 0.0254;
+	const double b_gain = 2.0;
 
 public:
     drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
-              pros::Imu& imu_,
               const double wheelbase_length_,
               const double trackwidth_length_,
-              const wheels<ff_constants>& motor_constants_)
+              const wheels<ff_constants>& motor_constants_,
+			  pros::Rotation& linear_wheel_,
+              pros::Rotation& horizontal_wheel_,
+              pros::Imu& imu_,
+              pose Pose_)
         : motors(motors_),
-          imu(imu_),
           wheelbase_length(wheelbase_length_),
           trackwidth_length(trackwidth_length_),
           motor_constants(motor_constants_),
@@ -32,7 +36,8 @@ public:
                      DCff(motor_constants_.o1),
                      DCff(motor_constants_.o2),
                      DCff(motor_constants_.m3),
-                     DCff(motor_constants_.m4) }
+                     DCff(motor_constants_.m4) },
+		  localization{linear_wheel_, horizontal_wheel_, imu_, Pose_}
     {}
 
     pros::Controller master{pros::E_CONTROLLER_MASTER};
@@ -61,9 +66,14 @@ public:
 	
 	double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt);
 
-	wheels<double> differential_vels_to_motor_vels(differentialVels robot_velocity);
-	
-	void move_wheel_vels(std::vector<wheels<double>> wheel_vels);
+
+	wheels<double> differential_vels_to_motor_vels(differentialVels robot_velocity);	
+
+	void move_differential_robot_vels(std::vector<differentialVels> robot_vels, double& dt);
+
+	differentialVels ramsete(pose wanted_pose, differentialVels wanted_vels);
+
+	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>, double& dt);
 };
 
 #endif // DRIVETRAIN_HPP
