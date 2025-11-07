@@ -1,5 +1,6 @@
 #include "main.h"
-
+pros::adi::Pneumatics redirector ('b', false);
+pros::adi::Pneumatics descorer ('b', true);
 pros::Rotation linear_wheel(15);
 pros::Rotation horizontal_wheel(5);
 pros::Imu imu_sensor_1(3);
@@ -154,7 +155,10 @@ void opcontrol() {
     
     while(true) {
 	    if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-	        Intake.intakeState = topScore; 			
+	        Intake.intakeState = topScore;
+			if (!redirector.is_extended()) {
+				redirector.extend();
+			}
 	    }
         if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
 	        Intake.intakeState = midScore; 			
@@ -163,10 +167,16 @@ void opcontrol() {
 	        Intake.intakeState = bottomScore; 			
 	    }
         if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-	        Intake.intakeState = intakeOnly; 			
+	        Intake.intakeState = intakeOnly;
+			if (redirector.is_extended()) {
+				redirector.retract();
+			}		
 	    }
         if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 	        Intake.intakeState = intakeOff; 			
+	    }
+		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+	        descorer.toggle();
 	    }
 	 	Intake.update_intake_state(dt_);
 	    dt.field_oriented_holonomic_control(dt_);
