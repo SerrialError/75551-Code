@@ -271,13 +271,13 @@ wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& wanted_
 }
 
 void drivetrain::tank_drive_control(const double& dt) {
-    const double y_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
+    const double x_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
     const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
     const wheels<wheel_vel_bounds> bounds = get_wheel_vel_bounds(dt);
     const double W = trackwidth_length;
 	const double lin_max_velocity = (bounds.m1.max + bounds.m2.max + bounds.m3.max + bounds.m4.max + bounds.o1.max + bounds.o2.max) / 6.0;
     const double left_velocity = y_left / 127.0 * lin_max_velocity;
-    const double right_velocity = y_right / 127.0 * lin_max_velocity;
+    const double right_velocity = x_right / 127.0 * lin_max_velocity;
 	const double linear_velocity = (left_velocity + right_velocity) / 2.0;
 	const double angular_velocity = (right_velocity - left_velocity) / W;
 	const differentialVels robot_velocity = {linear_velocity, angular_velocity};
