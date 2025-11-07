@@ -184,6 +184,18 @@ void drivetrain::move_wheel_volts(const wheels<double>& wheel_voltages) {
     motors.m4.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m4)));
 }
 
+void drivetrain::move_wheel_volts_time(const wheels<double>& wheel_voltages, const int time) {
+    for (int i = 0; i < time / 10; i++) {
+        motors.m1.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m1)));
+        motors.m2.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m2)));
+        motors.o1.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.o1)));
+        motors.o2.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.o2)));
+        motors.m3.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m3)));
+        motors.m4.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m4)));
+        pros::delay(10);
+    }
+}
+
 void drivetrain::field_oriented_holonomic_control(const double& dt) {
     const double L = wheelbase_length;
     const double W = trackwidth_length;
@@ -275,11 +287,11 @@ void drivetrain::tank_drive_control(const double& dt) {
     const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
     const wheels<wheel_vel_bounds> bounds = get_wheel_vel_bounds(dt);
     const double W = trackwidth_length;
-	const double lin_max_velocity = (bounds.m1.max + bounds.m2.max + bounds.m3.max + bounds.m4.max + bounds.o1.max + bounds.o2.max) / 6.0;
-    const double left_velocity = y_left / 127.0 * lin_max_velocity;
-    const double right_velocity = x_right / 127.0 * lin_max_velocity;
-	const double linear_velocity = (left_velocity + right_velocity) / 2.0;
-	const double angular_velocity = (right_velocity - left_velocity) / W;
+	const double L = wheelbase_length;
+    const double lin_max_velocity = (bounds.m1.max + bounds.m2.max + bounds.m3.max + bounds.m4.max + bounds.o1.max + bounds.o2.max) / 6.0;
+    const double ang_max_velocity = (L+W)/24.0*(bounds.m2.max + bounds.m4.max - bounds.m1.min - bounds.m3.min) + W/12.0*(bounds.o2.max-bounds.o1.min);
+	const double linear_velocity = y_left / 127.0 * lin_max_velocity;
+	const double angular_velocity = -x_right / 127.0 * ang_max_velocity;
 	const differentialVels robot_velocity = {linear_velocity, angular_velocity};
 	const wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(robot_velocity);
     const double m1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m1.get(), motor_constants.m1, wanted_motor_vels.m1, dt);

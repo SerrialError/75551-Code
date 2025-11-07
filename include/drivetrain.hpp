@@ -51,6 +51,8 @@ public:
     void move_wheel_accels(const wheels<double>& wheel_accelerations);
 
     void move_wheel_volts(const wheels<double>& wheel_voltages);
+
+    void move_wheel_volts_time(const wheels<double>& wheel_voltages, const int time);
     
     void field_oriented_holonomic_control(const double& dt);
     
