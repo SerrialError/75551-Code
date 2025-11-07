@@ -69,11 +69,11 @@ public:
 
 	wheels<double> differential_vels_to_motor_vels(differentialVels robot_velocity);	
 
-	void move_differential_robot_vels(std::vector<differentialVels> robot_vels, double& dt);
+	void move_differential_robot_vels(std::vector<differentialVels> robot_vels, const double& dt);
 
 	differentialVels ramsete(pose wanted_pose, differentialVels wanted_vels);
 
-	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>, double& dt);
+	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>, const double& dt);
 };
 
 #endif // DRIVETRAIN_HPP
