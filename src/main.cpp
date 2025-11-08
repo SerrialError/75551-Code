@@ -169,22 +169,34 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-	const double angular = .5;
+	const double angular = .6;
 	switch (current_auton) {
 		case blueRight:
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 4000);
-			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 4000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
+			descorer.retract();
+			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 3000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1000);
 			break;
 		case blueLeft:
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
+			descorer.retract();
+			dt.move_wheel_volts_time({5.10915405344*angular, -5.10915405344*angular, 10.166687932*angular, -10.166687932*angular, 5.10915405344*angular, -5.10915405344*angular}, 3000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1000);
 			break;
 		case redLeft:
-			
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
+			descorer.retract();
+			dt.move_wheel_volts_time({5.10915405344*angular, -5.10915405344*angular, 10.166687932*angular, -10.166687932*angular, 5.10915405344*angular, -5.10915405344*angular}, 3000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1000);
 			break;
 		case redRight:
-			
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
+			descorer.retract();
+			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 3000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1000);
 			break;
 		default:
-			
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
 			break;
 	}
 }
