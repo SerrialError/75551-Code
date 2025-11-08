@@ -67,14 +67,55 @@ const double dt_ = 0.01;
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
-void on_center_button() {
+void on_left_button() {
     static bool pressed = false;
     pressed = !pressed;
     if (pressed) {
-        pros::lcd::set_text(2, "I was pressed!");
-    } else {
-        pros::lcd::clear_line(2);
+		current_auton = static_cast<autons>((current_auton - 1) % 4);
+		switch (current_auton) {
+			case blueRight:
+				pros::lcd::set_text(1, "Blue Right");
+				break;
+			case blueLeft:
+				pros::lcd::set_text(1, "Blue Left");
+				break;
+			case redLeft:
+				pros::lcd::set_text(1, "Red Left");
+				break;
+			case redRight:
+				pros::lcd::set_text(1, "Red Right");
+				break;
+			default:
+				pros::lcd::set_text(1, "Blue Right");
+				break;
+		}
     }
+}
+
+void on_right_button() {
+    static bool pressed = false;
+    pressed = !pressed;
+    if (pressed) {
+		current_auton = static_cast<autons>((current_auton + 1) % 4);
+		switch (current_auton) {
+			case blueRight:
+				pros::lcd::set_text(1, "Blue Right");
+				break;
+			case blueLeft:
+				pros::lcd::set_text(1, "Blue Left");
+				break;
+			case redLeft:
+				pros::lcd::set_text(1, "Red Left");
+				break;
+			case redRight:
+				pros::lcd::set_text(1, "Red Right");
+				break;
+			default:
+				pros::lcd::set_text(1, "Blue Right");
+				break;
+		}
+    }
+	
 }
 
 
@@ -84,12 +125,13 @@ void on_center_button() {
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
+autons current_auton = blueRight;
+
 void initialize() {
     pros::lcd::initialize();
-    pros::lcd::set_text(1, "Hello PROS User!");
-
-
-    pros::lcd::register_btn1_cb(on_center_button);
+	pros::lcd::register_btn0_cb(on_left_button);
+	pros::lcd::register_btn2_cb(on_right_button);
 }
 
 
@@ -110,8 +152,11 @@ void disabled() {}
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-void competition_initialize() {}
 
+
+
+void competition_initialize() {
+}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -125,8 +170,25 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 4000);
+	switch (current_auton) {
+		case blueRight:
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 4000);
+			break;
+		case blueLeft:
+			
+			break;
+		case redLeft:
+			
+			break;
+		case redRight:
+			
+			break;
+		default:
+			
+			break;
+	}
 }
+
 
 /**
  * Runs the operator control code. This function will be started in its own task
