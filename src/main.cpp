@@ -39,7 +39,7 @@ const double trackwidth = 0.29508135; // m
 drivetrain dt(driveMotors, wheelbase, trackwidth, dtConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
 
 pros::Motor fb(8, pros::v5::MotorGears::blue);
-pros::Motor ft(2, pros::v5::MotorGears::blue);
+pros::Motor ft(-2, pros::v5::MotorGears::blue);
 pros::Motor bb(1, pros::v5::MotorGears::blue);
 pros::Motor bt(10, pros::v5::MotorGears::blue);
 
@@ -60,7 +60,7 @@ const rollers<ff_constants> intakeConsts {
 intake Intake(intakeMotors, optical, intakeConsts);
 
 const double dt_ = 0.01;
-
+autons current_auton = blueRight;
 /**
  * A callback function for LLEMU's center button.
  *
@@ -126,7 +126,6 @@ void on_right_button() {
  * to keep execution time for this mode under a few seconds.
  */
 
-autons current_auton = blueRight;
 
 void initialize() {
     pros::lcd::initialize();
@@ -170,12 +169,13 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
+	const double angular = .5;
 	switch (current_auton) {
 		case blueRight:
 			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 4000);
+			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 4000);
 			break;
 		case blueLeft:
-			
 			break;
 		case redLeft:
 			
