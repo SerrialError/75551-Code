@@ -77,4 +77,11 @@ struct differentialVels {
     double angular;
 };
 
+enum autons {
+    blueRight,
+    blueLeft,
+    redRight,
+    redLeft
+};
+
 #endif // STRUCTS_HPP
