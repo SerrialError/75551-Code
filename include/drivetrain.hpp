@@ -17,6 +17,9 @@ private:
 	Localization localization;
 	const double wheel_radius = 2.0 / 2.0 * 0.0254;
 	const double b_gain = 2.0;
+    const double decimal_of_max_velocity = 0.7;
+    const double max_wheels_ang_vel_scaled;
+    const double min_wheels_ang_accel;
 
 public:
     drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
@@ -37,8 +40,18 @@ public:
                      DCff(motor_constants_.o2),
                      DCff(motor_constants_.m3),
                      DCff(motor_constants_.m4) },
-		  localization{linear_wheel_, horizontal_wheel_, imu_, Pose_}
+		  localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
+          max_wheels_ang_vel_scaled(std::min({angular_velocity(0.0, motor_constants_.m1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m3) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m4) * decimal_of_max_velocity})),
+          min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4)}))
     {}
+    
+    double angular_velocity(const double angular_acceleration, ff_constants motor_constant) {
+        return ((motor_constant.max_voltage-(motor_constant.K_a * angular_acceleration)-motor_constant.K_s)/motor_constant.K_v);
+    };
+
+    double angular_acceleration(const double angular_velocity, ff_constants motor_constant) {
+        return ((motor_constant.max_voltage-(motor_constant.K_v * angular_velocity)-motor_constant.K_s)/motor_constant.K_a);
+    };
 
     pros::Controller master{pros::E_CONTROLLER_MASTER};
 	
