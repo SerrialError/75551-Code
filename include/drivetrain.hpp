@@ -15,9 +15,9 @@ private:
     const wheels<ff_constants> motor_constants;
     const wheels<DCff> motor_ffs;
 	Localization localization;
-	const double wheel_radius = 2.0 / 2.0 * 0.0254;
-	const double b_gain = 2.0;
-    const double decimal_of_max_velocity = 0.7;
+	static constexpr double wheel_radius = 2.0 / 2.0 * 0.0254;
+	static constexpr double b_gain = 2.0;
+    static constexpr double decimal_of_max_velocity = 0.7;
     const double max_wheels_ang_vel_scaled;
     const double min_wheels_ang_accel;
 
