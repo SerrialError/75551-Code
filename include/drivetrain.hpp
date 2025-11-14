@@ -81,7 +81,6 @@ public:
 	
 	double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt);
 
-
 	wheels<double> differential_vels_to_motor_vels(differentialVels robot_velocity);	
 
 	void move_differential_robot_vels(std::vector<differentialVels> robot_vels, const double& dt);
