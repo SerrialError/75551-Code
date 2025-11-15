@@ -6,6 +6,7 @@
 #include "ff-velocity-controller.hpp"
 #include "localization.hpp"
 #include "helper-functions.hpp"
+#include "motion-profiler.hpp"
 
 class drivetrain {
 private:
@@ -15,6 +16,7 @@ private:
     const wheels<ff_constants> motor_constants;
     const wheels<DCff> motor_ffs;
 	Localization localization;
+    mp LinearMP;
 	static constexpr double wheel_radius = 2.0 / 2.0 * 0.0254;
 	static constexpr double b_gain = 2.0;
     static constexpr double decimal_of_max_velocity = 0.7;
@@ -42,7 +44,8 @@ public:
                      DCff(motor_constants_.m4) },
 		  localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
           max_wheels_ang_vel_scaled(std::min({angular_velocity(0.0, motor_constants_.m1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m3) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m4) * decimal_of_max_velocity})),
-          min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4)}))
+          min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4)})),
+          LinearMP(min_wheels_ang_accel * wheel_radius, max_wheels_ang_vel_scaled * wheel_radius)
     {}
     
     double angular_velocity(const double angular_acceleration, ff_constants motor_constant) {
@@ -88,6 +91,8 @@ public:
 	differentialVels ramsete(pose wanted_pose, differentialVels wanted_vels);
 
 	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>, const double& dt);
+
+    void linear_mp(const double distance);
 };
 
 #endif // DRIVETRAIN_HPP

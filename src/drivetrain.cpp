@@ -383,3 +383,13 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
         pros::delay(static_cast<int>(dt*100.0));
 	}
 }
+
+void drivetrain::linear_mp(const double distance) {
+    double time = 0.0;
+    while(!LinearMP.profileFinished(time)) {
+        LinearMP.velocity(time, distance);
+        pros::delay(10);
+        time += 0.01;
+    }
+    
+}
