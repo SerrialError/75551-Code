@@ -3,15 +3,17 @@
 
 #include "api.h"
 #include "structs.hpp"
+#include "motor-controller.hpp"
 
-void print_vector(const std::vector<input_output>& vec);
-
-class compute {
+class print_data {
 private:
-    pros::Motor& test_motor;
+    MotorController *motor;
+
 public:
-    compute(pros::Motor& test_motor_) : test_motor(test_motor_) {}
-    std::vector<input_output> fopdt_system_identification(int n);
+    print_data(MotorController *motor_) : motor(motor_) {}
+    std::vector<input_output> motor_data;
+    void print_vector();
+    void update_motor_data();
 };
 
 #endif // SYSTEM_IDENTIFICATION_HPP

@@ -363,6 +363,9 @@ void opcontrol() {
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			descorer.extend();
 	    }
+		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+			dt.print_motor_data();
+		}
 	 	Intake.update_intake_state(dt_);
 	    // dt.field_oriented_holonomic_control(dt_);
 	    dt.tank_drive_control(dt_);

@@ -102,6 +102,9 @@ void drivetrain::move_differential_robot_vels(std::vector<differentialVels> robo
     	wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
 		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_bounded_motor_vels, dt);
 		move_motor_accelerations(wanted_motor_accels);
+        for (int j = 0; j < 6; ++j) {
+	        motors[j].motor_printer.update_motor_data();
+        }
         pros::delay(static_cast<int>(dt*100.0));
 	}
 }
@@ -134,6 +137,12 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
 		move_motor_accelerations(wanted_motor_accels);
         pros::delay(static_cast<int>(dt*100.0));
 	}
+}
+
+void drivetrain::print_motor_data() {
+    for (int i = 0; i < 6; ++i) {
+	    motors[i].motor_printer.print_vector();
+    }
 }
 
 void drivetrain::linear_mp(const double distance) {
