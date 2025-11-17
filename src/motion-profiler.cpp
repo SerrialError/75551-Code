@@ -5,6 +5,7 @@ bool mp::profileFinished(double time) {
 }
 
 double mp::velocity(double time, double distance) {
+    
     const double t_1 = max_velocity / max_acceleration;
     const double c = max_velocity * t_1 / 2;
     const double b = distance - 2 * c;
@@ -52,7 +53,7 @@ double mp::trapezoidal_motion_profile(double time, double distance) {
     const double t_3 = l * cos(theta);
     end_time = (max_acceleration * t_2 + max_velocity)/max_acceleration;
     if (time < t_1) {
-        return (max_acceleration * time);
+        return (max_acceleration * time);    
     }
     else {
         if (time <= t_2) {

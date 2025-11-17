@@ -172,7 +172,8 @@ void autonomous() {
 	const double angular = -800.0;
 	switch (current_auton) {
 		case blueRight:
-	        	Intake.intakeState = intakeOnly;
+			/*
+	        Intake.intakeState = intakeOnly;
 			if (!redirector.is_extended()) {
 				redirector.extend();
 			}
@@ -194,6 +195,14 @@ void autonomous() {
 	 		  Intake.update_intake_state(dt_);
         		  pros::delay(static_cast<int>(dt_*100.0));
 			}
+			*/
+		    // dt.master.clear();
+			// pros::delay(1000);
+    		// dt.master.print(0, 0, "%lf", dt.LinearMP.max_velocity);
+    		// pros::delay(1000);
+			// dt.master.print(1, 0, "%lf", dt.LinearMP.max_acceleration);
+
+			dt.linear_mp(0.3048);
 			break;
 		case blueLeft:
 			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1100);

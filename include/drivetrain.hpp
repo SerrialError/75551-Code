@@ -15,7 +15,7 @@ private:
     const double wheelbase_length;
     const double trackwidth_length;
     Localization localization;
-    mp LinearMP;
+    
     static constexpr double wheel_radius = 2.0 / 2.0 * 0.0254;
     static constexpr double b_gain = 2.0;
     static constexpr double decimal_of_max_velocity = 0.7;
@@ -39,12 +39,12 @@ public:
                   MotorController(motors_.m4, motor_constants_.m4)},
           wheelbase_length(wheelbase_length_),
           trackwidth_length(trackwidth_length_),
-	  localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
+	    localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
           max_wheels_ang_vel_scaled(std::min({angular_velocity(0.0, motor_constants_.m1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m3) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m4) * decimal_of_max_velocity})),
           min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4)})),
           LinearMP(min_wheels_ang_accel * wheel_radius, max_wheels_ang_vel_scaled * wheel_radius)
     {}
-    
+    mp LinearMP;
     double angular_velocity(const double angular_acceleration, ff_constants motor_constant) {
         return ((motor_constant.max_voltage-(motor_constant.K_a * angular_acceleration)-motor_constant.K_s)/motor_constant.K_v);
     };

@@ -6,8 +6,7 @@
 
 class mp {
 private:
-    const double max_acceleration;
-    const double max_velocity;
+
 
 public:
     mp(const double max_acceleration_,
@@ -15,6 +14,8 @@ public:
         : max_acceleration(max_acceleration_),
           max_velocity(max_velocity_)
     {}
+    const double max_acceleration;
+    const double max_velocity;
     double end_time;
     bool profileFinished(double time);
     double velocity(double time, double distance);
