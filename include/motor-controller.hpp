@@ -8,7 +8,6 @@
 
 class MotorController {
 private:
-    const pros::Motor motor;
     const ff_constants motor_constants;
     const DCff motor_ff;
 
@@ -19,6 +18,7 @@ public:
           motor_constants(motor_constants_),
           motor_ff(motor_constants_)
     {}
+    	const std::reference_wrapper<pros::Motor> motor;
     
 	void move_motor_acceleration(const double& desired_acceleration);
 

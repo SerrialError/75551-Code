@@ -72,7 +72,7 @@ std::optional<wheels<double>> drivetrain::calculate_wheel_vels(const pose& desir
 	const int n = 6;
 	const int n2 = 2 * n;
 
-	const std::vector<double> x_nom = {motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius};
+	const std::vector<double> x_nom = {motors.m1.motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.m2.motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.m3.motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.m4.motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.o1.motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius, motors.o2.motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 * wheel_radius};
 
     const double L = wheelbase_length;
     const double W = trackwidth_length;
@@ -142,25 +142,10 @@ std::optional<wheels<double>> drivetrain::calculate_wheel_vels(const pose& desir
 	return result;
 }
 
-void drivetrain::move_wheel_accels(const wheels<double>& wheel_accelerations) {
-    double m1_velocity = motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double m1_voltage = motor_ffs.m1.compute_voltage(wheel_accelerations.m1, m1_velocity) * 1000.0;
-    double m2_velocity = motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double m2_voltage = motor_ffs.m2.compute_voltage(wheel_accelerations.m2, m2_velocity) * 1000.0;
-    double o1_velocity = motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double o1_voltage = motor_ffs.o1.compute_voltage(wheel_accelerations.o1, o1_velocity) * 1000.0;
-    double o2_velocity = motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double o2_voltage = motor_ffs.o2.compute_voltage(wheel_accelerations.o2, o2_velocity) * 1000.0;
-    double m3_velocity = motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double m3_voltage = motor_ffs.m3.compute_voltage(wheel_accelerations.m3, m3_velocity) * 1000.0;
-    double m4_velocity = motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double m4_voltage = motor_ffs.m4.compute_voltage(wheel_accelerations.m4, m4_velocity) * 1000.0;
-    motors.m1.get().move_voltage(static_cast<int>(std::lround(m1_voltage)));
-    motors.m2.get().move_voltage(static_cast<int>(std::lround(m2_voltage)));
-    motors.o1.get().move_voltage(static_cast<int>(std::lround(o1_voltage)));
-    motors.o2.get().move_voltage(static_cast<int>(std::lround(o2_voltage)));
-    motors.m3.get().move_voltage(static_cast<int>(std::lround(m3_voltage)));
-    motors.m4.get().move_voltage(static_cast<int>(std::lround(m4_voltage)));
+void drivetrain::move_motor_accelerations(const wheels<double>& motor_accelerations) {
+    for (int i = 0; i < 6; i++) {
+	motors[i].move_motor_acceleration(motor_accelerations[i]);
+    }
 }
 
 double drivetrain::get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction) {
@@ -176,23 +161,15 @@ double drivetrain::get_motor_max_accel(pros::Motor& motor, const ff_constants mo
 }
 
 void drivetrain::move_wheel_volts(const wheels<double>& wheel_voltages) {
-    motors.m1.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m1)));
-    motors.m2.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m2)));
-    motors.o1.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.o1)));
-    motors.o2.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.o2)));
-    motors.m3.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m3)));
-    motors.m4.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m4)));
+    for (int i = 0; i < 6; ++i) {
+        motors[i].move_motor_voltage(wheel_voltages[i]);
+    }
 }
 
 void drivetrain::move_wheel_volts_time(const wheels<double>& wheel_voltages, const int time) {
     for (int i = 0; i < time / 10; i++) {
-        motors.m1.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m1)));
-        motors.m2.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m2)));
-        motors.o1.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.o1)));
-        motors.o2.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.o2)));
-        motors.m3.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m3)));
-        motors.m4.get().move_voltage(static_cast<int>(std::lround(wheel_voltages.m4)));
-        pros::delay(10);
+        move_wheel_volts(wheel_voltages);
+	pros::delay(10);
     }
 }
 
@@ -243,42 +220,24 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
         return;
     }
     wheels<double> wanted_motor_vels = *wanted_motor_vels_;
-    double bounded_wanted_m1_vel = get_wanted_motor_vel(motors.m1.get(), motor_constants.m1, wanted_motor_vels.m1, dt);
-    double bounded_wanted_m2_vel = get_wanted_motor_vel(motors.m2.get(), motor_constants.m2, wanted_motor_vels.m2, dt);
-    double bounded_wanted_o1_vel = get_wanted_motor_vel(motors.o1.get(), motor_constants.o1, wanted_motor_vels.o1, dt);
-    double bounded_wanted_o2_vel = get_wanted_motor_vel(motors.o2.get(), motor_constants.o2, wanted_motor_vels.o2, dt);
-    double bounded_wanted_m3_vel = get_wanted_motor_vel(motors.m3.get(), motor_constants.m3, wanted_motor_vels.m3, dt);
-    double bounded_wanted_m4_vel = get_wanted_motor_vel(motors.m4.get(), motor_constants.m4, wanted_motor_vels.m4, dt);
-    wheels<double> wanted_bounded_motor_vels = {bounded_wanted_m1_vel, bounded_wanted_m2_vel, bounded_wanted_o1_vel, bounded_wanted_o2_vel, bounded_wanted_m3_vel, bounded_wanted_m4_vel};
+    wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
     const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_bounded_motor_vels, dt);
-    move_wheel_accels(wanted_motor_accels);
+    move_motor_accelerations(wanted_motor_accels);
 }
 
 wheels<wheel_vel_bounds> drivetrain::get_wheel_vel_bounds(const double& dt) {
     wheels<wheel_vel_bounds> result{};
-    result.m1.min = (motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m1.get(), motor_constants.m1, -1) * dt) * wheel_radius;
-    result.m2.min = (motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m2.get(), motor_constants.m2, -1) * dt) * wheel_radius;
-    result.o1.min = (motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.o1.get(), motor_constants.o1, -1) * dt) * wheel_radius;
-    result.o2.min = (motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.o2.get(), motor_constants.o2, -1) * dt) * wheel_radius;
-    result.m3.min = (motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m3.get(), motor_constants.m3, -1) * dt) * wheel_radius;
-    result.m4.min = (motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 - get_motor_max_accel(motors.m4.get(), motor_constants.m4, -1) * dt) * wheel_radius;
-    result.m1.max = (motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m1.get(), motor_constants.m1, 1) * dt) * wheel_radius;
-    result.m2.max = (motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m2.get(), motor_constants.m2, 1) * dt) * wheel_radius;
-    result.o1.max = (motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.o1.get(), motor_constants.o1, 1) * dt) * wheel_radius;
-    result.o2.max = (motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.o2.get(), motor_constants.o2, 1) * dt) * wheel_radius;
-    result.m3.max = (motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m3.get(), motor_constants.m3, 1) * dt) * wheel_radius;
-    result.m4.max = (motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(motors.m4.get(), motor_constants.m4, 1) * dt) * wheel_radius;
+    for (int i = 0; i < 6; ++i) {
+	result[i] = motors[i].get_motor_vel_bounds(dt);
+    }
     return result;
 }
 
-wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt) {
+wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& desired_motor_vels, const double& dt) {
     wheels<double> result{};
-    result.m1 = (wanted_motor_vels.m1 - motors.m1.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
-    result.m2 = (wanted_motor_vels.m2 - motors.m2.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
-    result.o1 = (wanted_motor_vels.o1 - motors.o1.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
-    result.o2 = (wanted_motor_vels.o2 - motors.o2.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
-    result.m3 = (wanted_motor_vels.m3 - motors.m3.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
-    result.m4 = (wanted_motor_vels.m4 - motors.m4.get().get_actual_velocity() * 2.0 * M_PI / 60.0) / dt;
+    for (int i = 0; i < 6; ++i) {
+	result[i] = motors[i].get_desired_motor_acceleration(desired_motor_vels[i], dt);
+    }
     return result;
 }
 
@@ -294,15 +253,9 @@ void drivetrain::tank_drive_control(const double& dt) {
 	const double angular_velocity = -x_right / 127.0 * ang_max_velocity;
 	const differentialVels robot_velocity = {linear_velocity, angular_velocity};
 	const wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(robot_velocity);
-    const double m1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m1.get(), motor_constants.m1, wanted_motor_vels.m1, dt);
-    const double m2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m2.get(), motor_constants.m2, wanted_motor_vels.m2, dt);
-    const double o1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o1.get(), motor_constants.o1, wanted_motor_vels.o1, dt);
-    const double o2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o2.get(), motor_constants.o2, wanted_motor_vels.o2, dt);
-    const double m3_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m3.get(), motor_constants.m3, wanted_motor_vels.m3, dt);
-    const double m4_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m4.get(), motor_constants.m4, wanted_motor_vels.m4, dt);
-	const wheels<double> wanted_motor_vels_bounded = {m1_wanted_motor_vel_bounded, m2_wanted_motor_vel_bounded, o1_wanted_motor_vel_bounded, o2_wanted_motor_vel_bounded, m3_wanted_motor_vel_bounded, m4_wanted_motor_vel_bounded};
-    const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels_bounded, dt);
-    move_wheel_accels(wanted_motor_accels);
+    wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
+    const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_bounded_motor_vels, dt);
+    move_motor_accelerations(wanted_motor_accels);
 }
 
 double drivetrain::get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt) {
@@ -320,6 +273,14 @@ double drivetrain::get_wanted_motor_vel(pros::Motor& motor, const ff_constants m
 	return wanted_velocity_bounded;
 }
 
+wheels<double> drivetrain::bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double& dt) {
+    wheels<double> result;
+    for (int i = 0; i < 6; ++i) {
+	result[i] = motors[i].bound_desired_motor_velocity(desired_motor_velocities[i], dt);
+    }
+    return result;
+}
+
 wheels<double> drivetrain::differential_vels_to_motor_vels(differentialVels robot_velocity) {	
     const double L = wheelbase_length;
     const double W = trackwidth_length;
@@ -335,15 +296,9 @@ wheels<double> drivetrain::differential_vels_to_motor_vels(differentialVels robo
 void drivetrain::move_differential_robot_vels(std::vector<differentialVels> robot_vels, const double& dt) {
 	for (int i = 0; i < robot_vels.size(); i++) {
 		wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(robot_vels[i]);
-		const double m1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m1.get(), motor_constants.m1, wanted_motor_vels.m1, dt);
-		const double m2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m2.get(), motor_constants.m2, wanted_motor_vels.m2, dt);
-		const double o1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o1.get(), motor_constants.o1, wanted_motor_vels.o1, dt);
-		const double o2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o2.get(), motor_constants.o2, wanted_motor_vels.o2, dt);
-		const double m3_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m3.get(), motor_constants.m3, wanted_motor_vels.m3, dt);
-		const double m4_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m4.get(), motor_constants.m4, wanted_motor_vels.m4, dt);
-		const wheels<double> wanted_motor_vels_bounded = {m1_wanted_motor_vel_bounded, m2_wanted_motor_vel_bounded, o1_wanted_motor_vel_bounded, o2_wanted_motor_vel_bounded, m3_wanted_motor_vel_bounded, m4_wanted_motor_vel_bounded};
-		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
-		move_wheel_accels(wanted_motor_accels);
+    		wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
+		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_bounded_motor_vels, dt);
+		move_motor_accelerations(wanted_motor_accels);
         pros::delay(static_cast<int>(dt*100.0));
 	}
 }
@@ -371,15 +326,9 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
 	for (int i = 0; i < robot_vels.size(); i++) {
 		differentialVels corrected_robot_vels = ramsete(wanted_pose[i], robot_vels[i]); 
 		wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(corrected_robot_vels);
-		const double m1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m1.get(), motor_constants.m1, wanted_motor_vels.m1, dt);
-		const double m2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m2.get(), motor_constants.m2, wanted_motor_vels.m2, dt);
-		const double o1_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o1.get(), motor_constants.o1, wanted_motor_vels.o1, dt);
-		const double o2_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.o2.get(), motor_constants.o2, wanted_motor_vels.o2, dt);
-		const double m3_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m3.get(), motor_constants.m3, wanted_motor_vels.m3, dt);
-		const double m4_wanted_motor_vel_bounded = get_wanted_motor_vel(motors.m4.get(), motor_constants.m4, wanted_motor_vels.m4, dt);
-		const wheels<double> wanted_motor_vels_bounded = {m1_wanted_motor_vel_bounded, m2_wanted_motor_vel_bounded, o1_wanted_motor_vel_bounded, o2_wanted_motor_vel_bounded, m3_wanted_motor_vel_bounded, m4_wanted_motor_vel_bounded};
-		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels_bounded, dt);
-		move_wheel_accels(wanted_motor_accels);
+    		wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
+		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_bounded_motor_vels, dt);
+		move_motor_accelerations(wanted_motor_accels);
         pros::delay(static_cast<int>(dt*100.0));
 	}
 }
@@ -387,7 +336,9 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
 void drivetrain::linear_mp(const double distance) {
     double time = 0.0;
     while(!LinearMP.profileFinished(time)) {
-        LinearMP.velocity(time, distance);
+        double linear_velocity = LinearMP.velocity(time, distance);
+	std::vector<differentialVels> desired_differential_vel = {{linear_velocity, 0.0}};
+	move_differential_robot_vels(desired_differential_vel, 100.0);
         pros::delay(10);
         time += 0.01;
     }
