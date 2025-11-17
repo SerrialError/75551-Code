@@ -2,22 +2,28 @@
 #define MOTION_PROFILER_HPP
 
 #include "api.h"
-#include "system-identification.hpp"
-#include "ff-velocity-controller.hpp"
 #include "structs.hpp"
 
-double calculate_t_accel(const double v_max, const double a_max);
+class mp {
+private:
 
-double calculate_d_accel(const double v_max, const double a_max);
 
-double calculate_d_coast(const double d_total, const double d_accel);
+public:
+    mp(const double max_acceleration_,
+       const double max_velocity_)
+        : max_acceleration(max_acceleration_),
+          max_velocity(max_velocity_)
+    {}
+    const double max_acceleration;
+    const double max_velocity;
+    double end_time;
+    bool profileFinished(double time);
+    double velocity(double time, double distance);
+    double triangular_motion_profile(double time, double distance);
+    double trapezoidal_motion_profile(double time, double distance);
+};
 
-double calculate_t_coast(const double d_coast, const double d_max);
 
-double oned_mp(const double a_max, const double t_accel, const double v_max, const double t_coast, const double t);
 
-double oned_mp_accel(const double a_max, const double t_accel, const double t_coast, const double t);
-
-void motor_angle_mp_test(const pros::Motor& test_motor, const ff_constants test_motor_constants, const double v_max, const double a_max, const double angle);
 
 #endif // MOTION_PROFILER_HPP

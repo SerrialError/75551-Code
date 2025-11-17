@@ -1,6 +1,6 @@
 #include "main.h"
 pros::adi::Pneumatics redirector ('b', false);
-pros::adi::Pneumatics descorer ('a', true, true);
+pros::adi::Pneumatics descorer ('a', true, false);
 pros::Rotation linear_wheel(15);
 pros::Rotation horizontal_wheel(5);
 pros::Imu imu_sensor_1(3);
@@ -169,31 +169,142 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-	const double angular = .6;
+	const double angular = -800.0;
 	switch (current_auton) {
 		case blueRight:
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
-			descorer.retract();
-			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 3000);
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1000);
+			/*
+	        Intake.intakeState = intakeOnly;
+			if (!redirector.is_extended()) {
+				redirector.extend();
+			}
+			for (int i = 0; i < 20; i++) {
+	 		  Intake.update_intake_state(dt_);
+        		  pros::delay(static_cast<int>(dt_*100.0));
+			}
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1500);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+			dt.move_wheel_volts_time({5.10915405344*angular, -5.10915405344*angular, 10.166687932*angular, -10.166687932*angular, 5.10915405344*angular, -5.10915405344*angular}, 450);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 600);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+	        	Intake.intakeState = bottomScore;
+			if (redirector.is_extended()) {
+				redirector.retract();
+			}
+			for (int i = 0; i < 20; i++) {
+	 		  Intake.update_intake_state(dt_);
+        		  pros::delay(static_cast<int>(dt_*100.0));
+			}
+			*/
+		    // dt.master.clear();
+			// pros::delay(1000);
+    		// dt.master.print(0, 0, "%lf", dt.LinearMP.max_velocity);
+    		// pros::delay(1000);
+			// dt.master.print(1, 0, "%lf", dt.LinearMP.max_acceleration);
+
+			dt.linear_mp(0.3048);
 			break;
 		case blueLeft:
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1100);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
 			descorer.retract();
-			dt.move_wheel_volts_time({5.10915405344*angular, -5.10915405344*angular, 10.166687932*angular, -10.166687932*angular, 5.10915405344*angular, -5.10915405344*angular}, 3000);
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1000);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+			dt.move_wheel_volts_time({5.10915405344*angular, -5.10915405344*angular, 10.166687932*angular, -10.166687932*angular, 5.10915405344*angular, -5.10915405344*angular}, 630);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+			dt.move_wheel_volts_time({5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0}, 500);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+	        	Intake.intakeState = intakeOnly;
+			if (!redirector.is_extended()) {
+				redirector.extend();
+			}
+			for (int i = 0; i < 20; i++) {
+	 		  Intake.update_intake_state(dt_);
+        		  pros::delay(static_cast<int>(dt_*100.0));
+			}
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 2000);
+			dt.move_wheel_volts_time({-4000.0, -4000.0, -4000.0, -4000.0, -4000.0, -4000.0}, 500);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 2000);
+			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 1150);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 2000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 800);
+			descorer.extend();
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+	        	Intake.intakeState = topScore;
+			if (redirector.is_extended()) {
+				redirector.retract();
+			}
+			for (int i = 0; i < 20; i++) {
+	 		  Intake.update_intake_state(dt_);
+        		  pros::delay(static_cast<int>(dt_*100.0));
+			}
 			break;
 		case redLeft:
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1100);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
 			descorer.retract();
-			dt.move_wheel_volts_time({5.10915405344*angular, -5.10915405344*angular, 10.166687932*angular, -10.166687932*angular, 5.10915405344*angular, -5.10915405344*angular}, 3000);
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1000);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 630);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+			dt.move_wheel_volts_time({5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0}, 500);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+	        	Intake.intakeState = intakeOnly;
+			if (!redirector.is_extended()) {
+				redirector.extend();
+			}
+			for (int i = 0; i < 20; i++) {
+	 		  Intake.update_intake_state(dt_);
+        		  pros::delay(static_cast<int>(dt_*100.0));
+			}
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 2000);
+			dt.move_wheel_volts_time({-4000.0, -4000.0, -4000.0, -4000.0, -4000.0, -4000.0}, 500);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 2000);
+			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 1150);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 2000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 800);
+			descorer.extend();
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+	        	Intake.intakeState = topScore;
+			if (redirector.is_extended()) {
+				redirector.retract();
+			}
+			for (int i = 0; i < 20; i++) {
+	 		  Intake.update_intake_state(dt_);
+        		  pros::delay(static_cast<int>(dt_*100.0));
+			}
 			break;
 		case redRight:
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1100);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
 			descorer.retract();
-			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 3000);
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1000);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+			dt.move_wheel_volts_time({5.10915405344*angular, -5.10915405344*angular, 10.166687932*angular, -10.166687932*angular, 5.10915405344*angular, -5.10915405344*angular}, 630);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+			dt.move_wheel_volts_time({5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0}, 500);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+	        	Intake.intakeState = intakeOnly;
+			if (!redirector.is_extended()) {
+				redirector.extend();
+			}
+			for (int i = 0; i < 20; i++) {
+	 		  Intake.update_intake_state(dt_);
+        		  pros::delay(static_cast<int>(dt_*100.0));
+			}
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 2000);
+			dt.move_wheel_volts_time({-4000.0, -4000.0, -4000.0, -4000.0, -4000.0, -4000.0}, 500);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 2000);
+			dt.move_wheel_volts_time({-5.10915405344*angular, 5.10915405344*angular, -10.166687932*angular, 10.166687932*angular, -5.10915405344*angular, 5.10915405344*angular}, 1150);
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 2000);
+			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 800);
+			descorer.extend();
+			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+	        	Intake.intakeState = topScore;
+			if (redirector.is_extended()) {
+				redirector.retract();
+			}
+			for (int i = 0; i < 20; i++) {
+	 		  Intake.update_intake_state(dt_);
+        		  pros::delay(static_cast<int>(dt_*100.0));
+			}
 			break;
 		default:
 			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 3000);
@@ -247,10 +358,10 @@ void opcontrol() {
 	        Intake.intakeState = intakeOff; 			
 	    }
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-			descorer.extend();
+			descorer.retract();
 	    }
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			descorer.retract();
+			descorer.extend();
 	    }
 	 	Intake.update_intake_state(dt_);
 	    // dt.field_oriented_holonomic_control(dt_);
