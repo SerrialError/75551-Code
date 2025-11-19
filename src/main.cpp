@@ -338,9 +338,9 @@ void opcontrol() {
     while(true) {
 	    if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
 	        Intake.intakeState = topScore;
-			if (redirector.is_extended()) {
-				redirector.retract();
-			}
+			if (!redirector.is_extended()) {
+				redirector.extend();
+			}	
 	    }
         if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
 	        Intake.intakeState = midScore; 			
@@ -350,9 +350,9 @@ void opcontrol() {
 	    }
         if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
 	        Intake.intakeState = intakeOnly;
-			if (!redirector.is_extended()) {
-				redirector.extend();
-			}		
+			if (redirector.is_extended()) {
+				redirector.retract();
+			}	
 	    }
         if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 	        Intake.intakeState = intakeOff; 			

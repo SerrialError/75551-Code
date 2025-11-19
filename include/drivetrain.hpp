@@ -6,8 +6,8 @@
 #include "ff-velocity-controller.hpp"
 #include "localization.hpp"
 #include "helper-functions.hpp"
-#include "motion-profiler.hpp"
 #include "motor-controller.hpp"
+#include "motion-profiler.hpp"
 
 class drivetrain {
 private:

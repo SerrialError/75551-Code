@@ -47,6 +47,9 @@ wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& desired
 void drivetrain::tank_drive_control(const double& dt) {
     const double x_right = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
     const double y_left = static_cast<double>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+    for (int j = 0; j < 6; ++j) {
+	    motors[j].update_motor_data();
+    }
     const wheels<wheel_vel_bounds> bounds = get_wheel_vel_bounds(dt);
     const double W = trackwidth_length;
 	const double L = wheelbase_length;
@@ -100,11 +103,8 @@ void drivetrain::move_differential_robot_vels(std::vector<differentialVels> robo
 	for (int i = 0; i < robot_vels.size(); i++) {
 		wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(robot_vels[i]);
     	wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
-		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_bounded_motor_vels, dt);
+		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
 		move_motor_accelerations(wanted_motor_accels);
-        for (int j = 0; j < 6; ++j) {
-	        motors[j].motor_printer.update_motor_data();
-        }
         pros::delay(static_cast<int>(dt*100.0));
 	}
 }
@@ -141,7 +141,8 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
 
 void drivetrain::print_motor_data() {
     for (int i = 0; i < 6; ++i) {
-	    motors[i].motor_printer.print_vector();
+	    motors[i].print_vector();
+        pros::delay(10);
     }
 }
 

@@ -5,13 +5,12 @@
 #include "structs.hpp"
 #include "ff-velocity-controller.hpp"
 #include "helper-functions.hpp"
-#include "system-identification.hpp"
 
 class MotorController {
 private:
     const ff_constants motor_constants;
     const DCff motor_ff;
-    
+    std::vector<input_output> motor_data;
 
 public:
     MotorController(const std::reference_wrapper<pros::Motor>& motor_,
@@ -20,11 +19,11 @@ public:
         : motor(motor_),
           motor_constants(motor_constants_),
           motor_ff(motor_constants_),
-          motor_name(motor_name_),
-          motor_printer(this)
+          motor_name(motor_name_)
     {}
+    void print_vector();
     
-    print_data motor_printer;
+    void update_motor_data();
     
     const std::reference_wrapper<pros::Motor> motor;
     
