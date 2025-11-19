@@ -76,8 +76,15 @@ void MotorController::print_vector() {
 }
 
 void MotorController::update_motor_data() {
+    if (motor_data.size() > 5000) {
+        return;
+    }
     double measured_mv = motor.get().get_voltage();           // mV
     double measured_rpm = motor.get().get_actual_velocity(); // RPM
+    const double ZERO_DEADBAND = 0.001;
+    if (std::abs(measured_mv) < ZERO_DEADBAND && std::abs(measured_rpm) < ZERO_DEADBAND) {
+        return;
+    }
     input_output sample;
     sample.u = measured_mv / 1000.f;             // V
     sample.x = measured_rpm * 2.f * M_PI / 60.f; // rad/s
