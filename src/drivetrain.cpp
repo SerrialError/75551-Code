@@ -82,7 +82,7 @@ double drivetrain::get_wanted_motor_vel(pros::Motor& motor, const ff_constants m
 wheels<double> drivetrain::bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double& dt) {
     wheels<double> result;
     for (int i = 0; i < 6; ++i) {
-	result[i] = motors[i].bound_desired_motor_velocity(desired_motor_velocities[i], dt);
+	    result[i] = motors[i].bound_desired_motor_velocity(desired_motor_velocities[i], dt);
     }
     return result;
 }
@@ -151,7 +151,7 @@ void drivetrain::linear_mp(const double distance) {
     bool start = true;
     while(!LinearMP.profileFinished(time) || start) {
         double linear_velocity = LinearMP.velocity(time, distance);
-	    std::vector<differentialVels> desired_differential_vel = {{linear_velocity, 0.0}};
+	    std::vector<differentialVels> desired_differential_vel = {{linear_velocity * 2.0, 0.0}};
 	    move_differential_robot_vels(desired_differential_vel, .1);
         pros::delay(10);
         time += 0.01;

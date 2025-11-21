@@ -17,7 +17,8 @@ private:
     Localization localization;
     static constexpr double wheel_radius = 2.0 / 2.0 * 0.0254;
     static constexpr double b_gain = 2.0;
-    static constexpr double decimal_of_max_velocity = 0.7;
+    static constexpr double decimal_of_max_velocity = 0.5;
+    static constexpr double decimal_of_max_acceleration = 0.5;
     const double max_wheels_ang_vel_scaled;
     const double min_wheels_ang_accel;
 
@@ -40,7 +41,7 @@ public:
           trackwidth_length(trackwidth_length_),
 	      localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
           max_wheels_ang_vel_scaled(std::min({angular_velocity(0.0, motor_constants_.m1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m3) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m4) * decimal_of_max_velocity})),
-          min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4)})),
+          min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4) * decimal_of_max_acceleration})),
           LinearMP(min_wheels_ang_accel * wheel_radius, max_wheels_ang_vel_scaled * wheel_radius)
           
     {}

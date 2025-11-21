@@ -202,7 +202,7 @@ void autonomous() {
     		// pros::delay(1000);
 			// dt.master.print(1, 0, "%lf", dt.LinearMP.max_acceleration);
 
-			dt.linear_mp(0.3048);
+			dt.linear_mp(3.0 * 0.0254);
 			break;
 		case blueLeft:
 			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1100);
