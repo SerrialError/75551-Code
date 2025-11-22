@@ -19,7 +19,7 @@ private:
     static constexpr double b_gain = 2.0;
     static constexpr double decimal_of_max_velocity = 0.5;
     static constexpr double decimal_of_max_acceleration = 0.5;
-    const double max_wheels_ang_vel_scaled;
+    const double max_wheels_ang_vel;
     const double min_wheels_ang_accel;
 
 public:
@@ -40,12 +40,16 @@ public:
           wheelbase_length(wheelbase_length_),
           trackwidth_length(trackwidth_length_),
 	      localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
-          max_wheels_ang_vel_scaled(std::min({angular_velocity(0.0, motor_constants_.m1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m3) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m4) * decimal_of_max_velocity})),
-          min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3) * decimal_of_max_acceleration, angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4) * decimal_of_max_acceleration})),
-          LinearMP(min_wheels_ang_accel * wheel_radius, max_wheels_ang_vel_scaled * wheel_radius)
+          max_wheels_ang_vel(std::min({angular_velocity(0.0, motor_constants_.m1), angular_velocity(0.0, motor_constants_.m2), angular_velocity(0.0, motor_constants_.o1), angular_velocity(0.0, motor_constants_.o2), angular_velocity(0.0, motor_constants_.m3), angular_velocity(0.0, motor_constants_.m4)})),
+          min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel, motor_constants_.m1), angular_acceleration(max_wheels_ang_vel, motor_constants_.m2), angular_acceleration(max_wheels_ang_vel, motor_constants_.o1), angular_acceleration(max_wheels_ang_vel, motor_constants_.o2), angular_acceleration(max_wheels_ang_vel, motor_constants_.m3), angular_acceleration(max_wheels_ang_vel, motor_constants_.m4)})),
+          max_robot_lin_vel(max_wheels_ang_vel * wheel_radius),
+          max_robot_ang_vel((wheelbase_length_+trackwidth_length_)/24.0*(max_wheels_ang_vel * 4.0) + trackwidth_length_/12.0*(max_wheels_ang_vel * 2.0)),
+          LinearMP((min_wheels_ang_accel * decimal_of_max_velocity * wheel_radius), (max_robot_lin_vel * decimal_of_max_acceleration))
           
     {}
     mp LinearMP;
+    const double max_robot_lin_vel;
+    const double max_robot_ang_vel;
     double angular_velocity(const double angular_acceleration, ff_constants motor_constant) {
         return ((motor_constant.max_voltage-(motor_constant.K_a * angular_acceleration)-motor_constant.K_s)/motor_constant.K_v);
     };
@@ -60,7 +64,7 @@ public:
 
     std::optional<wheels<double>> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_bounds>& bounds);
 
-	double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction);
+	double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, bool reverse, int direction);
     
     void move_wheel_accels(const wheels<double>& wheel_accelerations);
 

@@ -73,14 +73,6 @@ struct ff_constants {
 
 struct wheel_vel_bounds {
     double min, max;
-    auto asArray() {
-        return std::array<std::reference_wrapper<double>, 2>{
-            std::ref(min), std::ref(max)
-        };
-    }
-
-    auto begin() { return asArray().begin(); }
-    auto end()   { return asArray().end(); }
 };
 
 struct input_output {
