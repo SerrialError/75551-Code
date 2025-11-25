@@ -27,13 +27,13 @@ double drivetrain::get_motor_max_accel(pros::Motor& motor, const ff_constants mo
 }
 
 void drivetrain::move_wheel_volts(const wheels<double>& wheel_voltages) {
-    for (int i = 0; i < 6; ++i) {
+    for (size_t i = 0; i < 6; ++i) {
         motors[i].move_motor_voltage(wheel_voltages[i]);
     }
 }
 
 void drivetrain::move_wheel_volts_time(const wheels<double>& wheel_voltages, const int time) {
-    for (int i = 0; i < time / 10; i++) {
+    for (size_t i = 0; i < time / 10; i++) {
         move_wheel_volts(wheel_voltages);
 	    pros::delay(10);
     }
@@ -41,7 +41,7 @@ void drivetrain::move_wheel_volts_time(const wheels<double>& wheel_voltages, con
 
 wheels<wheel_vel_bounds> drivetrain::get_wheel_vel_bounds(const double& dt) {
     wheels<wheel_vel_bounds> result{};
-    for (int i = 0; i < 6; ++i) {
+    for (size_t i = 0; i < 6; ++i) {
 	    result[i].min = motors[i].get_motor_vel_bounds(dt).min * wheel_radius;
 	    result[i].max = motors[i].get_motor_vel_bounds(dt).max * wheel_radius;
     }
@@ -50,7 +50,7 @@ wheels<wheel_vel_bounds> drivetrain::get_wheel_vel_bounds(const double& dt) {
 
 wheels<double> drivetrain::get_wanted_motor_accels(const wheels<double>& desired_motor_vels, const double& dt) {
     wheels<double> result{};
-    for (int i = 0; i < 6; ++i) {
+    for (size_t i = 0; i < 6; ++i) {
 	    result[i] = motors[i].get_desired_motor_acceleration(desired_motor_vels[i], dt);
     }
     return result;
@@ -94,7 +94,7 @@ double drivetrain::get_wanted_motor_vel(pros::Motor& motor, const ff_constants m
 
 wheels<double> drivetrain::bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double& dt) {
     wheels<double> result;
-    for (int i = 0; i < 6; ++i) {
+    for (size_t i = 0; i < 6; ++i) {
 	    result[i] = motors[i].bound_desired_motor_velocity(desired_motor_velocities[i], dt);
     }
     return result;
@@ -112,13 +112,13 @@ wheels<double> drivetrain::differential_vels_to_motor_vels(differentialVels robo
 	return {m1_velocity, m2_velocity, o1_velocity, o2_velocity, m3_velocity, m4_velocity};
 }
 
-void drivetrain::move_differential_robot_vels(std::vector<differentialVels> robot_vels, const double& dt) {
-	for (int i = 0; i < robot_vels.size(); i++) {
+void drivetrain::move_differential_robot_vels(const std::vector<differentialVels>& robot_vels, const double& dt) {
+	for (size_t i = 0; i < robot_vels.size(); i++) {
 		wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(robot_vels[i]);
     	// wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
 		const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
 		move_motor_accelerations(wanted_motor_accels);
-        pros::delay(static_cast<int>(dt*100.0));
+        pros::delay(static_cast<int>(dt*1000.0));
 	}
 }
 
@@ -142,7 +142,7 @@ differentialVels drivetrain::ramsete(pose wanted_pose, differentialVels wanted_v
 }
 
 void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose> wanted_pose, const double& dt) {
-	for (int i = 0; i < robot_vels.size(); i++) {
+	for (size_t i = 0; i < robot_vels.size(); i++) {
 		differentialVels corrected_robot_vels = ramsete(wanted_pose[i], robot_vels[i]); 
 		wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(corrected_robot_vels);
     	wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
@@ -153,7 +153,7 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
 }
 
 void drivetrain::print_motor_data() {
-    for (int i = 0; i < 6; ++i) {
+    for (size_t i = 0; i < 6; ++i) {
 	    motors[i].print_vector();
         pros::delay(10);
     }

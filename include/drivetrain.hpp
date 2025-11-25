@@ -47,9 +47,9 @@ public:
           LinearMP((min_wheels_ang_accel * decimal_of_max_velocity * wheel_radius), (max_robot_lin_vel * decimal_of_max_acceleration))
           
     {}
-    mp LinearMP;
     const double max_robot_lin_vel;
     const double max_robot_ang_vel;
+    mp LinearMP;
     double angular_velocity(const double angular_acceleration, ff_constants motor_constant) {
         return ((motor_constant.max_voltage-(motor_constant.K_a * angular_acceleration)-motor_constant.K_s)/motor_constant.K_v);
     };
@@ -88,7 +88,7 @@ public:
 
 	wheels<double> differential_vels_to_motor_vels(differentialVels robot_velocity);	
 
-	void move_differential_robot_vels(std::vector<differentialVels> robot_vels, const double& dt);
+	void move_differential_robot_vels(const std::vector<differentialVels>& robot_vels, const double& dt);
 
 	differentialVels ramsete(pose wanted_pose, differentialVels wanted_vels);
 

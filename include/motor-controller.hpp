@@ -15,7 +15,7 @@ private:
 public:
     MotorController(const std::reference_wrapper<pros::Motor>& motor_,
               const ff_constants& motor_constants_,
-              char* motor_name_)
+              std::string_view motor_name_)
         : motor(motor_),
           motor_constants(motor_constants_),
           motor_ff(motor_constants_),
@@ -27,7 +27,7 @@ public:
     
     const std::reference_wrapper<pros::Motor> motor;
     
-    char* motor_name;
+	std::string_view motor_name;
 	
     void move_motor_acceleration(const double& desired_acceleration);
 
