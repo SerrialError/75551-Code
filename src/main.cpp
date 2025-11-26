@@ -182,12 +182,12 @@ void autonomous() {
 	 		  Intake.update_intake_state(dt_);
         		  pros::delay(static_cast<int>(dt_*100.0));
 			}
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1500);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
-			dt.move_wheel_volts_time({5.10915405344*angular, -5.10915405344*angular, 10.166687932*angular, -10.166687932*angular, 5.10915405344*angular, -5.10915405344*angular}, 450);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
-			dt.move_wheel_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 600);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 1500);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 500);
+			dt.move_motor_volts_time({5.10915405344*angular, -5.10915405344*angular, 10.166687932*angular, -10.166687932*angular, 5.10915405344*angular, -5.10915405344*angular}, 450);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({4000.0, 4000.0, 4000.0, 4000.0, 4000.0, 4000.0}, 600);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 	        	Intake.intakeState = bottomScore;
 			if (redirector.is_extended()) {
 				redirector.retract();
@@ -208,16 +208,16 @@ void autonomous() {
         		pros::delay(static_cast<int>(dt_*100.0));
 			}
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(16 * 100), differentialVels{ dt.max_robot_lin_vel * linear_scalar, 0.0 }), dt_);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			Intake.intakeState = intakeOff;
 			for (int i = 0; i < 20; i++) {
 	 			Intake.update_intake_state(dt_);
         		pros::delay(static_cast<int>(dt_*100.0));
 			}
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(12 * 100), differentialVels{ 0.0, dt.max_robot_ang_vel * angular_scalar}), dt_);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(8 * 100), differentialVels{ dt.max_robot_lin_vel * linear_scalar, 0.0 }), dt_);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			Intake.intakeState = midScore;
 			for (int i = 0; i < 20; i++) {
 	 			Intake.update_intake_state(dt_);
@@ -230,10 +230,10 @@ void autonomous() {
         		pros::delay(static_cast<int>(dt_*100.0));
 			}
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(8 * 100), differentialVels{ -dt.max_robot_lin_vel * linear_scalar, 0.0 }), dt_);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(12 * 100), differentialVels{ 0.0, -dt.max_robot_ang_vel * angular_scalar}), dt_);	
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
-			// dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			// dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			// dt.linear_mp(6.0 * 0.0254);
 			break;
 		case blueLeft:

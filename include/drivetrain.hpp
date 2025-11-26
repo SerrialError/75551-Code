@@ -64,39 +64,33 @@ public:
 
     std::optional<wheels<double>> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_bounds>& bounds);
 
-	double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, bool reverse, int direction);
-    
-    void move_wheel_accels(const wheels<double>& wheel_accelerations);
+    void move_motor_volts(const wheels<double>& wheel_voltages);
 
-    void move_wheel_volts(const wheels<double>& wheel_voltages);
-
-    void move_wheel_volts_time(const wheels<double>& wheel_voltages, const int time);
+    void move_motor_volts_time(const wheels<double>& wheel_voltages, const int time);
     
-    void field_oriented_holonomic_control(const double& dt);
+    void field_oriented_holonomic_control(const double dt);
     
     double get_standard_angle(void);
     
-    double joystick_to_vel(const double& joystick);
+    double joystick_to_vel(const double joystick);
     
-    wheels<wheel_vel_bounds> get_wheel_vel_bounds(const double& dt);
+    wheels<wheel_vel_bounds> get_wheel_vel_bounds(const double dt);
     
-    wheels<double> get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt);
+	wheels<motorVelocityType> get_wanted_motor_accels(const wheels<motorVelocityType>& desired_motor_vels, const double dt);
 
-    void tank_drive_control(const double& dt);
+    void tank_drive_control(const double dt);
 	
-	double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt);
+	wheels<motorVelocityType> differential_vels_to_motor_vels(differentialVels robot_velocity);	
 
-	wheels<double> differential_vels_to_motor_vels(differentialVels robot_velocity);	
-
-	void move_differential_robot_vels(const std::vector<differentialVels>& robot_vels, const double& dt);
+	void move_differential_robot_vels(const std::vector<differentialVels>& robot_vels, const double dt);
 
 	differentialVels ramsete(pose wanted_pose, differentialVels wanted_vels);
 
-	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>, const double& dt);
+	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>, const double dt);
 
-	void move_motor_accelerations(const wheels<double>& motor_accelerations);
+	void move_motor_accelerations(const wheels<motorVelocityType>& motor_accelerations);
 
-	wheels<double> bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double& dt);
+	wheels<double> bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double dt);
 
     void print_motor_data();
 
