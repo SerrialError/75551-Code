@@ -65,10 +65,25 @@ void drivetrain::tank_drive_control(const double& dt) {
     const wheels<wheel_vel_bounds> bounds = get_wheel_vel_bounds(dt);
     const double W = trackwidth_length;
 	const double L = wheelbase_length;
-    const double lin_max_velocity = (bounds.m1.max + bounds.m2.max + bounds.m3.max + bounds.m4.max + bounds.o1.max + bounds.o2.max) / 6.0;
-    const double ang_max_velocity = (L+W)/24.0*(bounds.m2.max + bounds.m4.max - bounds.m1.min - bounds.m3.min) + W/12.0*(bounds.o2.max-bounds.o1.min);
-	const double linear_velocity = y_left / 127.0 * lin_max_velocity;
-	const double angular_velocity = -x_right / 127.0 * ang_max_velocity;
+    double linear_velocity;
+    double angular_velocity;
+    if (y_left > 0) {
+         const double lin_max_velocity = (bounds.m1.max + bounds.m2.max + bounds.m3.max + bounds.m4.max + bounds.o1.max + bounds.o2.max) / 6.0;
+	 linear_velocity = std::abs(y_left) / 127.0 * lin_max_velocity;
+    }
+    else {
+         const double lin_min_velocity = (bounds.m1.min + bounds.m2.min + bounds.m3.min + bounds.m4.min + bounds.o1.min + bounds.o2.min) / 6.0;
+	 linear_velocity = std::abs(y_left) / 127.0 * lin_min_velocity;
+    }
+    if (-x_right > 0) {
+    	const double ang_max_velocity = (L+W)/24.0*(bounds.m2.max + bounds.m4.max - bounds.m1.min - bounds.m3.min) + W/12.0*(bounds.o2.max-bounds.o1.min);
+	angular_velocity = std::abs(x_right) / 127.0 * ang_max_velocity;
+    }
+    else {
+    	const double ang_min_velocity = (L+W)/24.0*(bounds.m2.min + bounds.m4.min - bounds.m1.max - bounds.m3.max) + W/12.0*(bounds.o2.min-bounds.o1.max);
+	angular_velocity = std::abs(x_right) / 127.0 * ang_min_velocity;
+
+    }
 	const differentialVels robot_velocity = {linear_velocity, angular_velocity};
 	const wheels<double> wanted_motor_vels = differential_vels_to_motor_vels(robot_velocity);
     // wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
