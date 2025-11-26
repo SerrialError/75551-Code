@@ -50,8 +50,8 @@ void MotorController::move_motor_volts_time(const double& voltage, const int& ti
 
 wheel_vel_bounds MotorController::get_motor_vel_bounds(const double& dt) {
     wheel_vel_bounds result{};
-    result.min = (motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(false, -1) * dt);
-    result.max = (motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(true, 1) * dt);
+    result.min = (motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(true, -1) * dt);
+    result.max = (motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0 + get_motor_max_accel(false, 1) * dt);
     return result;
 }
 

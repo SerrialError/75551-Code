@@ -1,15 +1,15 @@
 #include "main.h"
 pros::adi::Pneumatics redirector ('b', false);
 pros::adi::Pneumatics descorer ('a', true, false);
-pros::Rotation linear_wheel(15);
-pros::Rotation horizontal_wheel(5);
-pros::Imu imu_sensor_1(3);
-pros::Imu imu_sensor_2(6);
+pros::Rotation linear_wheel(6);
+pros::Rotation horizontal_wheel(3);
+pros::Imu imu_sensor_1(5);
+pros::Imu imu_sensor_2(9);
 
-pros::Motor m1(-13, pros::v5::MotorGears::blue);
-pros::Motor m2(18, pros::v5::MotorGears::blue);
-pros::Motor o1(-12, pros::v5::MotorGears::blue);
-pros::Motor o2(19, pros::v5::MotorGears::blue);
+pros::Motor m1(-1, pros::v5::MotorGears::blue);
+pros::Motor m2(10, pros::v5::MotorGears::blue);
+pros::Motor o1(-2, pros::v5::MotorGears::blue);
+pros::Motor o2(8, pros::v5::MotorGears::blue);
 pros::Motor m3(-11, pros::v5::MotorGears::blue);
 pros::Motor m4(20, pros::v5::MotorGears::blue);
 
@@ -38,10 +38,10 @@ const double trackwidth = 0.29508135; // m
 
 drivetrain dt(driveMotors, wheelbase, trackwidth, dtConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
 
-pros::Motor fb(8, pros::v5::MotorGears::blue);
-pros::Motor ft(-2, pros::v5::MotorGears::blue);
-pros::Motor bb(1, pros::v5::MotorGears::blue);
-pros::Motor bt(10, pros::v5::MotorGears::blue);
+pros::Motor fb(4, pros::v5::MotorGears::blue);
+pros::Motor ft(-7, pros::v5::MotorGears::blue);
+pros::Motor bb(12, pros::v5::MotorGears::blue);
+pros::Motor bt(13, pros::v5::MotorGears::blue);
 
 const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 	std::ref(fb),
@@ -49,7 +49,7 @@ const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 	std::ref(bb),
 	std::ref(bt)
 };
-pros::Optical optical(4);
+pros::Optical optical(14);
 const rollers<ff_constants> intakeConsts {
 	{0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},
 	{0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},   	 
@@ -173,21 +173,22 @@ void autonomous() {
 	const double linear_scalar = 0.3;
 	switch (current_auton) {
 		case blueRight:
+			/*
 			Intake.intakeState = intakeOnly;
 			for (int i = 0; i < 20; i++) {
 	 			Intake.update_intake_state(dt_);
         		pros::delay(static_cast<int>(dt_*100.0));
 			}
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(17 * 100), differentialVels{ dt.max_robot_lin_vel * linear_scalar, 0.0 }), dt_);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(2.5 * 100), differentialVels{ 0.0, -dt.max_robot_ang_vel * angular_scalar}), dt_);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(13.2 * 100), differentialVels{ -dt.max_robot_lin_vel * linear_scalar, 0.0 }), dt_);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(2.1 * 100), differentialVels{ 0.0, dt.max_robot_ang_vel * angular_scalar}), dt_);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(6.5 * 100), differentialVels{ dt.max_robot_lin_vel * linear_scalar, 0.0 }), dt_);
-			dt.move_wheel_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
+			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
 			Intake.intakeState = topScore;
 			if (!redirector.is_extended()) {
 				redirector.extend();
@@ -196,6 +197,8 @@ void autonomous() {
 	 			Intake.update_intake_state(dt_);
         		pros::delay(static_cast<int>(dt_*100.0));
 			}
+			*/
+			dt.linear_mp(12.0 * 0.0254);
 			break;
 		case blueLeft:
 			break;

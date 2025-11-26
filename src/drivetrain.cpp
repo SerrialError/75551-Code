@@ -68,6 +68,8 @@ void drivetrain::tank_drive_control(const double dt) {
 	angular_velocity = std::abs(x_right) / 127.0 * ang_min_velocity;
 
     }
+    master.print(0, 0, "%lf", linear_velocity);
+    master.clear();
 	const differentialVels robot_velocity = {linear_velocity, angular_velocity};
 	const wheels<motorVelocityType> wanted_motor_vels = differential_vels_to_motor_vels(robot_velocity);
     // wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
@@ -101,7 +103,6 @@ void drivetrain::move_differential_robot_vels(const std::vector<differentialVels
     	// wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
     	const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
 		move_motor_accelerations(wanted_motor_accels);
-        pros::delay(static_cast<int>(dt*1000.0));
 	}
 }
 
