@@ -142,13 +142,7 @@ std::optional<wheels<double>> drivetrain::calculate_wheel_vels(const pose& desir
 	return result;
 }
 
-void drivetrain::move_motor_accelerations(const wheels<double>& motor_accelerations) {
-    for (int i = 0; i < 6; i++) {
-	    motors[i].move_motor_acceleration(motor_accelerations[i]);
-    }
-}
-
-void drivetrain::field_oriented_holonomic_control(const double& dt) {
+void drivetrain::field_oriented_holonomic_control(const double dt) {
     const double L = wheelbase_length;
     const double W = trackwidth_length;
     const double ZERO_DEADBAND = 1.0;
@@ -195,7 +189,7 @@ void drivetrain::field_oriented_holonomic_control(const double& dt) {
         return;
     }
     wheels<double> wanted_motor_vels = *wanted_motor_vels_;
-    wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
-    const wheels<double> wanted_motor_accels = get_wanted_motor_accels(wanted_bounded_motor_vels, dt);
+    // wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
+    const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels({{wanted_motor_vels.m1, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.m2, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.o1, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.o2, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.m3, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.m4, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}}, dt);
     move_motor_accelerations(wanted_motor_accels);
 }

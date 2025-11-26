@@ -8,30 +8,33 @@
 
 class MotorController {
 private:
-    const ff_constants motor_constants;
     const DCff motor_ff;
     std::vector<input_output> motor_data;
 
 public:
     MotorController(const std::reference_wrapper<pros::Motor>& motor_,
               const ff_constants& motor_constants_,
-              char* motor_name_)
+              std::string_view motor_name_)
         : motor(motor_),
           motor_constants(motor_constants_),
           motor_ff(motor_constants_),
           motor_name(motor_name_)
     {}
-    void print_vector();
+    const ff_constants motor_constants;
+    
+	void print_vector();
     
     void update_motor_data();
     
     const std::reference_wrapper<pros::Motor> motor;
     
-    char* motor_name;
-	
-    void move_motor_acceleration(const double& desired_acceleration);
+	std::string_view motor_name;
 
-	double get_motor_max_accel(const int& direction);
+	void move_motor_acceleration(const motorVelocityType& desired_acceleration);
+
+	double bound_velocity_to_deadband(double desired_velocity);
+
+	double get_motor_max_accel(bool reverse, int direction);
 
 	void move_motor_voltage(const double& voltage);
 

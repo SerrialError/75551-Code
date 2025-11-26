@@ -55,6 +55,39 @@ struct rollers {
     T ft; // front top
     T bb; // back bottom
     T bt; // back top
+    // non-const view as array of reference_wrapper
+    auto asArray() {
+        return std::array<std::reference_wrapper<T>, 4>{
+            std::ref(fb), std::ref(ft), std::ref(bb), std::ref(bt)
+        };
+    }
+
+    // const-view: reference to const T
+    auto asArray() const {
+        return std::array<std::reference_wrapper<const T>, 4>{
+            std::cref(fb), std::cref(ft), std::cref(bb), std::cref(bt)
+        };
+    }
+
+    // convenient index access (non-const)
+    T& operator[](size_t i) {
+        switch (i) {
+            case 0: return fb;
+            case 1: return ft;
+            case 2: return bb;
+            default: return bt;
+        }
+    }
+
+    // index access const
+    const T& operator[](size_t i) const {
+        switch (i) {
+            case 0: return fb;
+            case 1: return ft;
+            case 2: return bb;
+            default: return bt;
+        }
+    }
 };
 
 struct pose {
