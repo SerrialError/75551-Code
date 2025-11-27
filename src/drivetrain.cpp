@@ -1,6 +1,5 @@
 #include "drivetrain.hpp"
 #include "helper-functions.hpp"
-#include "simplex.hpp"
 #include "structs.hpp"
 
 void drivetrain::move_motor_volts(const wheels<double>& wheel_voltages) {
@@ -136,13 +135,6 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
 	}
 }
 
-void drivetrain::print_motor_data() {
-    for (size_t i = 0; i < 6; ++i) {
-	    motors[i].print_vector();
-        pros::delay(10);
-    }
-}
-
 void drivetrain::linear_mp(const double distance) {
     double time = 0.0;
     bool start = true;
@@ -155,4 +147,13 @@ void drivetrain::linear_mp(const double distance) {
         start = false;
     }
     move_motor_volts({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+}
+
+void drivetrain::calculate_and_print_motor_constants() {
+	pros::Task m1_constant_task(MotorController::calculate_constants_trampoline, &motors.m1, "m1 constant task");
+	pros::Task m2_constant_task(MotorController::calculate_constants_trampoline, &motors.m2, "m2 constant task");
+	pros::Task o1_constant_task(MotorController::calculate_constants_trampoline, &motors.o1, "o1 constant task");
+	pros::Task o2_constant_task(MotorController::calculate_constants_trampoline, &motors.o2, "o2 constant task");
+	pros::Task m3_constant_task(MotorController::calculate_constants_trampoline, &motors.m3, "m3 constant task");
+	pros::Task m4_constant_task(MotorController::calculate_constants_trampoline, &motors.m4, "m4 constant task");
 }

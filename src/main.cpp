@@ -266,7 +266,7 @@ void opcontrol() {
 			descorer.extend();
 	    }
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
-			dt.print_motor_data();
+			dt.calculate_and_print_motor_constants();
 		}
 	 	Intake.update_intake_state(dt_);
 	    // dt.field_oriented_holonomic_control(dt_);

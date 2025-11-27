@@ -1,6 +1,24 @@
 #include "motor-controller.hpp"
 #include "helper-functions.hpp"
+#include "system-identification.hpp"
 #include "structs.hpp"
+
+void MotorController::calculate_and_print_constants() {
+    auto [Kv, Ka, Ks] = SysIdent::calculate_Kv_Ka_and_Ks(*this);
+    
+	ff_constants identified_constants;
+    
+	identified_constants.K_v = Kv;
+    identified_constants.K_a = Ka;
+    identified_constants.K_s = Ks;
+    printf("%s\n", motor_name);
+    printf("K_v = ");
+	printf("%.6f", identified_constants.K_v);
+    printf("\nK_a = ");
+	printf("%.6f", identified_constants.K_a);
+    printf("\nK_s = ");
+	printf("%.6f", identified_constants.K_s);
+}
 
 void MotorController::move_motor_acceleration(const motorVelocityType& desired_acceleration) {
     double current_velocity = motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0;
@@ -77,36 +95,3 @@ double MotorController::bound_desired_motor_velocity(const double& desired_veloc
 	double desired_velocity_bounded = bound_velocity_to_deadband(std::clamp(desired_velocity, min_velocity, max_velocity));
 	return desired_velocity_bounded;
 }
-
-void MotorController::print_vector() {
-    printf("%s\n", motor_name);
-    printf("U = [");
-    for (size_t i = 0; i < motor_data.size(); ++i) {
-        printf("%.6f", motor_data[i].u);
-        if (i != motor_data.size() - 1) printf(",");
-    }
-    printf("]\n");
-    printf("X = [");
-    for (size_t i = 0; i < motor_data.size(); ++i) {
-        printf("%.6f", motor_data[i].x);
-        if (i != motor_data.size() - 1) printf(",");
-    }
-    printf("]\n");
-    pros::delay(5);
-}
-
-void MotorController::update_motor_data() {
-    if (motor_data.size() > 5000) {
-        return;
-    }
-    double measured_mv = motor.get().get_voltage();           // mV
-    double measured_rpm = motor.get().get_actual_velocity(); // RPM
-    const double ZERO_DEADBAND = 0.001;
-    if (std::abs(measured_mv) < ZERO_DEADBAND && std::abs(measured_rpm) < ZERO_DEADBAND) {
-        return;
-    }
-    input_output sample;
-    sample.u = measured_mv / 1000.f;             // V
-    sample.x = measured_rpm * 2.f * M_PI / 60.f; // rad/s
-    motor_data.push_back(sample);
-};

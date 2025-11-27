@@ -94,9 +94,9 @@ public:
 
 	wheels<double> bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double dt);
 
-    void print_motor_data();
-
     void linear_mp(const double distance);
+
+	void calculate_and_print_motor_constants();
 };
 
 #endif // DRIVETRAIN_HPP
