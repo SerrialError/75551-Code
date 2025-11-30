@@ -29,6 +29,11 @@ std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vecto
 		auto mean_ws = calculate_mean_velocities(applied_voltage, motors);
 		for (size_t j = 0; j < motors.size(); j++) {
 			velocity_data[j].push_back({ mean_ws[j], applied_voltage });
+			printf("STEADY motor=%s V=%.3f w=%.6f s=%d\n",
+		  		motors[j].motor_name,
+		  		applied_voltage,
+		  		mean_ws[j],
+		  		(mean_ws[j] > 0) - (mean_ws[j] < 0));
 		}
 	}
 	for (size_t i = 0; i < motors.size(); i++) {
@@ -135,11 +140,13 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, s
 
 std::vector<double> SysIdent::calculate_Ka_s(std::vector<std::pair<double, double>> Kv_and_Ks_s, std::vector<MotorController>& motors) {
 	auto [V, w, alpha] = get_acceleration_data(4.0, motors);
+	printf("---- BEGIN Ka DATA ----\n");
 	std::vector<double> Ka;
 	Ka.reserve(motors.size());
 	for (size_t i = 0; i < motors.size(); i++) {
 		Ka.push_back(through_origin_fit(V[i], w[i], alpha[i], Kv_and_Ks_s[i].first, Kv_and_Ks_s[i].second));
 	}
+	printf("---- END Ka DATA ----\n");
 	return Ka;
 }
 
@@ -157,6 +164,8 @@ double SysIdent::through_origin_fit(const std::vector<double>& V, const std::vec
 		double Y = V[i] - Kv * w[i] - Ks * s;
 		num += alpha[i] * Y;
 		den += alpha[i] * alpha[i];
+		printf("ACCEL V=%.4f w=%.6f alpha=%.6f s=%d Y=%.6f\n",
+		 V[i], w[i], alpha[i], (int)s, Y);
 	}
 
 	if (den == 0.0) return 0.0;
