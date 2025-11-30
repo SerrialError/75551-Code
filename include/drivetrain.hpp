@@ -6,8 +6,9 @@
 #include "ff-velocity-controller.hpp"
 #include "localization.hpp"
 #include "helper-functions.hpp"
-#include "motion-profiler.hpp"
 #include "motor-controller.hpp"
+#include "motion-profiler.hpp"
+#include "system-identification.hpp"
 
 class drivetrain {
 private:
@@ -15,10 +16,11 @@ private:
     const double wheelbase_length;
     const double trackwidth_length;
     Localization localization;
-    
     static constexpr double wheel_radius = 2.0 / 2.0 * 0.0254;
     static constexpr double b_gain = 2.0;
-    static constexpr double decimal_of_max_velocity = 0.7;
+    static constexpr double decimal_of_max_velocity = 0.5;
+    static constexpr double decimal_of_max_acceleration = 0.5;
+    const double max_wheels_ang_vel;
     const double max_wheels_ang_vel_scaled;
     const double min_wheels_ang_accel;
 
@@ -27,23 +29,29 @@ public:
               const double wheelbase_length_,
               const double trackwidth_length_,
               const wheels<ff_constants>& motor_constants_,
-	      pros::Rotation& linear_wheel_,
+	          pros::Rotation& linear_wheel_,
               pros::Rotation& horizontal_wheel_,
               pros::Imu& imu_,
               pose Pose_)
-        : motors{ MotorController(motors_.m1, motor_constants_.m1),
-                  MotorController(motors_.m2, motor_constants_.m2),
-                  MotorController(motors_.o1, motor_constants_.o1),
-                  MotorController(motors_.o2, motor_constants_.o2),
-                  MotorController(motors_.m3, motor_constants_.m3),
-                  MotorController(motors_.m4, motor_constants_.m4)},
+        : motors{ MotorController(motors_.m1, motor_constants_.m1, "m1"),
+                  MotorController(motors_.m2, motor_constants_.m2, "m2"),
+                  MotorController(motors_.o1, motor_constants_.o1, "o1"),
+                  MotorController(motors_.o2, motor_constants_.o2, "o2"),
+                  MotorController(motors_.m3, motor_constants_.m3, "m3"),
+                  MotorController(motors_.m4, motor_constants_.m4, "m4")},
           wheelbase_length(wheelbase_length_),
           trackwidth_length(trackwidth_length_),
-	    localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
-          max_wheels_ang_vel_scaled(std::min({angular_velocity(0.0, motor_constants_.m1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o1) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.o2) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m3) * decimal_of_max_velocity, angular_velocity(0.0, motor_constants_.m4) * decimal_of_max_velocity})),
+	      localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
+          max_wheels_ang_vel(std::min({angular_velocity(0.0, motor_constants_.m1), angular_velocity(0.0, motor_constants_.m2), angular_velocity(0.0, motor_constants_.o1), angular_velocity(0.0, motor_constants_.o2), angular_velocity(0.0, motor_constants_.m3), angular_velocity(0.0, motor_constants_.m4)})),
+          max_wheels_ang_vel_scaled(max_wheels_ang_vel * decimal_of_max_velocity),
           min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4)})),
-          LinearMP(min_wheels_ang_accel * wheel_radius, max_wheels_ang_vel_scaled * wheel_radius)
+          max_robot_lin_vel_scaled(max_wheels_ang_vel_scaled * wheel_radius),
+          max_robot_ang_vel((wheelbase_length_+trackwidth_length_)/24.0*(max_wheels_ang_vel * 4.0) + trackwidth_length_/12.0*(max_wheels_ang_vel * 2.0)),
+          LinearMP((min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius), (max_robot_lin_vel_scaled))
+          
     {}
+    const double max_robot_lin_vel_scaled;
+    const double max_robot_ang_vel;
     mp LinearMP;
     double angular_velocity(const double angular_acceleration, ff_constants motor_constant) {
         return ((motor_constant.max_voltage-(motor_constant.K_a * angular_acceleration)-motor_constant.K_s)/motor_constant.K_v);
@@ -59,39 +67,37 @@ public:
 
     std::optional<wheels<double>> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_bounds>& bounds);
 
-	double get_motor_max_accel(pros::Motor& motor, const ff_constants motor_constants_, int direction);
-    
-    void move_wheel_accels(const wheels<double>& wheel_accelerations);
+    void move_motor_volts(const wheels<double>& wheel_voltages);
 
-    void move_wheel_volts(const wheels<double>& wheel_voltages);
-
-    void move_wheel_volts_time(const wheels<double>& wheel_voltages, const int time);
+    void move_motor_volts_time(const wheels<double>& wheel_voltages, const int time);
     
-    void field_oriented_holonomic_control(const double& dt);
+    void field_oriented_holonomic_control(const double dt);
     
     double get_standard_angle(void);
     
-    double joystick_to_vel(const double& joystick);
+    double joystick_to_vel(const double joystick);
     
-    wheels<wheel_vel_bounds> get_wheel_vel_bounds(const double& dt);
+    wheels<wheel_vel_bounds> get_wheel_vel_bounds(const double dt);
     
-    wheels<double> get_wanted_motor_accels(const wheels<double>& wanted_motor_vels, const double& dt);
+	wheels<motorVelocityType> get_wanted_motor_accels(const wheels<motorVelocityType>& desired_motor_vels, const double dt);
 
-    void tank_drive_control(const double& dt);
+    void tank_drive_control(const double dt);
 	
-	double get_wanted_motor_vel(pros::Motor& motor, const ff_constants motor_constants_, const double wanted_velocity, const double& dt);
+	wheels<motorVelocityType> differential_vels_to_motor_vels(differentialVels robot_velocity);	
 
-	wheels<double> differential_vels_to_motor_vels(differentialVels robot_velocity);	
-
-	void move_differential_robot_vels(std::vector<differentialVels> robot_vels, const double& dt);
+	void move_differential_robot_vels(const std::vector<differentialVels>& robot_vels, const double dt);
 
 	differentialVels ramsete(pose wanted_pose, differentialVels wanted_vels);
 
-	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>, const double& dt);
-	void move_motor_accelerations(const wheels<double>& motor_accelerations);
-	wheels<double> bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double& dt);
+	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>, const double dt);
+
+	void move_motor_accelerations(const wheels<motorVelocityType>& motor_accelerations);
+
+	wheels<double> bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double dt);
 
     void linear_mp(const double distance);
+
+	void calculate_and_print_motor_constants();
 };
 
 #endif // DRIVETRAIN_HPP
