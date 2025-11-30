@@ -8,6 +8,7 @@
 #include "helper-functions.hpp"
 #include "motor-controller.hpp"
 #include "motion-profiler.hpp"
+#include "system-identification.hpp"
 
 class drivetrain {
 private:

@@ -1,28 +1,44 @@
 #include "system-identification.hpp"
 
-double SysIdent::calculate_mean_velocity(double voltage, MotorController& motor) {
-	motor.move_motor_voltage(voltage);
-	pros::delay(700);
-	double mean_velocity = 0.0;
-	for (size_t i = 0; i < 35; i++) {
-    	double measured_rpm = motor.motor.get().get_actual_velocity(); // RPM
-		double measured_rad_s = measured_rpm * 2.0 * M_PI / 60.0;
-		mean_velocity += measured_rad_s;
-		pros::delay(10);
+std::vector<double> SysIdent::calculate_mean_velocities(double voltage, std::vector<MotorController>& motors) {
+	for (size_t i = 0; i < motors.size(); i++) {
+	    motors[i].move_motor_voltage(voltage);
 	}
-	mean_velocity = mean_velocity / 35.0;
-	return mean_velocity;
+    	pros::delay(50);
+	std::vector<double> total_velocities(motors.size(), 0.0);
+	for (size_t i = 0; i < 35; i++) {
+		for (size_t j = 0; j < motors.size(); j++) {
+    			double measured_rpm = motors[j].motor.get().get_actual_velocity();
+			double measured_rad_s = measured_rpm * 2.0 * M_PI / 60.0;
+			total_velocities[j] += measured_rad_s;
+		}
+    		pros::delay(10);
+
+	}
+	std::vector<double> mean_velocities(motors.size(), 0.0);
+	for (size_t i = 0; i < motors.size(); i++) {
+		mean_velocities[i] = total_velocities[i] / 35.0;
+	}
+	return mean_velocities;
 }
 
-std::pair<double,double> SysIdent::calculate_Kv_and_Ks(MotorController& motor) {
-	std::vector<std::pair<double,double>> velocity_data;
-	velocity_data.reserve(12);
+std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vector<MotorController>& motors) {
+	std::vector<std::vector<std::pair<double,double>>> velocity_data(motors.size());
 	for (size_t i = 1; i <= 12; i++) {
-		velocity_data.emplace_back(std::make_pair(calculate_mean_velocity(static_cast<double>(i), motor), static_cast<double>(i)));
+		auto mean_ws = calculate_mean_velocities(static_cast<double>(i), motors);
+    		for (size_t j = 0; j < motors.size(); j++) {
+        		velocity_data[j].push_back({ mean_ws[j], static_cast<double>(i) });
+   		}
 	}
-	motor.move_motor_voltage(0.0);
-	std::pair<double,double> Kv_and_Ks = linear_reg(velocity_data);
-	return Kv_and_Ks;
+	for (size_t i = 0; i < motors.size(); i++) {
+	    motors[i].move_motor_voltage(0.0);
+	}
+	std::vector<std::pair<double, double>> Kv_and_Ks_s;
+	Kv_and_Ks_s.reserve(motors.size());
+	for (size_t i = 0; i < motors.size(); i++) {
+	    Kv_and_Ks_s.push_back(linear_reg(velocity_data[i]));
+	}
+	return Kv_and_Ks_s;
 }
 
 std::pair<double,double> SysIdent::linear_reg(const std::vector<std::pair<double,double>>& points) {
@@ -39,41 +55,51 @@ std::pair<double,double> SysIdent::linear_reg(const std::vector<std::pair<double
     }
 
     double denom = n * sum_xx - sum_x * sum_x;
+    if (std::abs(denom) < 1e-12) { // degenerate
+	double b = (n > 0.0) ? (sum_y / n) : 0.0;
+	return {0.0, b};
+    }
     double m = (n * sum_xy - sum_x * sum_y) / denom;
 	double b = (sum_y - m * sum_x) / n;
 
 	return {m, b};
 }
 
-std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> SysIdent::get_acceleration_data(double voltage, MotorController& motor) {
-	motor.move_motor_voltage(voltage);
-    std::vector<double> V;     V.reserve(40);
-    std::vector<double> w;     w.reserve(40);
-    std::vector<double> alpha; alpha.reserve(40);
-	pros::delay(20);    
-	double prev_w = 0.0;
-    bool have_prev = false;
+std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, std::vector<std::vector<double>>> SysIdent::get_acceleration_data(double voltage, std::vector<MotorController>& motors) {
+	for (size_t i = 0; i < motors.size(); i++) {
+	    motors[i].move_motor_voltage(voltage);
+	}
+	std::vector<std::vector<double>> V(motors.size()), w(motors.size()), alpha(motors.size());
+	std::vector<double> prev_w(motors.size(), 0.0);
+	pros::delay(200);    
+    	bool have_prev = false;
 	for (size_t i = 0; i < 40; i++) {
-    	double measured_mv = motor.motor.get().get_voltage();          // mV
-		double measured_v = measured_mv / 1000.0;
-    	double measured_rpm = motor.motor.get().get_actual_velocity(); // RPM
-		double measured_rad_s = measured_rpm * 2.0 * M_PI / 60.0;
-        if (have_prev) {
-            double measured_rad_s_s = (measured_rad_s - prev_w) / 0.01;
-			V.push_back(measured_v);
-            w.push_back(measured_rad_s);
-            alpha.push_back(measured_rad_s_s);
-        }
-        prev_w = measured_rad_s;
-        have_prev = true;
+		for (size_t j = 0; j < motors.size(); j++) {
+    			double measured_mv = motors[j].motor.get().get_voltage();          // mV
+			double measured_v = measured_mv / 1000.0;
+    			double measured_rpm = motors[j].motor.get().get_actual_velocity(); // RPM
+			double measured_rad_s = measured_rpm * 2.0 * M_PI / 60.0;
+        		if (have_prev) {
+            			double measured_rad_s_s = (measured_rad_s - prev_w[j]) / 0.01;
+				V[j].push_back(measured_v);
+            			w[j].push_back(measured_rad_s);
+            			alpha[j].push_back(measured_rad_s_s);
+        		}
+        		prev_w[j] = measured_rad_s;
+		}
+        	have_prev = true;
 		pros::delay(10);
 	}
 	return {V, w, alpha};
 }
 
-double SysIdent::calculate_Ka(std::pair<double,double> Kv_and_Ks, MotorController& motor) {
-	auto [V, w, alpha] = get_acceleration_data(4.0, motor);
-	double Ka = through_origin_fit(V, w, alpha, Kv_and_Ks.first, Kv_and_Ks.second);
+std::vector<double> SysIdent::calculate_Ka_s(std::vector<std::pair<double, double>> Kv_and_Ks_s, std::vector<MotorController>& motors) {
+	auto [V, w, alpha] = get_acceleration_data(4.0, motors);
+	std::vector<double> Ka;
+	Ka.reserve(motors.size());
+	for (size_t i = 0; i < motors.size(); i++) {
+		Ka.push_back(through_origin_fit(V[i], w[i], alpha[i], Kv_and_Ks_s[i].first, Kv_and_Ks_s[i].second));
+	}
 	return Ka;
 }
 
@@ -100,9 +126,34 @@ double SysIdent::through_origin_fit(const std::vector<double>& V, const std::vec
     return Ka;
 }
 
-std::tuple<double, double, double> SysIdent::calculate_Kv_Ka_and_Ks(MotorController& motor) {
-	std::pair<double, double> Kv_and_Ks = calculate_Kv_and_Ks(motor);
-	double Ka = calculate_Ka(Kv_and_Ks, motor);
-	std::tuple<double, double, double> Kv_Ka_and_Ks = {Kv_and_Ks.first, Ka, Kv_and_Ks.second};
-	return Kv_Ka_and_Ks;
+std::vector<std::tuple<double, double, double>> SysIdent::calculate_Kv_Ka_and_Ks_s(std::vector<MotorController>& motors) {
+	std::vector<std::pair<double, double>> Kv_and_Ks_s = calculate_Kv_and_Ks_s(motors);
+	std::vector<double> Ka = calculate_Ka_s(Kv_and_Ks_s, motors);
+	std::vector<std::tuple<double, double, double>> Kv_Ka_and_Ks_s;
+	for (size_t i = 0; i < motors.size(); i++) {
+		Kv_Ka_and_Ks_s.emplace_back(Kv_and_Ks_s[i].first, Ka[i], Kv_and_Ks_s[i].second);
+	}
+	return Kv_Ka_and_Ks_s;
+}
+
+void SysIdent::calculate_and_print_constants(std::vector<MotorController>& motors) {
+    	auto results = calculate_Kv_Ka_and_Ks_s(motors);
+    
+	for (size_t i = 0; i < motors.size(); i++) {
+    		auto [Kv, Ka, Ks] = results[i];
+   		printf("%s\n", std::string(motors[i].motor_name).c_str());
+		pros::delay(10);
+    		printf("K_v = ");
+		pros::delay(10);
+		printf("%.6f", Kv);
+		pros::delay(10);
+    		printf("\nK_a = ");
+		pros::delay(10);
+		printf("%.6f", Ka);
+		pros::delay(10);
+    		printf("\nK_s = ");
+		pros::delay(10);
+		printf("%.6f\n", Ks);
+		pros::delay(10);
+	}
 }

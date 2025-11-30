@@ -6,11 +6,9 @@
 #include "ff-velocity-controller.hpp"
 #include "helper-functions.hpp"
 
-class SysIdent;
-
 class MotorController {
 private:
-    const DCff motor_ff;
+    DCff motor_ff;
     std::vector<input_output> motor_data;
 
 public:
@@ -22,19 +20,13 @@ public:
           motor_ff(motor_constants_),
           motor_name(motor_name_)
     {}
-    const ff_constants motor_constants;
+    ff_constants motor_constants;
 
-	void calculate_and_print_constants();
-	
-    static void calculate_constants_trampoline(void* ptr) {
-        static_cast<MotorController*>(ptr)->calculate_and_print_constants();
-    }
-	
 	void print_vector();
     
     void update_motor_data();
     
-    const std::reference_wrapper<pros::Motor> motor;
+    std::reference_wrapper<pros::Motor> motor;
     
 	std::string_view motor_name;
 

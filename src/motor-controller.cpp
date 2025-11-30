@@ -1,24 +1,6 @@
 #include "motor-controller.hpp"
 #include "helper-functions.hpp"
-#include "system-identification.hpp"
 #include "structs.hpp"
-
-void MotorController::calculate_and_print_constants() {
-    auto [Kv, Ka, Ks] = SysIdent::calculate_Kv_Ka_and_Ks(*this);
-    
-	ff_constants identified_constants;
-    
-	identified_constants.K_v = Kv;
-    identified_constants.K_a = Ka;
-    identified_constants.K_s = Ks;
-    printf("%s\n", motor_name);
-    printf("K_v = ");
-	printf("%.6f", identified_constants.K_v);
-    printf("\nK_a = ");
-	printf("%.6f", identified_constants.K_a);
-    printf("\nK_s = ");
-	printf("%.6f", identified_constants.K_s);
-}
 
 void MotorController::move_motor_acceleration(const motorVelocityType& desired_acceleration) {
     double current_velocity = motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0;

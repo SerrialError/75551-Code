@@ -67,8 +67,6 @@ void drivetrain::tank_drive_control(const double dt) {
 	angular_velocity = std::abs(x_right) / 127.0 * ang_min_velocity;
 
     }
-    master.print(0, 0, "%lf", linear_velocity);
-    master.clear();
 	const differentialVels robot_velocity = {linear_velocity, angular_velocity};
 	const wheels<motorVelocityType> wanted_motor_vels = differential_vels_to_motor_vels(robot_velocity);
     // wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
@@ -150,10 +148,10 @@ void drivetrain::linear_mp(const double distance) {
 }
 
 void drivetrain::calculate_and_print_motor_constants() {
-	pros::Task m1_constant_task(MotorController::calculate_constants_trampoline, &motors.m1, "m1 constant task");
-	pros::Task m2_constant_task(MotorController::calculate_constants_trampoline, &motors.m2, "m2 constant task");
-	pros::Task o1_constant_task(MotorController::calculate_constants_trampoline, &motors.o1, "o1 constant task");
-	pros::Task o2_constant_task(MotorController::calculate_constants_trampoline, &motors.o2, "o2 constant task");
-	pros::Task m3_constant_task(MotorController::calculate_constants_trampoline, &motors.m3, "m3 constant task");
-	pros::Task m4_constant_task(MotorController::calculate_constants_trampoline, &motors.m4, "m4 constant task");
+	std::vector<MotorController> motors_;
+	motors_.reserve(6);  
+	for (size_t i = 0; i < 6; ++i) {
+		motors_.push_back(motors[i]);
+	}
+	SysIdent::calculate_and_print_constants(motors_);
 }
