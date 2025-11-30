@@ -14,6 +14,8 @@ private:
 
 	static std::vector<std::pair<double,double>> calculate_Kv_and_Ks_s(std::vector<MotorController>& motors);
 
+	static std::pair<double,double> fit_Kv_and_Ks_with_sign(const std::vector<std::pair<double,double>>& points);
+	
 	static std::pair<double,double> linear_reg(const std::vector<std::pair<double,double>>& points);
 
 	static std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, std::vector<std::vector<double>>> get_acceleration_data(double voltage, std::vector<MotorController>& motors);

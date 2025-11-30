@@ -1,9 +1,6 @@
 #include "system-identification.hpp"
 
 std::vector<double> SysIdent::calculate_mean_velocities(double voltage, std::vector<MotorController>& motors) {
-	if (std::fmod(static_cast<float>(voltage), static_cast<float>(2.0)) == 0) {
-		voltage = -voltage;
-	}
 	for (size_t i = 0; i < motors.size(); i++) {
 		motors[i].move_motor_voltage(voltage);
 	}
@@ -20,7 +17,7 @@ std::vector<double> SysIdent::calculate_mean_velocities(double voltage, std::vec
 	}
 	std::vector<double> mean_velocities(motors.size(), 0.0);
 	for (size_t i = 0; i < motors.size(); i++) {
-		mean_velocities[i] = total_velocities[i] / 35.0;
+		mean_velocities[i] = total_velocities[i] / 50.0;
 	}
 	return mean_velocities;
 }
@@ -28,9 +25,10 @@ std::vector<double> SysIdent::calculate_mean_velocities(double voltage, std::vec
 std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vector<MotorController>& motors) {
 	std::vector<std::vector<std::pair<double,double>>> velocity_data(motors.size());
 	for (size_t i = 1; i <= 10; i++) {
-		auto mean_ws = calculate_mean_velocities(static_cast<double>(i), motors);
+		double applied_voltage = (i % 2 == 0) ? -static_cast<double>(i) : static_cast<double>(i);
+		auto mean_ws = calculate_mean_velocities(applied_voltage, motors);
 		for (size_t j = 0; j < motors.size(); j++) {
-			velocity_data[j].push_back({ mean_ws[j], static_cast<double>(i) });
+			velocity_data[j].push_back({ mean_ws[j], applied_voltage });
 		}
 	}
 	for (size_t i = 0; i < motors.size(); i++) {
@@ -39,33 +37,72 @@ std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vecto
 	std::vector<std::pair<double, double>> Kv_and_Ks_s;
 	Kv_and_Ks_s.reserve(motors.size());
 	for (size_t i = 0; i < motors.size(); i++) {
-		Kv_and_Ks_s.push_back(linear_reg(velocity_data[i]));
+		Kv_and_Ks_s.push_back(fit_Kv_and_Ks_with_sign(velocity_data[i]));
 	}
 	return Kv_and_Ks_s;
 }
 
 std::pair<double,double> SysIdent::linear_reg(const std::vector<std::pair<double,double>>& points) {
 	double sum_x = 0.0, sum_y = 0.0, sum_xx = 0.0, sum_xy = 0.0;
-	const double n = static_cast<double>(points.size());
+    const double n = static_cast<double>(points.size());
 
-	for (const auto &point : points) {
-		double x = point.first;
-		double y = point.second;
-		sum_x += x;
-		sum_y += y;
-		sum_xx += x * x;
-		sum_xy += x * y;
-	}
+    for (const auto &point : points) {
+        double x = point.first;
+        double y = point.second;
+        sum_x += x;
+        sum_y += y;
+        sum_xx += x * x;
+        sum_xy += x * y;
+    }
 
-	double denom = n * sum_xx - sum_x * sum_x;
-	if (std::abs(denom) < 1e-12) { // degenerate
-		double b = (n > 0.0) ? (sum_y / n) : 0.0;
-		return {0.0, b};
-	}
-	double m = (n * sum_xy - sum_x * sum_y) / denom;
+    double denom = n * sum_xx - sum_x * sum_x;
+    if (std::abs(denom) < 1e-12) { // degenerate
+	double b = (n > 0.0) ? (sum_y / n) : 0.0;
+	return {0.0, b};
+    }
+    double m = (n * sum_xy - sum_x * sum_y) / denom;
 	double b = (sum_y - m * sum_x) / n;
 
 	return {m, b};
+}
+
+// Fit V = kV * w + kS * s  where s = sign(w)
+std::pair<double,double> SysIdent::fit_Kv_and_Ks_with_sign(const std::vector<std::pair<double,double>>& points) {
+    // points: (w, V)
+    double sum_w = 0.0;
+    double sum_s = 0.0;
+    double sum_ww = 0.0;
+    double sum_ws = 0.0;
+    double sum_ss = 0.0;
+    double sum_wy = 0.0;
+    double sum_sy = 0.0;
+    const double n = static_cast<double>(points.size());
+
+    for (const auto &p : points) {
+        double w = p.first;
+        double y = p.second;
+        double s = (w > 0.0) ? 1.0 : ((w < 0.0) ? -1.0 : 0.0);
+        sum_w += w;
+        sum_s += s;
+        sum_ww += w * w;
+        sum_ws += w * s;
+        sum_ss += s * s; // equals count of nonzero sign entries
+        sum_wy += w * y;
+        sum_sy += s * y;
+    }
+
+    // Normal equations: [sum_ww sum_ws; sum_ws sum_ss] * [kV; kS] = [sum_wy; sum_sy]
+    double det = sum_ww * sum_ss - sum_ws * sum_ws;
+    if (std::abs(det) < 1e-12) {
+        // degenerate: fall back to single-variable fit (your linear_reg) for kV, and approximate kS from medians
+        auto kb = linear_reg(points); // {m,b} from V = m*w + b
+        return { kb.first, kb.second }; // best-effort fallback
+    }
+
+    double kV =  ( sum_wy * sum_ss - sum_sy * sum_ws) / det;
+    double kS =  (-sum_wy * sum_ws + sum_sy * sum_ww) / det;
+
+    return {kV, kS};
 }
 
 std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, std::vector<std::vector<double>>> SysIdent::get_acceleration_data(double voltage, std::vector<MotorController>& motors) {
@@ -131,7 +168,7 @@ double SysIdent::through_origin_fit(const std::vector<double>& V, const std::vec
 
 std::vector<std::tuple<double, double, double>> SysIdent::calculate_Kv_Ka_and_Ks_s(std::vector<MotorController>& motors) {
 	std::vector<std::pair<double, double>> Kv_and_Ks_s = calculate_Kv_and_Ks_s(motors);
-	pros::delay(500);
+	pros::delay(5000);
 	std::vector<double> Ka = calculate_Ka_s(Kv_and_Ks_s, motors);
 	std::vector<std::tuple<double, double, double>> Kv_Ka_and_Ks_s;
 	for (size_t i = 0; i < motors.size(); i++) {
