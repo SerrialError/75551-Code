@@ -30,7 +30,7 @@ std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vecto
 		for (size_t j = 0; j < motors.size(); j++) {
 			velocity_data[j].push_back({ mean_ws[j], applied_voltage });
 			printf("STEADY motor=%s V=%.3f w=%.6f s=%d\n",
-		  		motors[j].motor_name,
+		  		std::string(motors[j].motor_name).c_str(),
 		  		applied_voltage,
 		  		mean_ws[j],
 		  		(mean_ws[j] > 0) - (mean_ws[j] < 0));
@@ -116,9 +116,8 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, s
 	}
 	std::vector<std::vector<double>> V(motors.size()), w(motors.size()), alpha(motors.size());
 	std::vector<double> prev_w(motors.size(), 0.0);
-	pros::delay(200);    
 	bool have_prev = false;
-	for (size_t i = 0; i < 300; i++) {
+	for (size_t i = 0; i < 20; i++) {
 		for (size_t j = 0; j < motors.size(); j++) {
 			double measured_mv = motors[j].motor.get().get_voltage();          // mV
 			double measured_v = measured_mv / 1000.0;
@@ -139,7 +138,7 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, s
 }
 
 std::vector<double> SysIdent::calculate_Ka_s(std::vector<std::pair<double, double>> Kv_and_Ks_s, std::vector<MotorController>& motors) {
-	auto [V, w, alpha] = get_acceleration_data(4.0, motors);
+	auto [V, w, alpha] = get_acceleration_data(12.0, motors);
 	printf("---- BEGIN Ka DATA ----\n");
 	std::vector<double> Ka;
 	Ka.reserve(motors.size());

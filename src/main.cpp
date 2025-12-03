@@ -6,12 +6,12 @@ pros::Rotation horizontal_wheel(3);
 pros::Imu imu_sensor_1(5);
 pros::Imu imu_sensor_2(9);
 
-pros::Motor m1(-1, pros::v5::MotorGears::blue);
-pros::Motor m2(10, pros::v5::MotorGears::blue);
-pros::Motor o1(-2, pros::v5::MotorGears::blue);
-pros::Motor o2(8, pros::v5::MotorGears::blue);
-pros::Motor m3(-11, pros::v5::MotorGears::blue);
-pros::Motor m4(20, pros::v5::MotorGears::blue);
+pros::Motor m1(-19, pros::v5::MotorGears::blue);
+pros::Motor m2(12, pros::v5::MotorGears::blue);
+pros::Motor o1(-20, pros::v5::MotorGears::blue);
+pros::Motor o2(11, pros::v5::MotorGears::blue);
+pros::Motor m3(-10, pros::v5::MotorGears::blue);
+pros::Motor m4(1, pros::v5::MotorGears::blue);
 
 const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 	std::ref(m1),
@@ -21,6 +21,33 @@ const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 	std::ref(m3),
 	std::ref(m4)
 };
+
+/*
+m1
+K_v = 0.159930
+K_a = 0.001531
+K_s = 0.183377
+m2
+K_v = 0.162656
+K_a = 0.001929
+K_s = 0.194497
+o1
+K_v = 0.161660
+K_a = 0.000871
+K_s = 0.704914
+o2
+K_v = 0.162965
+K_a = 0.001672
+K_s = 0.509290
+m3
+K_v = 0.162513
+K_a = 0.001297
+K_s = 0.497885
+m4
+K_v = 0.163441
+K_a = 0.001779
+K_s = 0.270301
+*/
 
 // kA, kV, kS
 const wheels<ff_constants> dtConsts{
@@ -40,7 +67,7 @@ drivetrain dt(driveMotors, wheelbase, trackwidth, dtConsts, linear_wheel, horizo
 
 pros::Motor fb(4, pros::v5::MotorGears::blue);
 pros::Motor ft(-7, pros::v5::MotorGears::blue);
-pros::Motor bb(12, pros::v5::MotorGears::blue);
+pros::Motor bb(21, pros::v5::MotorGears::blue);
 pros::Motor bt(13, pros::v5::MotorGears::blue);
 
 const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
