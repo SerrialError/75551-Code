@@ -6,12 +6,12 @@ pros::Rotation horizontal_wheel(3);
 pros::Imu imu_sensor_1(5);
 pros::Imu imu_sensor_2(9);
 
-pros::Motor m1(-1, pros::v5::MotorGears::blue);
-pros::Motor m2(10, pros::v5::MotorGears::blue);
-pros::Motor o1(-2, pros::v5::MotorGears::blue);
-pros::Motor o2(8, pros::v5::MotorGears::blue);
-pros::Motor m3(-11, pros::v5::MotorGears::blue);
-pros::Motor m4(20, pros::v5::MotorGears::blue);
+pros::Motor m1(-19, pros::v5::MotorGears::blue);
+pros::Motor m2(12, pros::v5::MotorGears::blue);
+pros::Motor o1(-20, pros::v5::MotorGears::blue);
+pros::Motor o2(11, pros::v5::MotorGears::blue);
+pros::Motor m3(-10, pros::v5::MotorGears::blue);
+pros::Motor m4(1, pros::v5::MotorGears::blue);
 
 const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 	std::ref(m1),
@@ -22,17 +22,61 @@ const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 	std::ref(m4)
 };
 
-// kA, kV, kS
-const wheels<ff_constants> dtConsts{
-	{0.0045870351481, 0.166157827462, 0.120535260966, 75.858991, 12.24},
-	{0.00346235990182, 0.16618573907, 0.103286863565, 74.351026, 12.055},
-	{0.0011750526572, 0.156487380984, 0.133576249675, 80.215332, 12.055},
-	{0.00169461151421, 0.161775364104, 0.136640169512, 76.235982, 12.055},
-	{0.0043200416094, 0.16243797244, 0.259385827274, 75.314448, 12.012},
-	{0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012}
-};
+/*
+m1
+K_v = 0.159930
+K_a = 0.001531
+K_s = 0.183377
+m2
+K_v = 0.162656
+K_a = 0.001929
+K_s = 0.194497
+o1
+K_v = 0.161660
+K_a = 0.000871
+K_s = 0.704914
+o2
+K_v = 0.162965
+K_a = 0.001672
+K_s = 0.509290
+m3
+K_v = 0.162513
+K_a = 0.001297
+K_s = 0.497885
+m4
+K_v = 0.163441
+K_a = 0.001779
+K_s = 0.270301
+*/
 
+/*m1
+K_v = 0.161079
+K_a = 0.008229
+K_s = 0.163760
+m2
+K_v = 0.164277
+K_a = 0.008519
+K_s = 0.167580
+o1
+K_v = 0.165935
+K_a = 0.008414
+K_s = 0.626835
+o2
+K_v = 0.163330
+K_a = 0.008552
+K_s = 0.526571
+m3
+K_v = 0.164669
+K_a = 0.008048
+K_s = 0.380013
+m4
+K_v = 0.163253
+K_a = 0.008055
+K_s = 0.286661
+*/
 
+// kA, kV, kS, max rad/s (calculated at 12 V), max voltage
+const wheels<ff_constants> dtConsts{ {0.0045870351481, 0.166157827462, 0.120535260966, 75.858991, 12.24}, {0.00346235990182, 0.16618573907, 0.103286863565, 74.351026, 12.055}, {0.0011750526572, 0.156487380984, 0.133576249675, 80.215332, 12.055}, {0.00169461151421, 0.161775364104, 0.136640169512, 76.235982, 12.055}, {0.0043200416094, 0.16243797244, 0.259385827274, 75.314448, 12.012}, {0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012} };
 const double wheelbase = 0.292100005; // m
 const double trackwidth = 0.29508135; // m
 
@@ -40,7 +84,7 @@ drivetrain dt(driveMotors, wheelbase, trackwidth, dtConsts, linear_wheel, horizo
 
 pros::Motor fb(4, pros::v5::MotorGears::blue);
 pros::Motor ft(-7, pros::v5::MotorGears::blue);
-pros::Motor bb(12, pros::v5::MotorGears::blue);
+pros::Motor bb(21, pros::v5::MotorGears::blue);
 pros::Motor bt(13, pros::v5::MotorGears::blue);
 
 const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{

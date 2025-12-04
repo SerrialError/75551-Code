@@ -63,6 +63,8 @@ public:
 
     pros::Controller master{pros::E_CONTROLLER_MASTER};
 	
+	void motor_brakes();
+
 	wheels<wheel_vel_bounds> calculate_wheel_vels_bounds(const pose& desired_vels, const wheels<wheel_vel_bounds>& bounds);
 
     std::optional<wheels<double>> calculate_wheel_vels(const pose& desired_vels, const wheels<wheel_vel_bounds>& bounds);

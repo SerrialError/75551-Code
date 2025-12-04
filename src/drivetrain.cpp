@@ -2,6 +2,14 @@
 #include "helper-functions.hpp"
 #include "structs.hpp"
 
+void drivetrain::motor_brakes() {
+    for (size_t i = 0; i < 6; ++i) {
+        motors[i].motor.get().set_brake_mode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_BRAKE);
+        motors[i].motor.get().brake();
+    	move_motor_volts({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+    }
+}
+
 void drivetrain::move_motor_volts(const wheels<double>& wheel_voltages) {
     for (size_t i = 0; i < 6; ++i) {
         motors[i].move_motor_voltage(wheel_voltages[i]);
@@ -144,7 +152,7 @@ void drivetrain::linear_mp(const double distance) {
         time += 0.01;
         start = false;
     }
-    move_motor_volts({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+    motor_brakes();
 }
 
 void drivetrain::calculate_and_print_motor_constants() {

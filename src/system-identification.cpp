@@ -30,6 +30,11 @@ std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vecto
 		auto mean_ws = calculate_mean_velocities(applied_voltage, motors);
 		for (size_t j = 0; j < motors.size(); j++) {
 			velocity_data[j].push_back({ mean_ws[j], applied_voltage });
+			printf("STEADY motor=%s V=%.3f w=%.6f s=%d\n",
+		  		std::string(motors[j].motor_name).c_str(),
+		  		applied_voltage,
+		  		mean_ws[j],
+		  		(mean_ws[j] > 0) - (mean_ws[j] < 0));
 		}
 	}
 	for (size_t i = 0; i < motors.size(); i++) {
@@ -112,8 +117,8 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, s
         motors[i].move_motor_voltage(voltage);
     }
 
-    const size_t iterations = 15;   // total outer loop iterations
-    const int window = 5;            // N-sample window used for robust slope (3 is a good start)
+    const size_t iterations = 20;   // total outer loop iterations
+    const int window = 4;            // N-sample window used for robust slope (3 is a good start)
     const double ms_to_s = 1.0 / 1000.0;
 
     // output buffers
