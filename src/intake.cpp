@@ -21,27 +21,27 @@ rollers<motorStateType> intake::get_roller_states(void) {
     using enum motorStateType;
     switch (intakeState) {
         case intakeOff:
-            result = {off, off, off, off};
+            result = {off, off};
             break;
         
 	    case intakeOnly:
-            result = {reverse, forward, hold, forward};
+            result = {forward, off};
             break;
         
 	    case bottomScore:
-            result = {forward, off, reverse, off};
+            result = {reverse, reverse};
             break;
         
 	    case midScore:
-            result = {reverse, reverse, reverse, forward};
+            result = {forward, reverse};
             break;
 	
 	    case topScore:
-            result = {reverse, forward, reverse, forward};
+            result = {forward, forward};
             break;
     
         default:
-            result = {off, off, off, off};
+            result = {off, off};
             break;
     }
     
@@ -120,7 +120,8 @@ bool intake::is_correct_color(void) {
 }
 
 color intake::get_block_color(void) {
-	double hue = optical.get_hue();
+	// double hue = optical.get_hue();
+    double hue = 0.01;
     master.print(0, 0, "%lf", hue);
     master.clear();
 	double redAngularDistance = angularDistance(hue, redHue);

@@ -19,16 +19,11 @@ private:
 
 public:
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_,
-              pros::Optical& optical_,
               const rollers<ff_constants>& motor_constants_)
-        : motors{ MotorController(motors_.fb, motor_constants_.fb, "fb"),
-                  MotorController(motors_.ft, motor_constants_.ft, "ft"),
-                  MotorController(motors_.bb, motor_constants_.bb, "bb"),
-                  MotorController(motors_.bt, motor_constants_.bt, "bt") },
-          optical(optical_)
+        : motors{ MotorController(motors_.front, motor_constants_.front, "front"),
+                  MotorController(motors_.back, motor_constants_.back, "back") }
     {}
     color allianceColor = red;
-    pros::Optical& optical;
     rollerStateType intakeState = intakeOff;
 	bool colorSorting = false;
 	void move_motor_accelerations(const rollers<motorVelocityType>& motor_accelerations);

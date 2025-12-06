@@ -1,17 +1,16 @@
 #include "main.h"
-pros::adi::Pneumatics redirector ('b', false);
-pros::adi::Pneumatics descorer ('a', true, false);
-pros::Rotation linear_wheel(6);
-pros::Rotation horizontal_wheel(3);
-pros::Imu imu_sensor_1(5);
+pros::adi::Pneumatics match_loader ('a', true, false);
+pros::Rotation linear_wheel(16);
+pros::Rotation horizontal_wheel(15);
+pros::Imu imu_sensor_1(6);
 pros::Imu imu_sensor_2(9);
 
-pros::Motor m1(-19, pros::v5::MotorGears::blue);
-pros::Motor m2(12, pros::v5::MotorGears::blue);
-pros::Motor o1(-20, pros::v5::MotorGears::blue);
-pros::Motor o2(11, pros::v5::MotorGears::blue);
-pros::Motor m3(-10, pros::v5::MotorGears::blue);
-pros::Motor m4(1, pros::v5::MotorGears::blue);
+pros::Motor m1(-18, pros::v5::MotorGears::blue);
+pros::Motor m2(2, pros::v5::MotorGears::blue);
+pros::Motor o1(-13, pros::v5::MotorGears::blue);
+pros::Motor o2(20, pros::v5::MotorGears::blue);
+pros::Motor m3(-11, pros::v5::MotorGears::blue);
+pros::Motor m4(19, pros::v5::MotorGears::blue);
 
 const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 	std::ref(m1),
@@ -22,86 +21,33 @@ const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 	std::ref(m4)
 };
 
-/*
-m1
-K_v = 0.159930
-K_a = 0.001531
-K_s = 0.183377
-m2
-K_v = 0.162656
-K_a = 0.001929
-K_s = 0.194497
-o1
-K_v = 0.161660
-K_a = 0.000871
-K_s = 0.704914
-o2
-K_v = 0.162965
-K_a = 0.001672
-K_s = 0.509290
-m3
-K_v = 0.162513
-K_a = 0.001297
-K_s = 0.497885
-m4
-K_v = 0.163441
-K_a = 0.001779
-K_s = 0.270301
-*/
-
-/*m1
-K_v = 0.161079
-K_a = 0.008229
-K_s = 0.163760
-m2
-K_v = 0.164277
-K_a = 0.008519
-K_s = 0.167580
-o1
-K_v = 0.165935
-K_a = 0.008414
-K_s = 0.626835
-o2
-K_v = 0.163330
-K_a = 0.008552
-K_s = 0.526571
-m3
-K_v = 0.164669
-K_a = 0.008048
-K_s = 0.380013
-m4
-K_v = 0.163253
-K_a = 0.008055
-K_s = 0.286661
-*/
-
 // kA, kV, kS, max rad/s (calculated at 12 V), max voltage
-const wheels<ff_constants> dtConsts{ {0.0045870351481, 0.166157827462, 0.120535260966, 75.858991, 12.24}, {0.00346235990182, 0.16618573907, 0.103286863565, 74.351026, 12.055}, {0.0011750526572, 0.156487380984, 0.133576249675, 80.215332, 12.055}, {0.00169461151421, 0.161775364104, 0.136640169512, 76.235982, 12.055}, {0.0043200416094, 0.16243797244, 0.259385827274, 75.314448, 12.012}, {0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012} };
+const wheels<ff_constants> dtConsts{ 
+	{0.0045870351481, 0.166157827462, 0.120535260966, 75.858991, 12.24}, 
+	{0.00346235990182, 0.16618573907, 0.103286863565, 74.351026, 12.055}, 
+	{0.0011750526572, 0.156487380984, 0.133576249675, 80.215332, 12.055}, 
+	{0.00169461151421, 0.161775364104, 0.136640169512, 76.235982, 12.055}, 
+	{0.0043200416094, 0.16243797244, 0.259385827274, 75.314448, 12.012}, 
+	{0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012} };
 const double wheelbase = 0.292100005; // m
 const double trackwidth = 0.29508135; // m
 
 drivetrain dt(driveMotors, wheelbase, trackwidth, dtConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
 
-pros::Motor fb(4, pros::v5::MotorGears::blue);
-pros::Motor ft(-7, pros::v5::MotorGears::blue);
-pros::Motor bb(21, pros::v5::MotorGears::blue);
-pros::Motor bt(13, pros::v5::MotorGears::blue);
+pros::Motor front(7, pros::v5::MotorGears::blue);
+pros::Motor back(-8, pros::v5::MotorGears::blue);
 
 const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
-	std::ref(fb),
-	std::ref(ft),
-	std::ref(bb),
-	std::ref(bt)
-};
-pros::Optical optical(14);
-const rollers<ff_constants> intakeConsts {
-	{0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},
-	{0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},   	 
-	{0.00291077896309, 0.26137479893, 0.0463373039661, 31.360076, 7.585},
-	{0.00744674908847, 0.265135278752, 0.17548243974, 27.646015, 7.294}
+	std::ref(front),
+	std::ref(back)
 };
 
-intake Intake(intakeMotors, optical, intakeConsts);
+const rollers<ff_constants> intakeConsts {
+	{0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},
+	{0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618}
+};
+
+intake Intake(intakeMotors, intakeConsts);
 
 const double dt_ = 0.01;
 autons current_auton = blueRight;
@@ -278,15 +224,10 @@ void opcontrol() {
 	// std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
 	// print_vector(u_vs_x);
     // motor_angle_mp_test(m1, m1_motor_constants, 78.497928, 4700.12687931 * 0.8f, 2.f * M_PI * 10);
-    Intake.optical.set_led_pwm(75);
-    Intake.optical.set_integration_time(10.0);
     
     while(true) {
 	    if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
 	        Intake.intakeState = topScore;
-			if (!redirector.is_extended()) {
-				redirector.extend();
-			}	
 	    }
         if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
 	        Intake.intakeState = midScore; 			
@@ -296,18 +237,15 @@ void opcontrol() {
 	    }
         if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
 	        Intake.intakeState = intakeOnly;
-			if (redirector.is_extended()) {
-				redirector.retract();
-			}	
 	    }
         if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 	        Intake.intakeState = intakeOff; 			
 	    }
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-			descorer.retract();
+			match_loader.retract();
 	    }
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			descorer.extend();
+			match_loader.extend();
 	    }
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
 			dt.calculate_and_print_motor_constants();

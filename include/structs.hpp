@@ -51,41 +51,35 @@ struct wheels {
 
 template<typename T>
 struct rollers {
-    T fb; // front bottom
-    T ft; // front top
-    T bb; // back bottom
-    T bt; // back top
+    T front;
+    T back;
     // non-const view as array of reference_wrapper
     auto asArray() {
-        return std::array<std::reference_wrapper<T>, 4>{
-            std::ref(fb), std::ref(ft), std::ref(bb), std::ref(bt)
+        return std::array<std::reference_wrapper<T>, 2>{
+            std::ref(front), std::ref(back)
         };
     }
 
     // const-view: reference to const T
     auto asArray() const {
         return std::array<std::reference_wrapper<const T>, 4>{
-            std::cref(fb), std::cref(ft), std::cref(bb), std::cref(bt)
+            std::cref(front), std::cref(back)
         };
     }
 
     // convenient index access (non-const)
     T& operator[](size_t i) {
         switch (i) {
-            case 0: return fb;
-            case 1: return ft;
-            case 2: return bb;
-            default: return bt;
+            case 0: return front;
+            case 1: return back;
         }
     }
 
     // index access const
     const T& operator[](size_t i) const {
         switch (i) {
-            case 0: return fb;
-            case 1: return ft;
-            case 2: return bb;
-            default: return bt;
+            case 0: return front;
+            case 1: return back;
         }
     }
 };
