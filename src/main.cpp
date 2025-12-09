@@ -43,8 +43,8 @@ const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 };
 
 const rollers<ff_constants> intakeConsts {
-	{0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618},
-	{0.00681526983289, 0.276443936704, 0.23522177916, 27.590165, 7.618}
+	{0.00681526983289, 0.276443936704, 0.23522177916, 60.590165, 10.618},
+	{0.00681526983289, 0.276443936704, 0.23522177916, 60.590165, 10.618}
 };
 
 intake Intake(intakeMotors, intakeConsts);
@@ -163,32 +163,21 @@ void autonomous() {
 	const double linear_scalar = 0.3;
 	switch (current_auton) {
 		case blueRight:
-			/*
 			Intake.intakeState = intakeOnly;
 			for (int i = 0; i < 20; i++) {
 	 			Intake.update_intake_state(dt_);
-        		pros::delay(static_cast<int>(dt_*100.0));
+        			pros::delay(static_cast<int>(dt_*100.0));
 			}
-			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(17 * 100), differentialVels{ dt.max_robot_lin_vel * linear_scalar, 0.0 }), dt_);
-			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
-			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(2.5 * 100), differentialVels{ 0.0, -dt.max_robot_ang_vel * angular_scalar}), dt_);
-			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
-			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(13.2 * 100), differentialVels{ -dt.max_robot_lin_vel * linear_scalar, 0.0 }), dt_);
-			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
-			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(2.1 * 100), differentialVels{ 0.0, dt.max_robot_ang_vel * angular_scalar}), dt_);
-			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
-			dt.move_differential_robot_vels(std::vector<differentialVels>(static_cast<int>(6.5 * 100), differentialVels{ dt.max_robot_lin_vel * linear_scalar, 0.0 }), dt_);
-			dt.move_motor_volts_time({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 1000);
-			Intake.intakeState = topScore;
-			if (!redirector.is_extended()) {
-				redirector.extend();
-			}	
+			dt.linear_mp(45.0 * 0.0254);
+			pros::delay(1000);
+			dt.angular_mp(114.0 * M_PI / 180.0 * 0.0254);
+			pros::delay(1000);
+			dt.linear_mp(8.0 * 0.0254);
+			Intake.intakeState = bottomScore;
 			for (int i = 0; i < 20; i++) {
 	 			Intake.update_intake_state(dt_);
-        		pros::delay(static_cast<int>(dt_*100.0));
+        			pros::delay(static_cast<int>(dt_*100.0));
 			}
-			*/
-			dt.linear_mp(12.0 * 0.0254);
 			break;
 		case blueLeft:
 			break;

@@ -18,8 +18,8 @@ private:
     Localization localization;
     static constexpr double wheel_radius = 2.0 / 2.0 * 0.0254;
     static constexpr double b_gain = 2.0;
-    static constexpr double decimal_of_max_velocity = 0.5;
-    static constexpr double decimal_of_max_acceleration = 0.5;
+    static constexpr double decimal_of_max_velocity = 0.3;
+    static constexpr double decimal_of_max_acceleration = 0.3;
     const double max_wheels_ang_vel;
     const double max_wheels_ang_vel_scaled;
     const double min_wheels_ang_accel;
@@ -46,13 +46,19 @@ public:
           max_wheels_ang_vel_scaled(max_wheels_ang_vel * decimal_of_max_velocity),
           min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4)})),
           max_robot_lin_vel_scaled(max_wheels_ang_vel_scaled * wheel_radius),
-          max_robot_ang_vel((wheelbase_length_+trackwidth_length_)/24.0*(max_wheels_ang_vel * 4.0) + trackwidth_length_/12.0*(max_wheels_ang_vel * 2.0)),
-          LinearMP((min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius), (max_robot_lin_vel_scaled))
+          max_robot_ang_vel((wheelbase_length_+trackwidth_length_)/24.0*(max_wheels_ang_vel * wheel_radius * 4.0) + trackwidth_length_/12.0*(max_wheels_ang_vel * wheel_radius * 2.0)),
+          max_robot_ang_vel_scaled((wheelbase_length_+trackwidth_length_)/24.0*(max_wheels_ang_vel_scaled * wheel_radius * 4.0) + trackwidth_length_/12.0*(max_wheels_ang_vel_scaled * wheel_radius * 2.0)),
+          max_robot_ang_accel_scaled((wheelbase_length_+trackwidth_length_)/24.0*(min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 4.0) + trackwidth_length_/12.0*(min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 2.0)),
+	  LinearMP((min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius), (max_robot_lin_vel_scaled)),
+          AngularMP((max_robot_ang_accel_scaled), (max_robot_ang_vel_scaled))
           
     {}
     const double max_robot_lin_vel_scaled;
     const double max_robot_ang_vel;
+    const double max_robot_ang_vel_scaled;
+    const double max_robot_ang_accel_scaled;
     mp LinearMP;
+    mp AngularMP;
     double angular_velocity(const double angular_acceleration, ff_constants motor_constant) {
         return ((motor_constant.max_voltage-(motor_constant.K_a * angular_acceleration)-motor_constant.K_s)/motor_constant.K_v);
     };
@@ -98,6 +104,7 @@ public:
 	wheels<double> bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double dt);
 
     void linear_mp(const double distance);
+    void angular_mp(const double distance);
 
 	void calculate_and_print_motor_constants();
 };

@@ -2,14 +2,14 @@
 #include "structs.hpp"
 
 void intake::move_motor_accelerations(const rollers<motorVelocityType>& motor_accelerations) {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 2; i++) {
 	    motors[i].move_motor_acceleration(motor_accelerations[i]);
     }
 }
 
 rollers<motorVelocityType> intake::get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels, const double& dt) {
     rollers<motorVelocityType> result{};
-    for (size_t i = 0; i < 4; ++i) {
+    for (size_t i = 0; i < 2; ++i) {
 	    result[i].velocity = motors[i].get_desired_motor_acceleration(desired_motor_vels[i].velocity, dt);
 		result[i].brakeMode = desired_motor_vels[i].brakeMode;
     }
@@ -29,7 +29,7 @@ rollers<motorStateType> intake::get_roller_states(void) {
             break;
         
 	    case bottomScore:
-            result = {reverse, reverse};
+            result = {reverse, off};
             break;
         
 	    case midScore:
@@ -80,7 +80,7 @@ motorVelocityType intake::get_desired_motor_state(motorStateType wanted_roller_s
 
 rollers<motorVelocityType> intake::get_desired_motor_states(rollers<motorStateType> wanted_roller_states) {
     rollers<motorVelocityType> desired_motor_states;
-	for (size_t i = 0; i < 4; ++i) {
+	for (size_t i = 0; i < 2; ++i) {
         desired_motor_states[i] = get_desired_motor_state(wanted_roller_states[i], motors[i]);
     }
 	return desired_motor_states;

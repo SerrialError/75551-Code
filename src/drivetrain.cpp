@@ -154,6 +154,19 @@ void drivetrain::linear_mp(const double distance) {
     }
     motor_brakes();
 }
+void drivetrain::angular_mp(const double distance) {
+    double time = 0.0;
+    bool start = true;
+    while(!AngularMP.profileFinished(time) || start) {
+        double angular_velocity = AngularMP.velocity(time, distance);
+	    std::vector<differentialVels> desired_differential_vel = {{0.0, angular_velocity}};
+	    move_differential_robot_vels(desired_differential_vel, .01);
+        pros::delay(10);
+        time += 0.01;
+        start = false;
+    }
+    motor_brakes();
+}
 
 void drivetrain::calculate_and_print_motor_constants() {
 	std::vector<MotorController> motors_;
