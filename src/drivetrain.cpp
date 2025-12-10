@@ -137,7 +137,7 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
     	// wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
     	const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
 		move_motor_accelerations(wanted_motor_accels);
-        pros::delay(static_cast<int>(dt*100.0));
+        pros::delay(static_cast<int>(dt*1000.0));
 	}
 }
 
@@ -154,11 +154,11 @@ void drivetrain::linear_mp(const double distance) {
     }
     motor_brakes();
 }
-void drivetrain::angular_mp(const double distance) {
+void drivetrain::angular_mp(const double angle) {
     double time = 0.0;
     bool start = true;
     while(!AngularMP.profileFinished(time) || start) {
-        double angular_velocity = AngularMP.velocity(time, distance);
+        double angular_velocity = AngularMP.velocity(time, angle);
 	    std::vector<differentialVels> desired_differential_vel = {{0.0, angular_velocity}};
 	    move_differential_robot_vels(desired_differential_vel, .01);
         pros::delay(10);

@@ -20,6 +20,7 @@ private:
     static constexpr double b_gain = 2.0;
     static constexpr double decimal_of_max_velocity = 0.3;
     static constexpr double decimal_of_max_acceleration = 0.3;
+    static constexpr double gear_ratio = 48.0/36.0;
     const double max_wheels_ang_vel;
     const double max_wheels_ang_vel_scaled;
     const double min_wheels_ang_accel;
@@ -42,7 +43,7 @@ public:
           wheelbase_length(wheelbase_length_),
           trackwidth_length(trackwidth_length_),
 	      localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
-          max_wheels_ang_vel(std::min({angular_velocity(0.0, motor_constants_.m1), angular_velocity(0.0, motor_constants_.m2), angular_velocity(0.0, motor_constants_.o1), angular_velocity(0.0, motor_constants_.o2), angular_velocity(0.0, motor_constants_.m3), angular_velocity(0.0, motor_constants_.m4)})),
+          max_wheels_ang_vel(std::min({angular_velocity(0.0, motor_constants_.m1), angular_velocity(0.0, motor_constants_.m2), angular_velocity(0.0, motor_constants_.o1), angular_velocity(0.0, motor_constants_.o2), angular_velocity(0.0, motor_constants_.m3), angular_velocity(0.0, motor_constants_.m4)}) * gear_ratio),
           max_wheels_ang_vel_scaled(max_wheels_ang_vel * decimal_of_max_velocity),
           min_wheels_ang_accel(std::min({angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3), angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4)})),
           max_robot_lin_vel_scaled(max_wheels_ang_vel_scaled * wheel_radius),
@@ -104,7 +105,7 @@ public:
 	wheels<double> bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double dt);
 
     void linear_mp(const double distance);
-    void angular_mp(const double distance);
+    void angular_mp(const double angle);
 
 	void calculate_and_print_motor_constants();
 };

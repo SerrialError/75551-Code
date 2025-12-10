@@ -38,6 +38,7 @@ double MotorController::get_motor_max_accel(bool reverse, int direction) {
 }
 
 void MotorController::move_motor_voltage(const double& voltage) {
+    double clamped_voltage = std::clamp(voltage, -motor_constants.max_voltage, motor_constants.max_voltage);
     motor.get().move_voltage(static_cast<int>(std::lround(voltage * 1000.0))); // volts to millivolts
 }
 

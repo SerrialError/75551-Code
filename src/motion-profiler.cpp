@@ -19,8 +19,7 @@ double mp::velocity(double time, double distance) {
 }
 
 double mp::triangular_motion_profile(double time, double distance) {
-    const double theta = atan(max_acceleration);
-    const double h = sqrt(distance * tan(theta));
+    const double h = sqrt(distance * max_acceleration);
     const double z = 2 * distance / h;
     end_time = z;
     if (time < z / 2) {
@@ -32,10 +31,9 @@ double mp::triangular_motion_profile(double time, double distance) {
 }
 
 double mp::trapezoidal_motion_profile(double time, double distance) {
-    const double theta = atan(max_acceleration);
-    const double h = sqrt(distance * tan(theta));
+    const double h = sqrt(distance * max_acceleration);
     const double z = 2 * distance / h;
-    const double u = 2 * max_velocity / tan(theta);
+    const double u = 2 * max_velocity / max_acceleration;
     const double w = (distance - (1.0 / 2.0 * u * max_velocity)) / max_velocity;
     const double t_4 = u / 2;
     const double t_5 = t_4 + w;

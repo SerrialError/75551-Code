@@ -166,7 +166,7 @@ void autonomous() {
 			Intake.intakeState = intakeOnly;
 			for (int i = 0; i < 20; i++) {
 	 			Intake.update_intake_state(dt_);
-        			pros::delay(static_cast<int>(dt_*100.0));
+        			pros::delay(static_cast<int>(dt_*1000.0));
 			}
 			dt.linear_mp(45.0 * 0.0254);
 			pros::delay(1000);
@@ -176,7 +176,7 @@ void autonomous() {
 			Intake.intakeState = bottomScore;
 			for (int i = 0; i < 20; i++) {
 	 			Intake.update_intake_state(dt_);
-        			pros::delay(static_cast<int>(dt_*100.0));
+        			pros::delay(static_cast<int>(dt_*1000.0));
 			}
 			break;
 		case blueLeft:
@@ -209,11 +209,6 @@ void autonomous() {
  */
 
 void opcontrol() {
-	// compute sysid(fb);
-	// std::vector<input_output> u_vs_x = sysid.fopdt_system_identification(200);
-	// print_vector(u_vs_x);
-    // motor_angle_mp_test(m1, m1_motor_constants, 78.497928, 4700.12687931 * 0.8f, 2.f * M_PI * 10);
-    
     while(true) {
 	    if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
 	        Intake.intakeState = topScore;
@@ -243,6 +238,6 @@ void opcontrol() {
 	    // dt.field_oriented_holonomic_control(dt_);
 	    dt.tank_drive_control(dt_);
         // dt.test_control(dt_);
-        pros::delay(static_cast<int>(dt_*100.0));
+        pros::delay(static_cast<int>(dt_*1000.0));
     }
 }
