@@ -2,12 +2,56 @@
 #include "helper-functions.hpp"
 #include "structs.hpp"
 
+drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
+                       const double wheelbase_length_,
+                       const double trackwidth_length_,
+                       const wheels<ff_constants>& motor_constants_,
+                       pros::Rotation& linear_wheel_,
+                       pros::Rotation& horizontal_wheel_,
+                       pros::Imu& imu_,
+                       pose Pose_)
+    : motors{
+          MotorController(motors_.m1, motor_constants_.m1, "m1"),
+          MotorController(motors_.m2, motor_constants_.m2, "m2"),
+          MotorController(motors_.o1, motor_constants_.o1, "o1"),
+          MotorController(motors_.o2, motor_constants_.o2, "o2"),
+          MotorController(motors_.m3, motor_constants_.m3, "m3"),
+          MotorController(motors_.m4, motor_constants_.m4, "m4")},
+      wheelbase_length(wheelbase_length_),
+      trackwidth_length(trackwidth_length_),
+      localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
+      max_wheels_ang_vel(
+          std::min({ angular_velocity(0.0, motor_constants_.m1),
+                     angular_velocity(0.0, motor_constants_.m2),
+                     angular_velocity(0.0, motor_constants_.o1),
+                     angular_velocity(0.0, motor_constants_.o2),
+                     angular_velocity(0.0, motor_constants_.m3),
+                     angular_velocity(0.0, motor_constants_.m4) }) * gear_ratio),
+      max_wheels_ang_vel_scaled(max_wheels_ang_vel * decimal_of_max_velocity),
+      min_wheels_ang_accel(
+          std::min({ angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1),
+                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2),
+                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1),
+                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2),
+                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3),
+                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4) })),
+      max_robot_lin_vel_scaled(max_wheels_ang_vel_scaled * wheel_radius),
+      max_robot_ang_vel(((wheelbase_length_ + trackwidth_length_) / 24.0 * (max_wheels_ang_vel * wheel_radius * 4.0)) +
+                        (trackwidth_length_ / 12.0 * (max_wheels_ang_vel * wheel_radius * 2.0))),
+      max_robot_ang_vel_scaled(((wheelbase_length_ + trackwidth_length_) / 24.0 * (max_wheels_ang_vel_scaled * wheel_radius * 4.0)) +
+                               (trackwidth_length_ / 12.0 * (max_wheels_ang_vel_scaled * wheel_radius * 2.0))),
+      max_robot_ang_accel_scaled(((wheelbase_length_ + trackwidth_length_) / 24.0 * (min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 4.0)) +
+                                 (trackwidth_length_ / 12.0 * (min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 2.0))),
+      LinearMP((min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius), (max_robot_lin_vel_scaled)),
+      AngularMP((max_robot_ang_accel_scaled), (max_robot_ang_vel_scaled))
+{}
+
 void drivetrain::motor_brakes() {
-    for (size_t i = 0; i < 6; ++i) {
-        motors[i].motor.get().set_brake_mode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_BRAKE);
-        motors[i].motor.get().brake();
-    	move_motor_volts({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
-    }
+	for (size_t i = 0; i < 6; ++i) {
+		motors[i].motor.get().set_brake_mode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_BRAKE);
+		motors[i].motor.get().brake();
+		move_motor_volts({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+	}
 }
 
 void drivetrain::move_motor_volts(const wheels<double>& wheel_voltages) {
