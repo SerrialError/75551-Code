@@ -18,64 +18,58 @@ rollers<motorVelocityType> intake::get_wanted_motor_accels(const rollers<motorVe
 
 rollers<motorStateType> intake::get_roller_states(void) {
     rollers<motorStateType> result;
-    using enum motorStateType;
     switch (intakeState) {
         case intakeOff:
-            result = {off, off};
+            result = { make_off(), make_off() };
             break;
-        
-	    case intakeOnly:
-            result = {forward, off};
+
+        case intakeOnly:
+            result = { make_running(0.8), make_off() };
             break;
-        
-	    case bottomScore:
-            result = {reverse, off};
+
+        case bottomScore:
+            result = { make_running(0.8), make_off() };
             break;
-        
-	    case midScore:
-            result = {forward, reverse};
+
+        case midScore:
+            result = { make_running(0.8), make_running(0.8) };
             break;
-	
-	    case topScore:
-            result = {forward, forward};
+
+        case topScore:
+            result = { make_running(0.8), make_running(0.8) };
             break;
-    
+
         default:
-            result = {off, off};
+            result = { make_off(), make_off() };
             break;
     }
-    
     return result;
 }
 
 motorVelocityType intake::get_desired_motor_state(motorStateType wanted_roller_state, MotorController motor) {
-    double wanted_velocity;
-	pros::motor_brake_mode_e wanted_brake{};
-    using enum motorStateType; 
-    switch (wanted_roller_state) {
-	    case off:
-	        wanted_velocity = 0.0;
-            wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
-            break;
-	    case forward:
-	        wanted_velocity = motor.motor_constants.max_ang_vel;
-            wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
-            break;
-	    case reverse:
-	        wanted_velocity = -motor.motor_constants.max_ang_vel;
-            wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
-            break;
-	    case hold:
-	        wanted_velocity = 0.0;
-            wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_HOLD;
-            break;
-        default:
-	        wanted_velocity = 0.0;
-            wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
-            break;
+    double wanted_velocity = 0.0;
+    pros::motor_brake_mode_e wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
+
+    if (std::holds_alternative<double>(wanted_roller_state)) {
+        double scale = std::get<double>(wanted_roller_state);     // e.g. 0.8
+        wanted_velocity = motor.motor_constants.max_ang_vel * scale;
+        wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
+    } else {
+        // it's a SpecialState
+        switch (std::get<SpecialState>(wanted_roller_state)) {
+            case SpecialState::off:
+                wanted_velocity = 0.0;
+                wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
+                break;
+            case SpecialState::hold:
+                wanted_velocity = 0.0;
+                wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_HOLD;
+                break;
+        }
     }
+
     wanted_velocity = motor.bound_velocity_to_deadband(wanted_velocity);
-	return {wanted_velocity, wanted_brake};
+    return motorVelocityType{wanted_velocity, wanted_brake};
 }
 
 rollers<motorVelocityType> intake::get_desired_motor_states(rollers<motorStateType> wanted_roller_states) {

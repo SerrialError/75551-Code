@@ -15,7 +15,6 @@ private:
 	wheels<MotorController> motors;
 	const double wheelbase_length;
 	const double trackwidth_length;
-	Localization localization;
 	static constexpr double wheel_radius = 2.0 / 2.0 * 0.0254;
 	static constexpr double b_gain = 2.0;
 	static constexpr double decimal_of_max_velocity = 0.3;
@@ -38,6 +37,7 @@ public:
 	const double max_robot_ang_vel;
 	const double max_robot_ang_vel_scaled;
 	const double max_robot_ang_accel_scaled;
+	Localization localization;
 	mp LinearMP;
 	mp AngularMP;
 	double angular_velocity(const double angular_acceleration, ff_constants motor_constant) {
@@ -85,7 +85,12 @@ public:
 	wheels<double> bound_desired_motor_velocities(const wheels<double>& desired_motor_velocities, const double dt);
 
 	void linear_mp(const double distance);
+	
 	void angular_mp(const double angle);
+	
+	void mtp_mp(const pose desired_pose);
+		
+	void mtp_mp_ramsete(const pose desired_pose);
 
 	void calculate_and_print_motor_constants();
 };

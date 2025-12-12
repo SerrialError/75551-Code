@@ -115,12 +115,12 @@ enum rollerStateType {
     topScore
 };
 
-enum class motorStateType {
-    forward,
-    reverse,
-    hold,
-    off
-};
+enum class SpecialState { hold, off };
+using motorStateType = std::variant<double, SpecialState>;
+
+inline motorStateType make_running(double s) { return s; }
+inline motorStateType make_hold() { return SpecialState::hold; }
+inline motorStateType make_off()  { return SpecialState::off; }
 
 enum color {
     red,

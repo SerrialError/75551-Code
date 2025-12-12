@@ -198,6 +198,7 @@ void drivetrain::linear_mp(const double distance) {
     }
     motor_brakes();
 }
+
 void drivetrain::angular_mp(const double angle) {
     double time = 0.0;
     bool start = true;
@@ -219,4 +220,16 @@ void drivetrain::calculate_and_print_motor_constants() {
 		motors_.push_back(motors[i]);
 	}
 	SysIdent::calculate_and_print_constants(motors_);
+}
+
+void drivetrain::mtp_mp(const pose desired_pose) {
+	const double desired_angle_delta = localization.Pose.theta - desired_pose.theta;
+	angular_mp(desired_angle_delta);
+	pros::delay(500);
+	const double desired_linear_distance_delta = std::hypot(localization.Pose.x - desired_pose.x, localization.Pose.y - desired_pose.y);
+	linear_mp(desired_angle_delta);
+};
+	
+void drivetrain::mtp_mp_ramsete(const pose desired_pose) {
+
 }

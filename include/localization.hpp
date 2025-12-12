@@ -29,6 +29,10 @@ public:
     pose Pose;
     
 	void calculate_pose(void);
+
+	void set_pose(pose inputed_pose) {
+		Pose = inputed_pose;
+	}
 };
 
 #endif // LOCALIZATION_HPP

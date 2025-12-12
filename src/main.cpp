@@ -159,10 +159,9 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-	const double angular_scalar = -0.1;
-	const double linear_scalar = 0.3;
 	switch (current_auton) {
 		case blueRight:
+			dt.localization.set_pose({0.0, 0.0, 0.0});
 			Intake.intakeState = intakeOnly;
 			for (int i = 0; i < 20; i++) {
 	 			Intake.update_intake_state(dt_);
