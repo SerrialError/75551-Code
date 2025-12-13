@@ -2,15 +2,14 @@
 pros::adi::Pneumatics match_loader ('a', true, false);
 pros::Rotation linear_wheel(16);
 pros::Rotation horizontal_wheel(15);
-pros::Imu imu_sensor_1(6);
-pros::Imu imu_sensor_2(9);
+pros::Imu imu_sensor_1(3);
 
-pros::Motor m1(-18, pros::v5::MotorGears::blue);
-pros::Motor m2(2, pros::v5::MotorGears::blue);
+pros::Motor m1(-2, pros::v5::MotorGears::blue);
+pros::Motor m2(14, pros::v5::MotorGears::blue);
 pros::Motor o1(-13, pros::v5::MotorGears::blue);
-pros::Motor o2(20, pros::v5::MotorGears::blue);
+pros::Motor o2(18, pros::v5::MotorGears::blue);
 pros::Motor m3(-11, pros::v5::MotorGears::blue);
-pros::Motor m4(19, pros::v5::MotorGears::blue);
+pros::Motor m4(17, pros::v5::MotorGears::blue);
 
 const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 	std::ref(m1),
@@ -34,8 +33,8 @@ const double trackwidth = 0.29508135; // m
 
 drivetrain dt(driveMotors, wheelbase, trackwidth, dtConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
 
-pros::Motor front(7, pros::v5::MotorGears::blue);
-pros::Motor back(-8, pros::v5::MotorGears::blue);
+pros::Motor front(-5, pros::v5::MotorGears::blue);
+pros::Motor back(-6, pros::v5::MotorGears::blue);
 
 const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 	std::ref(front),
@@ -43,8 +42,8 @@ const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 };
 
 const rollers<ff_constants> intakeConsts {
-	{0.00681526983289, 0.276443936704, 0.23522177916, 60.590165, 10.618},
-	{0.00681526983289, 0.276443936704, 0.23522177916, 60.590165, 10.618}
+	{0.00681526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618},
+	{0.00681526983289, 0.276443936704, 0.28522177916, 70.590165, 12.618}
 };
 
 intake Intake(intakeMotors, intakeConsts);
