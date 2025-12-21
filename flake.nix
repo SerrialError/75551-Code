@@ -11,7 +11,7 @@
 
     pros-cli = pkgs.python3Packages.buildPythonApplication rec {
       pname = "pros-cli";
-      version = "3.5.5";
+      version = "3.5.6";
       doCheck = false;
 
       nativeBuildInputs = with pkgs.python3Packages; [ pip setuptools wheel ];

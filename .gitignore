@@ -8,6 +8,8 @@
 
 # PROS
 bin/
+build/
+.output/
 .vscode/
 .cache/
 compile_commands.json
