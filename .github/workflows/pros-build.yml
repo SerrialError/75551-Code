@@ -1,0 +1,16 @@
+            - name: PROS Build Action
+  # You may pin to the exact commit or the version.
+  # uses: LemLib/pros-build@619dd1890a1ac11f09d402e097fa8dca1176f48d
+  uses: LemLib/pros-build@v4.0.1
+  with:
+    # Whether to use multithreading when building the project (-j flag in make)
+    multithreading: # optional, default is true
+    # Whether to not include the commit hash in the artifact name
+    no_commit_hash: # optional
+    # Whether to copy the README.md and LICENSE files to the include directory
+    copy_readme_and_license_to_include: # optional
+    # The name of the folder under the include directory that contains the headers for the project. Required if copy_readme_and_license_to_include is true
+    lib_folder_name: # optional, default is 
+    # Whether to create a GitHub job summary
+    write_job_summary: # optional, default is true
+          
