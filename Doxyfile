@@ -1442,7 +1442,7 @@ HTML_HEADER            = docs/theme/header.html
 # that Doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = docs/theme/footer.html
+HTML_FOOTER            =
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1472,7 +1472,7 @@ HTML_STYLESHEET        =
 # documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  = docs/theme/awesome/doxygen-awesom.css
+HTML_EXTRA_STYLESHEET  = docs/theme/awesome/doxygen-awesome.css docs/theme/awesome/doxygen-awesome-sidebar-only-darkmode-toggle.js
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1482,9 +1482,7 @@ HTML_EXTRA_STYLESHEET  = docs/theme/awesome/doxygen-awesom.css
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       =\
-  docs/theme/awesome/doxygen-awesome-darkmode-toggle.js \
-  docs/theme/awesome/doxygen-awesome-fragment-copy-button.js
+HTML_EXTRA_FILES       = docs/theme/awesome/doxygen-awesome-darkmode-toggle.js 
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.
@@ -1835,7 +1833,7 @@ GENERATE_TREEVIEW      = YES
 # The default value is: YES.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-PAGE_OUTLINE_PANEL     = YES
+PAGE_OUTLINE_PANEL     = NO
 
 # When GENERATE_TREEVIEW is set to YES, the FULL_SIDEBAR option determines if
 # the side bar is limited to only the treeview area (value NO) or if it should
