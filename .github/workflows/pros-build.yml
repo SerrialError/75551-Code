@@ -26,7 +26,7 @@ jobs:
       - name: Pre-build devShell (optional, fails early if shell won't build)
         run: nix build --no-link .#devShells.x86_64-linux.default
 
-      - name: Diagnostic: show PATH and search for pros
+      - name: show PATH and search for pros
         run: |
           echo "PATH=$PATH"
           which pros || echo "which pros: not found"
