@@ -3,13 +3,36 @@
 
 #include "api.h"
 
+/**
+ * @brief Simplex method solver for linear programming problems
+ *
+ * Implements the two-phase simplex method to solve linear programming problems
+ * of the form: maximize c^T x, subject to A x <= b, with x unrestricted.
+ * The solver handles unrestricted variables by splitting them into positive
+ * and negative parts, and uses artificial variables when needed for feasibility.
+ */
 class Simplex {
 public:
-    // Solve LP: maximize c^T x, subject to A x <= b, x free (unrestricted) (we allow negative A, b, x)
-    // A: m x n matrix
-    // b: length m
-    // c: length n
-    // returns optimal x (length n) corresponding to original variables (not split ones)
+    /**
+     * @brief Solves a linear programming problem using the simplex method
+     *
+     * Solves the LP problem: maximize c^T x, subject to A x <= b, where x is
+     * unrestricted (can be negative). The method uses a two-phase approach:
+     * Phase I finds a feasible solution using artificial variables, and Phase II
+     * optimizes the objective function. Unrestricted variables are handled by
+     * splitting each into positive and negative components (x = x_pos - x_neg).
+     *
+     * The algorithm converts constraints to standard form, adds slack/surplus
+     * variables, and iteratively pivots to find the optimal solution. Returns
+     * an empty optional if the problem is infeasible.
+     *
+     * @param[in] A_in Constraint matrix A (m x n), where m is number of constraints
+     * @param[in] b_in Right-hand side vector b (length m) for constraints
+     * @param[in] c_in Objective function coefficients c (length n)
+     *
+     * @return Optional vector of optimal variable values (length n) if solution exists,
+     *         empty optional if problem is infeasible
+     */
     static std::optional<std::vector<double>> solve(const std::vector<std::vector<double>>& A_in,
                                      const std::vector<double>& b_in,
                                      const std::vector<double>& c_in) {
