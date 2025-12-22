@@ -1,6 +1,16 @@
 #ifndef SYSTEM_IDENTIFICATION_HPP
 #define SYSTEM_IDENTIFICATION_HPP
 
+/**
+ * \file system-identification.hpp
+ * @brief Motor system identification routines.
+ *
+ * Declares the `SysIdent` class, which performs system identification to
+ * determine feedforward constants (K_v, K_a, K_s) for DC motors. The
+ * routines apply test voltages, measure steady-state and transient
+ * responses, and fit model parameters for use in feedforward control.
+ */
+
 #include "api.h"
 #include "structs.hpp"
 #include "helper-functions.hpp"

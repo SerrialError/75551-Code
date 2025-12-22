@@ -1,6 +1,15 @@
 #ifndef LOCALIZATION_HPP
 #define LOCALIZATION_HPP
 
+/**
+ * \file localization.hpp
+ * @brief Odometry-based robot localization.
+ *
+ * Declares the `Localization` class that estimates the robot's pose using
+ * rotation sensors and an IMU. This file provides the interface for pose
+ * tracking and manual pose resetting used throughout the drivetrain code.
+ */
+
 #include "api.h"
 #include "structs.hpp"
 #include "ff-velocity-controller.hpp"

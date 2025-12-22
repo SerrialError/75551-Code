@@ -1,6 +1,16 @@
 #ifndef FF_VELOCITY_CONTROLLER_HPP
 #define FF_VELOCITY_CONTROLLER_HPP
 
+/**
+ * \file ff-velocity-controller.hpp
+ * @brief Feedforward velocity controller interfaces.
+ *
+ * Declares the `DCff` feedforward controller class for DC motors and a
+ * placeholder `pd` controller. These classes are used to compute motor
+ * voltages from desired accelerations and velocities using identified
+ * motor constants.
+ */
+
 #include "api.h"
 #include "structs.hpp"
 #include "helper-functions.hpp"

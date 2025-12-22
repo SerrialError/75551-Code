@@ -1,3 +1,11 @@
+/**
+ * \file system-identification.cpp
+ * @brief Implementation of motor system identification routines.
+ *
+ * Contains the procedures that sweep motor voltages, measure steady-state
+ * speeds, and fit the feedforward model parameters (K_v, K_a, K_s) using
+ * regression and filtered acceleration data.
+ */
 #include "system-identification.hpp"
 #include <deque>
 
@@ -5,7 +13,7 @@ std::vector<double> SysIdent::calculate_mean_velocities(double voltage, std::vec
 	for (size_t i = 0; i < motors.size(); i++) {
 		motors[i].move_motor_voltage(voltage);
 	}
-	pros::delay(1000);
+	pros::delay(1000); // allow motors to reach steady state
 	std::vector<double> total_velocities(motors.size(), 0.0);
 	for (size_t i = 0; i < 50; i++) {
 		for (size_t j = 0; j < motors.size(); j++) {
@@ -26,6 +34,7 @@ std::vector<double> SysIdent::calculate_mean_velocities(double voltage, std::vec
 std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vector<MotorController>& motors) {
 	std::vector<std::vector<std::pair<double,double>>> velocity_data(motors.size());
 	for (size_t i = 1; i <= 10; i++) {
+		// Alternate between positive and negative voltages to identify K_s sign.
 		double applied_voltage = (i % 2 == 0) ? -static_cast<double>(i) : static_cast<double>(i);
 		auto mean_ws = calculate_mean_velocities(applied_voltage, motors);
 		for (size_t j = 0; j < motors.size(); j++) {

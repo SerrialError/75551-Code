@@ -1,6 +1,15 @@
 #ifndef INTAKE_HPP
 #define INTAKE_HPP
 
+/**
+ * \file intake.hpp
+ * @brief Intake mechanism control and color sorting logic.
+ *
+ * Declares the `intake` class, which manages a two-roller intake mechanism
+ * using `MotorController` objects. The intake supports multiple operating
+ * states and can optionally perform alliance-based color sorting.
+ */
+
 #include "api.h"
 #include "structs.hpp"
 #include "ff-velocity-controller.hpp"

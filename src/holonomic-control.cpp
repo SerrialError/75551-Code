@@ -1,3 +1,12 @@
+/**
+ * \file holonomic-control.cpp
+ * @brief Holonomic velocity allocation using linear programming.
+ *
+ * Implements the methods that convert desired chassis velocities into
+ * individual wheel velocity bounds and exact wheel velocity solutions
+ * using a simplex-based linear program. These routines enforce per-wheel
+ * limits while trying to stay close to the nominal solution.
+ */
 #include "drivetrain.hpp"
 #include "helper-functions.hpp"
 #include "simplex.hpp"
@@ -8,6 +17,7 @@ wheels<wheel_vel_bounds> drivetrain::calculate_wheel_vels_bounds(const pose& des
     const int n = 6;
     const double L = wheelbase_length;
     const double W = trackwidth_length;
+    // Core A matrix encodes chassis velocity constraints in wheel space.
     std::vector<std::vector<double>> A = {
         {1,         1,      1,        1,       1,    1  },
         {1,         -1,     -1,       1,       0,    0  },
@@ -20,7 +30,7 @@ wheels<wheel_vel_bounds> drivetrain::calculate_wheel_vels_bounds(const pose& des
     };
     std::vector<double> b = {desired_vels.y, desired_vels.x, desired_vels.theta, -desired_vels.y, -desired_vels.x, -desired_vels.theta, 0.0, 0.0};
 
-    // Add bounds: F_i <= max, -F_i <= -min
+    // Add bounds: F_i <= max, -F_i <= -min for each wheel.
     std::vector<wheel_vel_bounds> lims = {
         bounds.m1, bounds.m2, bounds.m3,
         bounds.m4, bounds.o1, bounds.o2
@@ -32,7 +42,7 @@ wheels<wheel_vel_bounds> drivetrain::calculate_wheel_vels_bounds(const pose& des
         row[i] = -1.0; A.push_back(row); b.push_back(-lims[i].min);
     }
 
-    // Map solution into wheels vels
+    // Map solution into wheel velocity bounds by solving n LPs: one per wheel.
     std::vector<double> max_result(n, 0.f);
     for (int j = 0; j < n; j++) {
         std::vector<double> c(n, 0.f);

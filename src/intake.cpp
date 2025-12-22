@@ -1,3 +1,11 @@
+/**
+ * \file intake.cpp
+ * @brief Implementation of the intake state machine and color sorting.
+ *
+ * Contains the logic that maps high-level intake states to motor commands,
+ * computes desired velocities for each roller, and optionally adjusts the
+ * state based on detected block color.
+ */
 #include "intake.hpp"
 #include "structs.hpp"
 
@@ -18,6 +26,7 @@ rollers<motorVelocityType> intake::get_wanted_motor_accels(const rollers<motorVe
 
 rollers<motorStateType> intake::get_roller_states(void) {
     rollers<motorStateType> result;
+    // Map the high-level intake state to a desired state per roller.
     switch (intakeState) {
         case intakeOff:
             result = { make_off(), make_off() };
@@ -82,6 +91,7 @@ rollers<motorVelocityType> intake::get_desired_motor_states(rollers<motorStateTy
 
 void intake::get_intake_state() {
     if (intakeState != intakeOff) {
+        // If the block color is wrong, bump the state to route the piece differently.
         if (!is_correct_color()) {
             if (intakeState == midScore) {
                 intakeState = topScore;

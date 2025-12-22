@@ -1,6 +1,15 @@
 #ifndef MOTOR_CONTROLLER_HPP
 #define MOTOR_CONTROLLER_HPP
 
+/**
+ * \file motor-controller.hpp
+ * @brief High-level motor control abstraction.
+ *
+ * Declares the `MotorController` class, which wraps a PROS motor and provides
+ * feedforward-based acceleration and velocity control, deadband handling, and
+ * velocity bounding. It is used by both the drivetrain and intake subsystems.
+ */
+
 #include "api.h"
 #include "structs.hpp"
 #include "ff-velocity-controller.hpp"

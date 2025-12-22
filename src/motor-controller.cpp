@@ -1,8 +1,17 @@
+/**
+ * \file motor-controller.cpp
+ * @brief Implementation of feedforward-based motor control primitives.
+ *
+ * Implements methods that translate desired accelerations and velocities
+ * into constrained voltage commands, while enforcing acceleration limits
+ * and applying a small deadband around zero to avoid jitter.
+ */
 #include "motor-controller.hpp"
 #include "helper-functions.hpp"
 #include "structs.hpp"
 
 void MotorController::move_motor_acceleration(const motorVelocityType& desired_acceleration) {
+    // Convert measured speed from RPM to rad/s for feedforward computation.
     double current_velocity = motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0;
     double voltage = motor_ff.compute_voltage(desired_acceleration.velocity, current_velocity);
     if (voltage == 0.0 && desired_acceleration.brakeMode == pros::motor_brake_mode_e::E_MOTOR_BRAKE_HOLD) {

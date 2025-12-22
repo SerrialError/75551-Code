@@ -2,6 +2,15 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 
+/**
+ * \file structs.hpp
+ * @brief Common strongly-typed data structures for the robot.
+ *
+ * Declares generic containers for wheels and rollers, pose and motion types,
+ * feedforward constants, velocity bounds, and various enums used throughout
+ * the drivetrain, intake, and localization code.
+ */
+
 #include "api.h"
 
 /**

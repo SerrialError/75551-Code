@@ -1,6 +1,16 @@
 #ifndef DRIVETRAIN_HPP
 #define DRIVETRAIN_HPP
 
+/**
+ * \file drivetrain.hpp
+ * @brief Holonomic drivetrain interface and control logic.
+ *
+ * Declares the `drivetrain` class, which manages a six-wheel holonomic
+ * drivetrain with motor controllers, localization, motion profiling,
+ * and Ramsete-based path following. This file is the primary interface
+ * for high-level robot motion control.
+ */
+
 #include "api.h"
 #include "structs.hpp"
 #include "ff-velocity-controller.hpp"

@@ -1,6 +1,16 @@
 #ifndef HELPER_FUNCTIONS_HPP
 #define HELPER_FUNCTIONS_HPP
 
+/**
+ * \file helper-functions.hpp
+ * @brief Small math helpers used across motion and control code.
+ *
+ * Declares utility functions such as `sign`, `wrapToPi`, `DEG_TO_RAD_NORM`,
+ * and `sinc` that are used by drivetrain control, localization, and
+ * motion profiling. These helpers encapsulate common mathematical
+ * operations on angles and scalar values.
+ */
+
 #include "api.h"
 
 /**

@@ -1,3 +1,11 @@
+/**
+ * \file motion-profiler.cpp
+ * @brief Implementation of triangular and trapezoidal motion profiles.
+ *
+ * Provides the piecewise equations that generate velocity profiles for a
+ * given distance, honoring maximum acceleration and velocity constraints.
+ * Used by higher-level code to command smooth linear and angular motions.
+ */
 #include "motion-profiler.hpp"
 
 bool mp::profileFinished(double time) {

@@ -1,6 +1,16 @@
 #ifndef SIMPLEX_HPP
 #define SIMPLEX_HPP
 
+/**
+ * \file simplex.hpp
+ * @brief Linear programming solver via the simplex method.
+ *
+ * Declares the `Simplex` class, which implements a two-phase simplex algorithm
+ * for solving LP problems of the form: maximize c^T x, subject to A x <= b,
+ * with unrestricted variables. Includes support for artificial variables and
+ * variable splitting.
+ */
+
 #include "api.h"
 
 /**

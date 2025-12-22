@@ -1,3 +1,11 @@
+/**
+ * \file drivetrain.cpp
+ * @brief Implementation of drivetrain control, RAMSETE, and motion profiles.
+ *
+ * Contains the implementation of the holonomic drivetrain, including tank
+ * drive, field-oriented control, RAMSETE-based path following, and motion
+ * profiling helpers for linear and angular movements.
+ */
 #include "drivetrain.hpp"
 #include "helper-functions.hpp"
 #include "structs.hpp"
@@ -35,6 +43,7 @@ drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors
                      angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2),
                      angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3),
                      angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4) })),
+      // Maximum linear and angular speeds/accelerations that respect motor limits.
       max_robot_lin_vel_scaled(max_wheels_ang_vel_scaled * wheel_radius),
       max_robot_ang_vel(((wheelbase_length_ + trackwidth_length_) / 24.0 * (max_wheels_ang_vel * wheel_radius * 4.0)) +
                         (trackwidth_length_ / 12.0 * (max_wheels_ang_vel * wheel_radius * 2.0))),
@@ -97,11 +106,13 @@ void drivetrain::tank_drive_control(const double dt) {
     // for (int j = 0; j < 6; ++j) {
 	    // motors[j].update_motor_data();
     // }
+    // Compute per-wheel velocity bounds given current state and time step.
     const wheels<wheel_vel_bounds> bounds = get_wheel_vel_bounds(dt);
     const double W = trackwidth_length;
 	const double L = wheelbase_length;
     double linear_velocity;
     double angular_velocity;
+    // Map joystick Y to a linear velocity, scaled by forward/reverse capability.
     if (y_left > 0) {
          const double lin_max_velocity = (bounds.m1.max + bounds.m2.max + bounds.m3.max + bounds.m4.max + bounds.o1.max + bounds.o2.max) / 6.0;
 	 linear_velocity = std::abs(y_left) / 127.0 * lin_max_velocity;
@@ -110,6 +121,7 @@ void drivetrain::tank_drive_control(const double dt) {
          const double lin_min_velocity = (bounds.m1.min + bounds.m2.min + bounds.m3.min + bounds.m4.min + bounds.o1.min + bounds.o2.min) / 6.0;
 	 linear_velocity = std::abs(y_left) / 127.0 * lin_min_velocity;
     }
+    // Map joystick X to an angular velocity, again using asymmetric bounds.
     if (-x_right > 0) {
     	const double ang_max_velocity = (L+W)/24.0*(bounds.m2.max + bounds.m4.max - bounds.m1.min - bounds.m3.min) + W/12.0*(bounds.o2.max-bounds.o1.min);
 	angular_velocity = std::abs(x_right) / 127.0 * ang_max_velocity;
@@ -119,6 +131,7 @@ void drivetrain::tank_drive_control(const double dt) {
 	angular_velocity = std::abs(x_right) / 127.0 * ang_min_velocity;
 
     }
+	// Desired chassis velocity in differential form (linear, angular).
 	const differentialVels robot_velocity = {linear_velocity, angular_velocity};
 	const wheels<motorVelocityType> wanted_motor_vels = differential_vels_to_motor_vels(robot_velocity);
     // wheels<double> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
@@ -156,7 +169,7 @@ void drivetrain::move_differential_robot_vels(const std::vector<differentialVels
 }
 
 differentialVels drivetrain::ramsete(pose wanted_pose, differentialVels wanted_vels) {
-	 // Compute errors in robot frame
+	 // Compute pose error expressed in the robot frame.
     double error_theta = wrapToPi(wanted_pose.theta - localization.Pose.theta);
     double dx = wanted_pose.x - localization.Pose.x;
     double dy = wanted_pose.y - localization.Pose.y;
@@ -165,10 +178,10 @@ differentialVels drivetrain::ramsete(pose wanted_pose, differentialVels wanted_v
     double error_x =  sin_t * dy + cos_t * dx;
     double error_y =  cos_t * dy - sin_t * dx;
 
-    // Gains
+    // Ramsete gain term combining linear and angular desired speeds.
     double k2 = std::sqrt(wanted_vels.angular * wanted_vels.angular + (b_gain * wanted_vels.linear) * (b_gain * wanted_vels.linear));
 
-    // Compute control outputs
+    // Compute corrected outputs; see Ramsete formulation for details.
     double linear_out  = wanted_vels.linear * std::cos(error_theta) + b_gain * error_x;
     double angular_out = wanted_vels.angular + k2 * sinc(error_theta) * error_y + b_gain * error_theta;
 	return {linear_out, angular_out};

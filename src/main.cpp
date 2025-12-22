@@ -1,3 +1,11 @@
+/**
+ * \file main.cpp
+ * @brief PROS entry points and high-level robot wiring.
+ *
+ * Creates the global drivetrain and intake instances, wires up sensors
+ * and motors, and implements the standard PROS callbacks (`initialize`,
+ * `disabled`, `competition_initialize`, `autonomous`, and `opcontrol`).
+ */
 #include "main.h"
 pros::adi::Pneumatics match_loader ('a', true, false);
 pros::Rotation linear_wheel(16);
@@ -11,6 +19,7 @@ pros::Motor o2(18, pros::v5::MotorGears::blue);
 pros::Motor m3(-11, pros::v5::MotorGears::blue);
 pros::Motor m4(17, pros::v5::MotorGears::blue);
 
+// Drivetrain motor grouping: mecanum (m1–m4) plus omni wheels (o1, o2).
 const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 	std::ref(m1),
 	std::ref(m2),

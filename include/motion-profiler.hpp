@@ -1,6 +1,16 @@
 #ifndef MOTION_PROFILER_HPP
 #define MOTION_PROFILER_HPP
 
+/**
+ * \file motion-profiler.hpp
+ * @brief Motion profiling utilities for trajectory generation.
+ *
+ * Declares the `mp` class, which generates triangular and trapezoidal
+ * velocity profiles that respect maximum acceleration and velocity
+ * constraints. Used by the drivetrain to execute smooth linear and
+ * angular motions.
+ */
+
 #include "api.h"
 #include "structs.hpp"
 
