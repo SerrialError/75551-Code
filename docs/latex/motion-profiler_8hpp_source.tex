@@ -1,0 +1,39 @@
+\doxysection{motion-\/profiler.hpp}
+\hypertarget{motion-profiler_8hpp_source}{}\label{motion-profiler_8hpp_source}\index{include/motion-\/profiler.hpp@{include/motion-\/profiler.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ MOTION\_PROFILER\_HPP}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ MOTION\_PROFILER\_HPP}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}api.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}structs.hpp"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classmp_a94953c861cf4a22c306d5e3f560a1009}{mp}}\ \{}
+\DoxyCodeLine{00016\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00030\ \ \ \ \ \mbox{\hyperlink{classmp_a94953c861cf4a22c306d5e3f560a1009}{mp}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ max\_acceleration\_,}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ max\_velocity\_)}
+\DoxyCodeLine{00032\ \ \ \ \ \ \ \ \ :\ max\_acceleration(max\_acceleration\_),}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ \ \ max\_velocity(max\_velocity\_)}
+\DoxyCodeLine{00034\ \ \ \ \ \{\}}
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ max\_acceleration;}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ max\_velocity;}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keywordtype}{double}\ end\_time;}
+\DoxyCodeLine{00038\ \ \ \ \ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classmp_a8c3474de5fff1ea67f7f006a23cd4058}{profileFinished}}(\textcolor{keywordtype}{double}\ time);}
+\DoxyCodeLine{00050\ \ \ \ \ }
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classmp_a9f68c6085208843136ee5c097e9a8a0b}{velocity}}(\textcolor{keywordtype}{double}\ time,\ \textcolor{keywordtype}{double}\ distance);}
+\DoxyCodeLine{00065\ \ \ \ \ }
+\DoxyCodeLine{00079\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classmp_a3d7ca208626b6b6138581b8b36b8b32c}{triangular\_motion\_profile}}(\textcolor{keywordtype}{double}\ time,\ \textcolor{keywordtype}{double}\ distance);}
+\DoxyCodeLine{00080\ \ \ \ \ }
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classmp_acb90b8432a73126e9844c6c9a50b03f9}{trapezoidal\_motion\_profile}}(\textcolor{keywordtype}{double}\ time,\ \textcolor{keywordtype}{double}\ distance);}
+\DoxyCodeLine{00095\ \};}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ MOTION\_PROFILER\_HPP}}
+
+\end{DoxyCode}

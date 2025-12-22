@@ -1,0 +1,56 @@
+\doxysection{motor-\/controller.hpp}
+\hypertarget{motor-controller_8hpp_source}{}\label{motor-controller_8hpp_source}\index{include/motor-\/controller.hpp@{include/motor-\/controller.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ MOTOR\_CONTROLLER\_HPP}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ MOTOR\_CONTROLLER\_HPP}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}api.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}structs.hpp"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}ff-\/velocity-\/controller.hpp"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}helper-\/functions.hpp"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classMotorController_a1382ed2cfc8628c9857e91e7fa79bbac}{MotorController}}\ \{}
+\DoxyCodeLine{00018\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00019\ \ \ \ \ \mbox{\hyperlink{classDCff}{DCff}}\ motor\_ff;}
+\DoxyCodeLine{00020\ \ \ \ \ std::vector<input\_output>\ motor\_data;}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00034\ \ \ \ \ \mbox{\hyperlink{classMotorController_a1382ed2cfc8628c9857e91e7fa79bbac}{MotorController}}(\textcolor{keyword}{const}\ std::reference\_wrapper<pros::Motor>\&\ motor\_,}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structff__constants}{ff\_constants}}\&\ motor\_constants\_,}
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\_view\ motor\_name\_)}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ :\ motor(motor\_),}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \ \ motor\_constants(motor\_constants\_),}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \ \ motor\_ff(motor\_constants\_),}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ motor\_name(motor\_name\_)}
+\DoxyCodeLine{00041\ \ \ \ \ \{\}}
+\DoxyCodeLine{00042\ \ \ \ \ \mbox{\hyperlink{structff__constants}{ff\_constants}}\ motor\_constants;}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorController_a316bfedd146d7211fc1d8c09be31bba6}{print\_vector}}();}
+\DoxyCodeLine{00051\ \ \ \ \ }
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorController_aa79686cf7c620df5beab7665c01d0813}{update\_motor\_data}}();}
+\DoxyCodeLine{00060\ \ \ \ \ }
+\DoxyCodeLine{00061\ \ \ \ \ std::reference\_wrapper<pros::Motor>\ motor;}
+\DoxyCodeLine{00062\ \ \ \ \ }
+\DoxyCodeLine{00063\ \ \ \ \ std::string\_view\ motor\_name;}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorController_a640bc078f40cf196b00ef10ab6612472}{move\_motor\_acceleration}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structmotorVelocityType}{motorVelocityType}}\&\ desired\_acceleration);}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classMotorController_ac30d434c950e7ae1deb189060f5c7603}{bound\_velocity\_to\_deadband}}(\textcolor{keywordtype}{double}\ desired\_velocity);}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classMotorController_ae90923cd2b746b790cdd19b1f13dcae1}{get\_motor\_max\_accel}}(\textcolor{keywordtype}{bool}\ reverse,\ \textcolor{keywordtype}{int}\ direction);}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorController_a35c5fb195efabfec25c443065e51663c}{move\_motor\_voltage}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\&\ voltage);}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00128\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classMotorController_af6989789de053ffbe8acb46edf83a684}{move\_motor\_volts\_time}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\&\ voltage,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\&\ time);}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00142\ \ \ \ \ \mbox{\hyperlink{structwheel__vel__bounds}{wheel\_vel\_bounds}}\ \mbox{\hyperlink{classMotorController_adb6ed0d3835939bb2687d6cc2c4c935f}{get\_motor\_vel\_bounds}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\&\ dt);}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classMotorController_a5d51a139c40bad97a8be37e6dea927f8}{get\_desired\_motor\_acceleration}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\&\ desired\_motor\_vels,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\&\ dt);}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classMotorController_a89b40f20066559f533fd8d886a6aaf93}{bound\_desired\_motor\_velocity}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\&\ desired\_velocity,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\&\ dt);}
+\DoxyCodeLine{00173\ \};}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ MOTOR\_CONTROLLER\_HPP}}
+
+\end{DoxyCode}

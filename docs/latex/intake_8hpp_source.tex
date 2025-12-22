@@ -1,0 +1,60 @@
+\doxysection{intake.\+hpp}
+\hypertarget{intake_8hpp_source}{}\label{intake_8hpp_source}\index{include/intake.hpp@{include/intake.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ INTAKE\_HPP}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ INTAKE\_HPP}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}api.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}structs.hpp"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}ff-\/velocity-\/controller.hpp"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}motor-\/controller.hpp"{}}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}helper-\/functions.hpp"{}}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00018\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classintake_a77061b9968867007b8a95bdf22c04d4a}{intake}}\ \{}
+\DoxyCodeLine{00019\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00020\ \ \ \ \ pros::Controller\ master\{pros::E\_CONTROLLER\_MASTER\};}
+\DoxyCodeLine{00021\ \ \ \ \ \mbox{\hyperlink{structrollers}{rollers<MotorController>}}\ motors;}
+\DoxyCodeLine{00022\ \ \ \ \ motorStateType\ motorState;}
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ redHue\ =\ 4.0;}
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ blueHue\ =\ 200.0;}
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ redHueUncertainty\ =\ 7.0;}
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ blueHueUncertainty\ =\ 20.0;}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00039\ \ \ \ \ \mbox{\hyperlink{classintake_a77061b9968867007b8a95bdf22c04d4a}{intake}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structrollers}{rollers}}<std::reference\_wrapper<pros::Motor>>\&\ motors\_,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structrollers}{rollers<ff\_constants>}}\&\ motor\_constants\_)}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ :\ motors\{\ \mbox{\hyperlink{classMotorController}{MotorController}}(motors\_.front,\ motor\_constants\_.front,\ \textcolor{stringliteral}{"{}front"{}}),}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classMotorController}{MotorController}}(motors\_.back,\ motor\_constants\_.back,\ \textcolor{stringliteral}{"{}back"{}})\ \}}
+\DoxyCodeLine{00043\ \ \ \ \ \{\}}
+\DoxyCodeLine{00044\ \ \ \ \ color\ allianceColor\ =\ red;}
+\DoxyCodeLine{00045\ \ \ \ \ rollerStateType\ intakeState\ =\ intakeOff;}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keywordtype}{bool}\ colorSorting\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00056\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classintake_ab1dad5ba70c0dc727ad12ee2f2cd4fb3}{move\_motor\_accelerations}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structrollers}{rollers<motorVelocityType>}}\&\ motor\_accelerations);}
+\DoxyCodeLine{00057\ \ \ \ \ }
+\DoxyCodeLine{00070\ \ \ \ \ \mbox{\hyperlink{structrollers}{rollers<motorVelocityType>}}\ \mbox{\hyperlink{classintake_affdd7dfff7fb55b3382930956473160e}{get\_wanted\_motor\_accels}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structrollers}{rollers<motorVelocityType>}}\&\ desired\_motor\_vels,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\&\ dt);}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00081\ \ \ \ \ \mbox{\hyperlink{structrollers}{rollers<motorStateType>}}\ \mbox{\hyperlink{classintake_ab296ff214440154e6de14a62d74fbee2}{get\_roller\_states}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00096\ \ \ \ \ \mbox{\hyperlink{structmotorVelocityType}{motorVelocityType}}\ \mbox{\hyperlink{classintake_acdbc1ef647f8d87af17141c9484f4d34}{get\_desired\_motor\_state}}(motorStateType\ wanted\_roller\_state,\ \mbox{\hyperlink{classMotorController}{MotorController}}\ motor);}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00109\ \ \ \ \ \mbox{\hyperlink{structrollers}{rollers<motorVelocityType>}}\ \mbox{\hyperlink{classintake_abe0703a7f3880971e174f537f18366d9}{get\_desired\_motor\_states}}(\mbox{\hyperlink{structrollers}{rollers<motorStateType>}}\ wanted\_roller\_states);}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00119\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classintake_a8cc54b17763251647dd16fe44d46c162}{get\_intake\_state}}();}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classintake_a6df590d9e2451660ecf87370f3765429}{update\_intake\_state}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\&\ dt);}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classintake_a649c641fa3268d5ae13d3fe201e07fa7}{is\_correct\_color}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00154\ \ \ \ \ color\ \mbox{\hyperlink{classintake_ad481ebb68c5b8290a9586e7c36dab39e}{get\_block\_color}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00155\ \ \ \ \ }
+\DoxyCodeLine{00168\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classintake_a341092f41973d750a540e00991c2d38d}{angularDistance}}(\textcolor{keywordtype}{double}\ a,\ \textcolor{keywordtype}{double}\ b)\ \{}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ d\ =\ fabs(a\ -\/\ b);}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (d\ >\ 180.0)\ d\ =\ 360.0\ -\/\ d;}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ d;}
+\DoxyCodeLine{00172\ \ \ \ \ \}}
+\DoxyCodeLine{00173\ \};}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ INTAKE\_HPP}}
+
+\end{DoxyCode}

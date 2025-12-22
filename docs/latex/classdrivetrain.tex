@@ -1,0 +1,631 @@
+\doxysection{drivetrain Class Reference}
+\hypertarget{classdrivetrain}{}\label{classdrivetrain}\index{drivetrain@{drivetrain}}
+
+
+Main drivetrain class for holonomic robot control.  
+
+
+
+
+{\ttfamily \#include $<$drivetrain.\+hpp$>$}
+
+
+
+Collaboration diagram for drivetrain\+:
+% FIG 0
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classdrivetrain_a40e2616bd179aa3eea580decfe6a622e}{drivetrain}} (const \mbox{\hyperlink{structwheels}{wheels}}$<$ std\+::reference\+\_\+wrapper$<$ pros\+::\+Motor $>$ $>$ \&motors\+\_\+, const double wheelbase\+\_\+length\+\_\+, const double trackwidth\+\_\+length\+\_\+, const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structff__constants}{ff\+\_\+constants}} $>$ \&motor\+\_\+constants\+\_\+, pros\+::\+Rotation \&linear\+\_\+wheel\+\_\+, pros\+::\+Rotation \&horizontal\+\_\+wheel\+\_\+, pros\+::\+Imu \&imu\+\_\+, \mbox{\hyperlink{structpose}{pose}} Pose\+\_\+)
+\begin{DoxyCompactList}\small\item\em Constructs a drivetrain object with specified motors and parameters. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classdrivetrain_a578e587b1e99d2d5f2f40788398b15fe}{angular\+\_\+velocity}} (const double \mbox{\hyperlink{classdrivetrain_aed58da1ede029a41585fd365e67f29e0}{angular\+\_\+acceleration}}, \mbox{\hyperlink{structff__constants}{ff\+\_\+constants}} motor\+\_\+constant)
+\begin{DoxyCompactList}\small\item\em Calculates maximum angular velocity for a given acceleration. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classdrivetrain_aed58da1ede029a41585fd365e67f29e0}{angular\+\_\+acceleration}} (const double \mbox{\hyperlink{classdrivetrain_a578e587b1e99d2d5f2f40788398b15fe}{angular\+\_\+velocity}}, \mbox{\hyperlink{structff__constants}{ff\+\_\+constants}} motor\+\_\+constant)
+\begin{DoxyCompactList}\small\item\em Calculates maximum angular acceleration for a given velocity. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a3d09faac849d3b8bfeb6685410db7d8e}{motor\+\_\+brakes}} ()
+\begin{DoxyCompactList}\small\item\em Applies brakes to all motors and stops movement. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} $>$ \mbox{\hyperlink{classdrivetrain_a7b40b8f91cf037e4c3f225b562a03d26}{calculate\+\_\+wheel\+\_\+vels\+\_\+bounds}} (const \mbox{\hyperlink{structpose}{pose}} \&desired\+\_\+vels, const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} $>$ \&bounds)
+\begin{DoxyCompactList}\small\item\em Calculates velocity bounds for each wheel based on desired robot velocity. \end{DoxyCompactList}\item 
+std\+::optional$<$ \mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ $>$ \mbox{\hyperlink{classdrivetrain_ad1ddd40f8ea7be5aa60fb9a49dfa4266}{calculate\+\_\+wheel\+\_\+vels}} (const \mbox{\hyperlink{structpose}{pose}} \&desired\+\_\+vels, const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} $>$ \&bounds)
+\begin{DoxyCompactList}\small\item\em Calculates wheel velocities from desired robot pose velocity. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_af18fd0d8aa7c2dd2e20627db783d0882}{move\+\_\+motor\+\_\+volts}} (const \mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ \&wheel\+\_\+voltages)
+\begin{DoxyCompactList}\small\item\em Sets voltage for all six motors simultaneously. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a936b16c0fce2d2b3f809f49a9d0f59f4}{move\+\_\+motor\+\_\+volts\+\_\+time}} (const \mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ \&wheel\+\_\+voltages, const int time)
+\begin{DoxyCompactList}\small\item\em Sets voltage for all motors for a specified duration. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a0072d5087947f26c8fe4fc0eadd1ce3c}{field\+\_\+oriented\+\_\+holonomic\+\_\+control}} (const double dt)
+\begin{DoxyCompactList}\small\item\em Controls the robot using field-\/oriented holonomic drive. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classdrivetrain_a85e9502edeb6a8ef5d40675bbf898394}{get\+\_\+standard\+\_\+angle}} (void)
+\begin{DoxyCompactList}\small\item\em Gets the standard angle representation of the robot\textquotesingle{}s orientation. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classdrivetrain_a71dc54bd2585366b4b8fcf2f2c49e8ec}{joystick\+\_\+to\+\_\+vel}} (const double joystick)
+\begin{DoxyCompactList}\small\item\em Converts joystick input value to velocity. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} $>$ \mbox{\hyperlink{classdrivetrain_abdac516869271ae70ef8410617fb8459}{get\+\_\+wheel\+\_\+vel\+\_\+bounds}} (const double dt)
+\begin{DoxyCompactList}\small\item\em Calculates achievable velocity bounds for each wheel. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} $>$ \mbox{\hyperlink{classdrivetrain_a8eeab78f61cdad71874d77231a49fe52}{get\+\_\+wanted\+\_\+motor\+\_\+accels}} (const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} $>$ \&desired\+\_\+motor\+\_\+vels, const double dt)
+\begin{DoxyCompactList}\small\item\em Calculates desired motor accelerations from desired velocities. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a3a292586d665ba8c335c2301176dd3dc}{tank\+\_\+drive\+\_\+control}} (const double dt)
+\begin{DoxyCompactList}\small\item\em Implements tank drive control using joystick inputs. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} $>$ \mbox{\hyperlink{classdrivetrain_a720512cdc096edb12257a43cffc97417}{differential\+\_\+vels\+\_\+to\+\_\+motor\+\_\+vels}} (\mbox{\hyperlink{structdifferentialVels}{differential\+Vels}} robot\+\_\+velocity)
+\begin{DoxyCompactList}\small\item\em Converts differential drive velocities to individual motor velocities. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a7ce0f807c3c4353010e6899812eedef0}{move\+\_\+differential\+\_\+robot\+\_\+vels}} (const std\+::vector$<$ \mbox{\hyperlink{structdifferentialVels}{differential\+Vels}} $>$ \&robot\+\_\+vels, const double dt)
+\begin{DoxyCompactList}\small\item\em Executes a sequence of differential drive velocity commands. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structdifferentialVels}{differential\+Vels}} \mbox{\hyperlink{classdrivetrain_a340804a93014467ff9810822b702ed61}{ramsete}} (\mbox{\hyperlink{structpose}{pose}} wanted\+\_\+pose, \mbox{\hyperlink{structdifferentialVels}{differential\+Vels}} wanted\+\_\+vels)
+\begin{DoxyCompactList}\small\item\em Computes Ramsete controller output for path following. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a66c3b17140a9b25e74562f692206017b}{move\+\_\+differential\+\_\+robot\+\_\+vels\+\_\+ramsete}} (std\+::vector$<$ \mbox{\hyperlink{structdifferentialVels}{differential\+Vels}} $>$ robot\+\_\+vels, std\+::vector$<$ \mbox{\hyperlink{structpose}{pose}} $>$, const double dt)
+\begin{DoxyCompactList}\small\item\em Executes velocity commands with Ramsete path following correction. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a72c94743e532149ca218c40ee089b10a}{move\+\_\+motor\+\_\+accelerations}} (const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} $>$ \&motor\+\_\+accelerations)
+\begin{DoxyCompactList}\small\item\em Applies desired accelerations to all motors using feedforward control. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ \mbox{\hyperlink{classdrivetrain_ac218a92ebce87afb07c1ec34739717bb}{bound\+\_\+desired\+\_\+motor\+\_\+velocities}} (const \mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ \&desired\+\_\+motor\+\_\+velocities, const double dt)
+\begin{DoxyCompactList}\small\item\em Bounds desired motor velocities to achievable limits. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a67e1fcf6f738d57770d1feea58436da5}{linear\+\_\+mp}} (const double distance)
+\begin{DoxyCompactList}\small\item\em Executes a linear motion profile to move a specified distance. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a5f8a66676233839cd50a06ab643a0fef}{angular\+\_\+mp}} (const double angle)
+\begin{DoxyCompactList}\small\item\em Executes an angular motion profile to rotate a specified angle. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_a36063f4c239c91fd57a3f4e4baa4a248}{mtp\+\_\+mp}} (const \mbox{\hyperlink{structpose}{pose}} desired\+\_\+pose)
+\begin{DoxyCompactList}\small\item\em Moves to a target pose using motion profiles. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_ad176a53371cadffc336d1b00df1da10a}{mtp\+\_\+mp\+\_\+ramsete}} (const \mbox{\hyperlink{structpose}{pose}} desired\+\_\+pose)
+\begin{DoxyCompactList}\small\item\em Moves to a target pose using Ramsete path following. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classdrivetrain_ad59f236e3c710d96b1e4d19c8e11b6a5}{calculate\+\_\+and\+\_\+print\+\_\+motor\+\_\+constants}} ()
+\begin{DoxyCompactList}\small\item\em Calculates and prints feedforward constants for all motors. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classdrivetrain_a1d750f2b78e214b7329885b8656246cf}\label{classdrivetrain_a1d750f2b78e214b7329885b8656246cf} 
+const double {\bfseries max\+\_\+robot\+\_\+lin\+\_\+vel\+\_\+scaled}
+\item 
+\Hypertarget{classdrivetrain_a5ee661c364ddef50215feccf2953abb1}\label{classdrivetrain_a5ee661c364ddef50215feccf2953abb1} 
+const double {\bfseries max\+\_\+robot\+\_\+ang\+\_\+vel}
+\item 
+\Hypertarget{classdrivetrain_a5ceefabdafc050cc80f17a38147bf017}\label{classdrivetrain_a5ceefabdafc050cc80f17a38147bf017} 
+const double {\bfseries max\+\_\+robot\+\_\+ang\+\_\+vel\+\_\+scaled}
+\item 
+\Hypertarget{classdrivetrain_aab64a9fb512c79f60d4f8a5004155b9e}\label{classdrivetrain_aab64a9fb512c79f60d4f8a5004155b9e} 
+const double {\bfseries max\+\_\+robot\+\_\+ang\+\_\+accel\+\_\+scaled}
+\item 
+\Hypertarget{classdrivetrain_ac552f2667f697ba6fbba28ab02947e72}\label{classdrivetrain_ac552f2667f697ba6fbba28ab02947e72} 
+\mbox{\hyperlink{classLocalization}{Localization}} {\bfseries localization}
+\item 
+\Hypertarget{classdrivetrain_a2a6a007d5afa2670d8e681e7c7849fc7}\label{classdrivetrain_a2a6a007d5afa2670d8e681e7c7849fc7} 
+\mbox{\hyperlink{classmp}{mp}} {\bfseries Linear\+MP}
+\item 
+\Hypertarget{classdrivetrain_a4e5be5fb1d73c0b1841ab3d0168af4fb}\label{classdrivetrain_a4e5be5fb1d73c0b1841ab3d0168af4fb} 
+\mbox{\hyperlink{classmp}{mp}} {\bfseries Angular\+MP}
+\item 
+\Hypertarget{classdrivetrain_a3909d01b307333b2360fedd8bb13063f}\label{classdrivetrain_a3909d01b307333b2360fedd8bb13063f} 
+pros\+::\+Controller {\bfseries master} \{pros\+::\+E\+\_\+\+CONTROLLER\+\_\+\+MASTER\}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classdrivetrain_a745f6621f495c0632a5e100f14d6f28c}\label{classdrivetrain_a745f6621f495c0632a5e100f14d6f28c} 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{classMotorController}{Motor\+Controller}} $>$ {\bfseries motors}
+\item 
+\Hypertarget{classdrivetrain_a81c24434df372f4b367f754148e6200e}\label{classdrivetrain_a81c24434df372f4b367f754148e6200e} 
+const double {\bfseries wheelbase\+\_\+length}
+\item 
+\Hypertarget{classdrivetrain_a3cf834595a3f7f6cec895eab6a4b8301}\label{classdrivetrain_a3cf834595a3f7f6cec895eab6a4b8301} 
+const double {\bfseries trackwidth\+\_\+length}
+\item 
+\Hypertarget{classdrivetrain_adf2579f09f692b0e91650cc61f0047b5}\label{classdrivetrain_adf2579f09f692b0e91650cc61f0047b5} 
+const double {\bfseries max\+\_\+wheels\+\_\+ang\+\_\+vel}
+\item 
+\Hypertarget{classdrivetrain_ab0cecc8b957be1992e986bccf170e6ef}\label{classdrivetrain_ab0cecc8b957be1992e986bccf170e6ef} 
+const double {\bfseries max\+\_\+wheels\+\_\+ang\+\_\+vel\+\_\+scaled}
+\item 
+\Hypertarget{classdrivetrain_ae556644ba827918ce57681468e56788d}\label{classdrivetrain_ae556644ba827918ce57681468e56788d} 
+const double {\bfseries min\+\_\+wheels\+\_\+ang\+\_\+accel}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classdrivetrain_a1a37f8803c48989e2668bce27e45eaf4}\label{classdrivetrain_a1a37f8803c48989e2668bce27e45eaf4} 
+static constexpr double {\bfseries wheel\+\_\+radius} = 2.\+0 / 2.\+0 \texorpdfstring{$\ast$}{*} 0.\+0254
+\item 
+\Hypertarget{classdrivetrain_a2ae0b893e7b06b0a2ae0e6bcd8ffb2a0}\label{classdrivetrain_a2ae0b893e7b06b0a2ae0e6bcd8ffb2a0} 
+static constexpr double {\bfseries b\+\_\+gain} = 2.\+0
+\item 
+\Hypertarget{classdrivetrain_a9cbb9bac1f1cfdc1cb331b9e8a2f0dbf}\label{classdrivetrain_a9cbb9bac1f1cfdc1cb331b9e8a2f0dbf} 
+static constexpr double {\bfseries decimal\+\_\+of\+\_\+max\+\_\+velocity} = 0.\+195
+\item 
+\Hypertarget{classdrivetrain_a02c508259cafc16b57495e591449d470}\label{classdrivetrain_a02c508259cafc16b57495e591449d470} 
+static constexpr double {\bfseries decimal\+\_\+of\+\_\+max\+\_\+acceleration} = 0.\+3
+\item 
+\Hypertarget{classdrivetrain_a33f4ddb94197b44f0f9bfedcd76cd66c}\label{classdrivetrain_a33f4ddb94197b44f0f9bfedcd76cd66c} 
+static constexpr double {\bfseries gear\+\_\+ratio} = 48.\+0/36.\+0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Main drivetrain class for holonomic robot control. 
+
+This class manages a six-\/wheel holonomic drivetrain with motor controllers, localization, and motion profiling capabilities. It provides methods for controlling the robot\textquotesingle{}s movement using differential drive kinematics, field-\/oriented control, and various motion profiles including Ramsete path following. 
+
+\label{doc-constructors}
+\Hypertarget{classdrivetrain_doc-constructors}
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classdrivetrain_a40e2616bd179aa3eea580decfe6a622e}\index{drivetrain@{drivetrain}!drivetrain@{drivetrain}}
+\index{drivetrain@{drivetrain}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{drivetrain()}{drivetrain()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a40e2616bd179aa3eea580decfe6a622e} 
+drivetrain\+::drivetrain (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structwheels}{wheels}}$<$ std\+::reference\+\_\+wrapper$<$ pros\+::\+Motor $>$ $>$ \&}]{motors\+\_\+}{, }\item[{const double}]{wheelbase\+\_\+length\+\_\+}{, }\item[{const double}]{trackwidth\+\_\+length\+\_\+}{, }\item[{const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structff__constants}{ff\+\_\+constants}} $>$ \&}]{motor\+\_\+constants\+\_\+}{, }\item[{pros\+::\+Rotation \&}]{linear\+\_\+wheel\+\_\+}{, }\item[{pros\+::\+Rotation \&}]{horizontal\+\_\+wheel\+\_\+}{, }\item[{pros\+::\+Imu \&}]{imu\+\_\+}{, }\item[{\mbox{\hyperlink{structpose}{pose}}}]{Pose\+\_\+}{}\end{DoxyParamCaption})}
+
+
+
+Constructs a drivetrain object with specified motors and parameters. 
+
+Initializes the drivetrain with six motors, physical dimensions, motor constants, and localization sensors. Calculates maximum velocities and accelerations based on motor characteristics and creates motion profilers for linear and angular movement.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em motors\+\_\+} & Reference wrapper array of six PROS motor objects \\
+\hline
+\mbox{\texttt{in}}  & {\em wheelbase\+\_\+length\+\_\+} & Distance between front and back wheels in meters \\
+\hline
+\mbox{\texttt{in}}  & {\em trackwidth\+\_\+length\+\_\+} & Distance between left and right wheels in meters \\
+\hline
+\mbox{\texttt{in}}  & {\em motor\+\_\+constants\+\_\+} & Feedforward constants for each motor (K\+\_\+a, K\+\_\+v, K\+\_\+s) \\
+\hline
+\mbox{\texttt{in}}  & {\em linear\+\_\+wheel\+\_\+} & Rotation sensor for measuring forward/backward movement \\
+\hline
+\mbox{\texttt{in}}  & {\em horizontal\+\_\+wheel\+\_\+} & Rotation sensor for measuring sideways movement \\
+\hline
+\mbox{\texttt{in}}  & {\em imu\+\_\+} & Inertial measurement unit for orientation tracking \\
+\hline
+\mbox{\texttt{in}}  & {\em Pose\+\_\+} & Initial pose (x, y, theta) of the robot \\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-func-members}
+\Hypertarget{classdrivetrain_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classdrivetrain_aed58da1ede029a41585fd365e67f29e0}\index{drivetrain@{drivetrain}!angular\_acceleration@{angular\_acceleration}}
+\index{angular\_acceleration@{angular\_acceleration}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{angular\_acceleration()}{angular\_acceleration()}}
+{\footnotesize\ttfamily \label{classdrivetrain_aed58da1ede029a41585fd365e67f29e0} 
+double drivetrain\+::angular\+\_\+acceleration (\begin{DoxyParamCaption}\item[{const double}]{angular\+\_\+velocity}{, }\item[{\mbox{\hyperlink{structff__constants}{ff\+\_\+constants}}}]{motor\+\_\+constant}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculates maximum angular acceleration for a given velocity. 
+
+Uses the feedforward motor model to determine the maximum angular acceleration achievable when the motor is operating at a specific angular velocity. The calculation accounts for voltage limits, velocity-\/dependent back-\/\+EMF, and static friction.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em angular\+\_\+velocity} & Current angular velocity in rad/s \\
+\hline
+\mbox{\texttt{in}}  & {\em motor\+\_\+constant} & Feedforward constants for the motor\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Maximum angular acceleration in rad/s\texorpdfstring{$^\wedge$}{\string^}2 that can be achieved 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_a5f8a66676233839cd50a06ab643a0fef}\index{drivetrain@{drivetrain}!angular\_mp@{angular\_mp}}
+\index{angular\_mp@{angular\_mp}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{angular\_mp()}{angular\_mp()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a5f8a66676233839cd50a06ab643a0fef} 
+void drivetrain\+::angular\+\_\+mp (\begin{DoxyParamCaption}\item[{const double}]{angle}{}\end{DoxyParamCaption})}
+
+
+
+Executes an angular motion profile to rotate a specified angle. 
+
+Rotates the robot by a specified angle using a motion profile. The profile accelerates to maximum angular velocity, maintains it if needed, then decelerates to a stop. The function blocks until the rotation is complete and applies brakes at the end.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em angle} & Angle to rotate in radians (positive = counterclockwise, negative = clockwise) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_a578e587b1e99d2d5f2f40788398b15fe}\index{drivetrain@{drivetrain}!angular\_velocity@{angular\_velocity}}
+\index{angular\_velocity@{angular\_velocity}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{angular\_velocity()}{angular\_velocity()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a578e587b1e99d2d5f2f40788398b15fe} 
+double drivetrain\+::angular\+\_\+velocity (\begin{DoxyParamCaption}\item[{const double}]{angular\+\_\+acceleration}{, }\item[{\mbox{\hyperlink{structff__constants}{ff\+\_\+constants}}}]{motor\+\_\+constant}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculates maximum angular velocity for a given acceleration. 
+
+Uses the feedforward motor model to determine the maximum angular velocity achievable when the motor is operating at a specific angular acceleration. The calculation accounts for voltage limits, acceleration torque, and static friction.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em angular\+\_\+acceleration} & Desired angular acceleration in rad/s\texorpdfstring{$^\wedge$}{\string^}2 \\
+\hline
+\mbox{\texttt{in}}  & {\em motor\+\_\+constant} & Feedforward constants for the motor\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Maximum angular velocity in rad/s that can be achieved 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_ac218a92ebce87afb07c1ec34739717bb}\index{drivetrain@{drivetrain}!bound\_desired\_motor\_velocities@{bound\_desired\_motor\_velocities}}
+\index{bound\_desired\_motor\_velocities@{bound\_desired\_motor\_velocities}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{bound\_desired\_motor\_velocities()}{bound\_desired\_motor\_velocities()}}
+{\footnotesize\ttfamily \label{classdrivetrain_ac218a92ebce87afb07c1ec34739717bb} 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ drivetrain\+::bound\+\_\+desired\+\_\+motor\+\_\+velocities (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ \&}]{desired\+\_\+motor\+\_\+velocities}{, }\item[{const double}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Bounds desired motor velocities to achievable limits. 
+
+Limits desired motor velocities to values that can be achieved within the given time step, accounting for maximum acceleration constraints and current motor velocities. This prevents the controller from requesting velocities that would require impossible accelerations.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+motor\+\_\+velocities} & Target velocities for each motor in rad/s \\
+\hline
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for calculating velocity change limits\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Bounded motor velocities that are achievable within the time step 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_ad59f236e3c710d96b1e4d19c8e11b6a5}\index{drivetrain@{drivetrain}!calculate\_and\_print\_motor\_constants@{calculate\_and\_print\_motor\_constants}}
+\index{calculate\_and\_print\_motor\_constants@{calculate\_and\_print\_motor\_constants}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{calculate\_and\_print\_motor\_constants()}{calculate\_and\_print\_motor\_constants()}}
+{\footnotesize\ttfamily \label{classdrivetrain_ad59f236e3c710d96b1e4d19c8e11b6a5} 
+void drivetrain\+::calculate\+\_\+and\+\_\+print\+\_\+motor\+\_\+constants (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Calculates and prints feedforward constants for all motors. 
+
+Performs system identification on all six motors to determine their feedforward constants (K\+\_\+v, K\+\_\+a, K\+\_\+s). The results are printed to the console for use in motor control. This function blocks while performing the identification process. \Hypertarget{classdrivetrain_ad1ddd40f8ea7be5aa60fb9a49dfa4266}\index{drivetrain@{drivetrain}!calculate\_wheel\_vels@{calculate\_wheel\_vels}}
+\index{calculate\_wheel\_vels@{calculate\_wheel\_vels}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{calculate\_wheel\_vels()}{calculate\_wheel\_vels()}}
+{\footnotesize\ttfamily \label{classdrivetrain_ad1ddd40f8ea7be5aa60fb9a49dfa4266} 
+std\+::optional$<$ \mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ $>$ drivetrain\+::calculate\+\_\+wheel\+\_\+vels (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structpose}{pose}} \&}]{desired\+\_\+vels}{, }\item[{const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} $>$ \&}]{bounds}{}\end{DoxyParamCaption})}
+
+
+
+Calculates wheel velocities from desired robot pose velocity. 
+
+Converts a desired robot velocity in pose coordinates to individual wheel velocities using holonomic kinematics. Returns an optional result that is empty if the desired velocity is not achievable within the given bounds.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+vels} & Desired robot velocity in pose coordinates (x, y, theta) \\
+\hline
+\mbox{\texttt{in}}  & {\em bounds} & Velocity bounds for each wheel that must be satisfied\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Optional wheel velocities if achievable, empty otherwise 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_a7b40b8f91cf037e4c3f225b562a03d26}\index{drivetrain@{drivetrain}!calculate\_wheel\_vels\_bounds@{calculate\_wheel\_vels\_bounds}}
+\index{calculate\_wheel\_vels\_bounds@{calculate\_wheel\_vels\_bounds}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{calculate\_wheel\_vels\_bounds()}{calculate\_wheel\_vels\_bounds()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a7b40b8f91cf037e4c3f225b562a03d26} 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} $>$ drivetrain\+::calculate\+\_\+wheel\+\_\+vels\+\_\+bounds (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structpose}{pose}} \&}]{desired\+\_\+vels}{, }\item[{const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} $>$ \&}]{bounds}{}\end{DoxyParamCaption})}
+
+
+
+Calculates velocity bounds for each wheel based on desired robot velocity. 
+
+Takes a desired robot pose velocity and existing wheel velocity bounds, then calculates new bounds that account for the kinematic constraints of the holonomic drivetrain. This ensures the desired velocity is achievable given the current motor capabilities.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+vels} & Desired robot velocity in pose coordinates (x, y, theta) \\
+\hline
+\mbox{\texttt{in}}  & {\em bounds} & Current velocity bounds for each wheel\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Updated velocity bounds for each wheel that satisfy the desired velocity 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_a720512cdc096edb12257a43cffc97417}\index{drivetrain@{drivetrain}!differential\_vels\_to\_motor\_vels@{differential\_vels\_to\_motor\_vels}}
+\index{differential\_vels\_to\_motor\_vels@{differential\_vels\_to\_motor\_vels}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{differential\_vels\_to\_motor\_vels()}{differential\_vels\_to\_motor\_vels()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a720512cdc096edb12257a43cffc97417} 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} $>$ drivetrain\+::differential\+\_\+vels\+\_\+to\+\_\+motor\+\_\+vels (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structdifferentialVels}{differential\+Vels}}}]{robot\+\_\+velocity}{}\end{DoxyParamCaption})}
+
+
+
+Converts differential drive velocities to individual motor velocities. 
+
+Takes a desired linear and angular velocity for the robot and calculates the corresponding velocity for each of the six wheels using holonomic kinematics. The calculation accounts for wheelbase and trackwidth dimensions to properly distribute the motion across all wheels.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em robot\+\_\+velocity} & Desired linear and angular velocities for the robot\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Motor velocities for each of the six wheels in rad/s with brake mode 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_a0072d5087947f26c8fe4fc0eadd1ce3c}\index{drivetrain@{drivetrain}!field\_oriented\_holonomic\_control@{field\_oriented\_holonomic\_control}}
+\index{field\_oriented\_holonomic\_control@{field\_oriented\_holonomic\_control}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{field\_oriented\_holonomic\_control()}{field\_oriented\_holonomic\_control()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a0072d5087947f26c8fe4fc0eadd1ce3c} 
+void drivetrain\+::field\+\_\+oriented\+\_\+holonomic\+\_\+control (\begin{DoxyParamCaption}\item[{const double}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Controls the robot using field-\/oriented holonomic drive. 
+
+Implements field-\/oriented control where joystick inputs are interpreted relative to the field coordinate system rather than the robot\textquotesingle{}s current orientation. This allows intuitive control regardless of robot heading.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for control loop calculations \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_a85e9502edeb6a8ef5d40675bbf898394}\index{drivetrain@{drivetrain}!get\_standard\_angle@{get\_standard\_angle}}
+\index{get\_standard\_angle@{get\_standard\_angle}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{get\_standard\_angle()}{get\_standard\_angle()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a85e9502edeb6a8ef5d40675bbf898394} 
+double drivetrain\+::get\+\_\+standard\+\_\+angle (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Gets the standard angle representation of the robot\textquotesingle{}s orientation. 
+
+Returns the robot\textquotesingle{}s current angle normalized to a standard range, typically \mbox{[}-\/PI, PI\mbox{]} or \mbox{[}0, 2\texorpdfstring{$\ast$}{*}\+PI\mbox{]} depending on the implementation.
+
+\begin{DoxyReturn}{Returns}
+Standardized angle in radians 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_a8eeab78f61cdad71874d77231a49fe52}\index{drivetrain@{drivetrain}!get\_wanted\_motor\_accels@{get\_wanted\_motor\_accels}}
+\index{get\_wanted\_motor\_accels@{get\_wanted\_motor\_accels}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{get\_wanted\_motor\_accels()}{get\_wanted\_motor\_accels()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a8eeab78f61cdad71874d77231a49fe52} 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} $>$ drivetrain\+::get\+\_\+wanted\+\_\+motor\+\_\+accels (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} $>$ \&}]{desired\+\_\+motor\+\_\+vels}{, }\item[{const double}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Calculates desired motor accelerations from desired velocities. 
+
+Converts desired motor velocities to the accelerations needed to achieve them within the given time step. This is used for feedforward control to improve tracking performance.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+motor\+\_\+vels} & Target velocities for each motor with brake mode \\
+\hline
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for acceleration calculation\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Desired accelerations for each motor in rad/s\texorpdfstring{$^\wedge$}{\string^}2 with brake mode 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_abdac516869271ae70ef8410617fb8459}\index{drivetrain@{drivetrain}!get\_wheel\_vel\_bounds@{get\_wheel\_vel\_bounds}}
+\index{get\_wheel\_vel\_bounds@{get\_wheel\_vel\_bounds}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{get\_wheel\_vel\_bounds()}{get\_wheel\_vel\_bounds()}}
+{\footnotesize\ttfamily \label{classdrivetrain_abdac516869271ae70ef8410617fb8459} 
+\mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} $>$ drivetrain\+::get\+\_\+wheel\+\_\+vel\+\_\+bounds (\begin{DoxyParamCaption}\item[{const double}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Calculates achievable velocity bounds for each wheel. 
+
+Determines the minimum and maximum velocities that each wheel can achieve in the next time step based on current motor state and physical constraints. The bounds account for maximum acceleration limits and current velocity.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for calculating velocity change limits\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Velocity bounds (min, max) for each of the six wheels in m/s 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_a71dc54bd2585366b4b8fcf2f2c49e8ec}\index{drivetrain@{drivetrain}!joystick\_to\_vel@{joystick\_to\_vel}}
+\index{joystick\_to\_vel@{joystick\_to\_vel}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{joystick\_to\_vel()}{joystick\_to\_vel()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a71dc54bd2585366b4b8fcf2f2c49e8ec} 
+double drivetrain\+::joystick\+\_\+to\+\_\+vel (\begin{DoxyParamCaption}\item[{const double}]{joystick}{}\end{DoxyParamCaption})}
+
+
+
+Converts joystick input value to velocity. 
+
+Maps a joystick analog value (typically -\/127 to 127) to a corresponding velocity value. The mapping may be linear or use a curve for better control feel at low speeds.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em joystick} & Joystick analog value, typically in range \mbox{[}-\/127, 127\mbox{]}\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Velocity value in appropriate units (m/s or rad/s) 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_a67e1fcf6f738d57770d1feea58436da5}\index{drivetrain@{drivetrain}!linear\_mp@{linear\_mp}}
+\index{linear\_mp@{linear\_mp}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{linear\_mp()}{linear\_mp()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a67e1fcf6f738d57770d1feea58436da5} 
+void drivetrain\+::linear\+\_\+mp (\begin{DoxyParamCaption}\item[{const double}]{distance}{}\end{DoxyParamCaption})}
+
+
+
+Executes a linear motion profile to move a specified distance. 
+
+Moves the robot forward or backward a specified distance using a motion profile. The profile accelerates to maximum velocity, maintains it if needed, then decelerates to a stop. The function blocks until the motion is complete and applies brakes at the end.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em distance} & Distance to travel in meters (positive = forward, negative = backward) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_a3d09faac849d3b8bfeb6685410db7d8e}\index{drivetrain@{drivetrain}!motor\_brakes@{motor\_brakes}}
+\index{motor\_brakes@{motor\_brakes}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{motor\_brakes()}{motor\_brakes()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a3d09faac849d3b8bfeb6685410db7d8e} 
+void drivetrain\+::motor\+\_\+brakes (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Applies brakes to all motors and stops movement. 
+
+Sets all six motors to brake mode and applies the brake, then sets all motor voltages to zero. This ensures the robot comes to a complete stop and holds position. \Hypertarget{classdrivetrain_a7ce0f807c3c4353010e6899812eedef0}\index{drivetrain@{drivetrain}!move\_differential\_robot\_vels@{move\_differential\_robot\_vels}}
+\index{move\_differential\_robot\_vels@{move\_differential\_robot\_vels}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{move\_differential\_robot\_vels()}{move\_differential\_robot\_vels()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a7ce0f807c3c4353010e6899812eedef0} 
+void drivetrain\+::move\+\_\+differential\+\_\+robot\+\_\+vels (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ \mbox{\hyperlink{structdifferentialVels}{differential\+Vels}} $>$ \&}]{robot\+\_\+vels}{, }\item[{const double}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Executes a sequence of differential drive velocity commands. 
+
+Applies a series of robot velocity commands, converting each to motor velocities and executing them with feedforward control. This is useful for following pre-\/planned paths or executing motion profiles.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em robot\+\_\+vels} & Vector of desired robot velocities to execute sequentially \\
+\hline
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for each velocity command \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_a66c3b17140a9b25e74562f692206017b}\index{drivetrain@{drivetrain}!move\_differential\_robot\_vels\_ramsete@{move\_differential\_robot\_vels\_ramsete}}
+\index{move\_differential\_robot\_vels\_ramsete@{move\_differential\_robot\_vels\_ramsete}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{move\_differential\_robot\_vels\_ramsete()}{move\_differential\_robot\_vels\_ramsete()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a66c3b17140a9b25e74562f692206017b} 
+void drivetrain\+::move\+\_\+differential\+\_\+robot\+\_\+vels\+\_\+ramsete (\begin{DoxyParamCaption}\item[{std\+::vector$<$ \mbox{\hyperlink{structdifferentialVels}{differential\+Vels}} $>$}]{robot\+\_\+vels}{, }\item[{std\+::vector$<$ \mbox{\hyperlink{structpose}{pose}} $>$}]{wanted\+\_\+pose}{, }\item[{const double}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Executes velocity commands with Ramsete path following correction. 
+
+Applies a sequence of robot velocities while using Ramsete controller to correct for pose errors. For each desired velocity, the function computes the corresponding desired pose, applies Ramsete correction, and executes the corrected velocity. This provides accurate path following even with disturbances or modeling errors.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em robot\+\_\+vels} & Vector of desired robot velocities to execute \\
+\hline
+\mbox{\texttt{in}}  & {\em wanted\+\_\+pose} & Vector of corresponding desired poses for Ramsete correction \\
+\hline
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for each velocity command \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_a72c94743e532149ca218c40ee089b10a}\index{drivetrain@{drivetrain}!move\_motor\_accelerations@{move\_motor\_accelerations}}
+\index{move\_motor\_accelerations@{move\_motor\_accelerations}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{move\_motor\_accelerations()}{move\_motor\_accelerations()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a72c94743e532149ca218c40ee089b10a} 
+void drivetrain\+::move\+\_\+motor\+\_\+accelerations (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structwheels}{wheels}}$<$ \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} $>$ \&}]{motor\+\_\+accelerations}{}\end{DoxyParamCaption})}
+
+
+
+Applies desired accelerations to all motors using feedforward control. 
+
+Takes desired accelerations for each motor and applies the corresponding voltages using feedforward control. The feedforward controller uses motor constants to calculate the voltage needed to achieve the desired acceleration at the current velocity.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em motor\+\_\+accelerations} & Desired accelerations for each motor with brake mode \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_af18fd0d8aa7c2dd2e20627db783d0882}\index{drivetrain@{drivetrain}!move\_motor\_volts@{move\_motor\_volts}}
+\index{move\_motor\_volts@{move\_motor\_volts}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{move\_motor\_volts()}{move\_motor\_volts()}}
+{\footnotesize\ttfamily \label{classdrivetrain_af18fd0d8aa7c2dd2e20627db783d0882} 
+void drivetrain\+::move\+\_\+motor\+\_\+volts (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ \&}]{wheel\+\_\+voltages}{}\end{DoxyParamCaption})}
+
+
+
+Sets voltage for all six motors simultaneously. 
+
+Applies the specified voltage to each motor in the drivetrain. The voltages are applied directly without any velocity or acceleration limiting, so this method should be used with caution.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em wheel\+\_\+voltages} & Voltage values for each of the six wheels in volts \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_a936b16c0fce2d2b3f809f49a9d0f59f4}\index{drivetrain@{drivetrain}!move\_motor\_volts\_time@{move\_motor\_volts\_time}}
+\index{move\_motor\_volts\_time@{move\_motor\_volts\_time}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{move\_motor\_volts\_time()}{move\_motor\_volts\_time()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a936b16c0fce2d2b3f809f49a9d0f59f4} 
+void drivetrain\+::move\+\_\+motor\+\_\+volts\+\_\+time (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structwheels}{wheels}}$<$ double $>$ \&}]{wheel\+\_\+voltages}{, }\item[{const int}]{time}{}\end{DoxyParamCaption})}
+
+
+
+Sets voltage for all motors for a specified duration. 
+
+Applies the specified voltage to each motor and maintains it for the given time period. The function loops in 10ms increments to maintain the voltage for the requested duration.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em wheel\+\_\+voltages} & Voltage values for each of the six wheels in volts \\
+\hline
+\mbox{\texttt{in}}  & {\em time} & Duration to maintain voltages in milliseconds \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_a36063f4c239c91fd57a3f4e4baa4a248}\index{drivetrain@{drivetrain}!mtp\_mp@{mtp\_mp}}
+\index{mtp\_mp@{mtp\_mp}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{mtp\_mp()}{mtp\_mp()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a36063f4c239c91fd57a3f4e4baa4a248} 
+void drivetrain\+::mtp\+\_\+mp (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structpose}{pose}}}]{desired\+\_\+pose}{}\end{DoxyParamCaption})}
+
+
+
+Moves to a target pose using motion profiles. 
+
+Moves the robot to a desired pose by first rotating to face the target, then moving linearly to the target position. Uses separate motion profiles for rotation and translation. This is a simple approach that does not account for simultaneous rotation and translation.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+pose} & Target pose (x, y, theta) to reach \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_ad176a53371cadffc336d1b00df1da10a}\index{drivetrain@{drivetrain}!mtp\_mp\_ramsete@{mtp\_mp\_ramsete}}
+\index{mtp\_mp\_ramsete@{mtp\_mp\_ramsete}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{mtp\_mp\_ramsete()}{mtp\_mp\_ramsete()}}
+{\footnotesize\ttfamily \label{classdrivetrain_ad176a53371cadffc336d1b00df1da10a} 
+void drivetrain\+::mtp\+\_\+mp\+\_\+ramsete (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structpose}{pose}}}]{desired\+\_\+pose}{}\end{DoxyParamCaption})}
+
+
+
+Moves to a target pose using Ramsete path following. 
+
+Moves the robot to a desired pose using Ramsete controller for path following. This method provides smoother and more accurate motion than the simple motion profile approach by allowing simultaneous rotation and translation with pose error correction.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+pose} & Target pose (x, y, theta) to reach \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classdrivetrain_a340804a93014467ff9810822b702ed61}\index{drivetrain@{drivetrain}!ramsete@{ramsete}}
+\index{ramsete@{ramsete}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{ramsete()}{ramsete()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a340804a93014467ff9810822b702ed61} 
+\mbox{\hyperlink{structdifferentialVels}{differential\+Vels}} drivetrain\+::ramsete (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structpose}{pose}}}]{wanted\+\_\+pose}{, }\item[{\mbox{\hyperlink{structdifferentialVels}{differential\+Vels}}}]{wanted\+\_\+vels}{}\end{DoxyParamCaption})}
+
+
+
+Computes Ramsete controller output for path following. 
+
+Implements the Ramsete nonlinear controller for tracking desired poses and velocities. The controller computes corrected linear and angular velocities that account for pose errors, providing stable path following with guaranteed convergence. Errors are computed in the robot\textquotesingle{}s local coordinate frame for better control performance.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em wanted\+\_\+pose} & Desired pose (x, y, theta) to track \\
+\hline
+\mbox{\texttt{in}}  & {\em wanted\+\_\+vels} & Desired linear and angular velocities to achieve\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Corrected differential velocities that account for pose errors 
+\end{DoxyReturn}
+\Hypertarget{classdrivetrain_a3a292586d665ba8c335c2301176dd3dc}\index{drivetrain@{drivetrain}!tank\_drive\_control@{tank\_drive\_control}}
+\index{tank\_drive\_control@{tank\_drive\_control}!drivetrain@{drivetrain}}
+\doxysubsubsection{\texorpdfstring{tank\_drive\_control()}{tank\_drive\_control()}}
+{\footnotesize\ttfamily \label{classdrivetrain_a3a292586d665ba8c335c2301176dd3dc} 
+void drivetrain\+::tank\+\_\+drive\+\_\+control (\begin{DoxyParamCaption}\item[{const double}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Implements tank drive control using joystick inputs. 
+
+Controls the robot using a tank drive scheme where the left joystick Y-\/axis controls linear velocity and the right joystick X-\/axis controls angular velocity. The function reads controller inputs, calculates desired robot velocities, converts them to motor velocities, and applies feedforward control with acceleration limiting.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for control loop calculations \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/drivetrain.\+hpp\item 
+src/drivetrain.\+cpp\item 
+src/holonomic-\/control.\+cpp\end{DoxyCompactItemize}

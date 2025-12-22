@@ -1,0 +1,39 @@
+\doxysection{system-\/identification.hpp}
+\hypertarget{system-identification_8hpp_source}{}\label{system-identification_8hpp_source}\index{include/system-\/identification.hpp@{include/system-\/identification.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ SYSTEM\_IDENTIFICATION\_HPP}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ SYSTEM\_IDENTIFICATION\_HPP}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}api.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}structs.hpp"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}helper-\/functions.hpp"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}motor-\/controller.hpp"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classMotorController}{MotorController}};}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00019\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classSysIdent}{SysIdent}}\ \{}
+\DoxyCodeLine{00020\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keyword}{static}\ std::vector<double>\ \mbox{\hyperlink{classSysIdent_abf4f6054b2694aa3ea5772bb0b2cc25d}{calculate\_mean\_velocities}}(\textcolor{keywordtype}{double}\ voltage,\ std::vector<MotorController>\&\ motors);}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keyword}{static}\ std::vector<std::pair<double,double>>\ \mbox{\hyperlink{classSysIdent_afe1ef8ccf57efd897c3667f871d7a513}{calculate\_Kv\_and\_Ks\_s}}(std::vector<MotorController>\&\ motors);}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{static}\ std::pair<double,double>\ \mbox{\hyperlink{classSysIdent_aa419833fa487f6958fb32845bdf36cad}{fit\_Kv\_and\_Ks\_with\_sign}}(\textcolor{keyword}{const}\ std::vector<std::pair<double,double>>\&\ points);}
+\DoxyCodeLine{00061\ \ \ \ \ }
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keyword}{static}\ std::pair<double,double>\ \mbox{\hyperlink{classSysIdent_a2a21be09f67201ea2951107baa4bd1a8}{linear\_reg}}(\textcolor{keyword}{const}\ std::vector<std::pair<double,double>>\&\ points);}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keyword}{static}\ std::tuple<std::vector<std::vector<double>>,\ std::vector<std::vector<double>>,\ std::vector<std::vector<double>>>\ \mbox{\hyperlink{classSysIdent_a21e11a44a9e606f5526d60bbafaa2796}{get\_acceleration\_data}}(\textcolor{keywordtype}{double}\ voltage,\ std::vector<MotorController>\&\ motors);}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keyword}{static}\ std::vector<double>\ \mbox{\hyperlink{classSysIdent_accdb7ea6b5bf18d4c40f9ffa1c73be70}{calculate\_Ka\_s}}(std::vector<std::pair<double,\ double>>\ Kv\_and\_Ks\_s,\ std::vector<MotorController>\&\ motors);}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classSysIdent_af145b03c7dd60a5f36cc2a6c6daa4903}{through\_origin\_fit}}(\textcolor{keyword}{const}\ std::vector<double>\&\ V,\ \textcolor{keyword}{const}\ std::vector<double>\&\ w,\ \textcolor{keyword}{const}\ std::vector<double>\&\ alpha,\ \textcolor{keywordtype}{double}\ Kv,\ \textcolor{keywordtype}{double}\ Ks);}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{keyword}{static}\ std::vector<std::tuple<double,\ double,\ double>>\ \mbox{\hyperlink{classSysIdent_a609fdfdd5e7ae3ecba14b09bc6f5499b}{calculate\_Kv\_Ka\_and\_Ks\_s}}(std::vector<MotorController>\&\ motors);}
+\DoxyCodeLine{00136\ \ \ \ \ }
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSysIdent_a0f97e9385ce2c4dd14e097d777bcbab5}{calculate\_and\_print\_constants}}(std::vector<MotorController>\&\ motors);}
+\DoxyCodeLine{00148\ \};}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ SYSTEM\_IDENTIFICATION\_HPP}}
+
+\end{DoxyCode}

@@ -1,0 +1,295 @@
+\doxysection{simplex.\+hpp}
+\hypertarget{simplex_8hpp_source}{}\label{simplex_8hpp_source}\index{include/simplex.hpp@{include/simplex.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ SIMPLEX\_HPP}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ SIMPLEX\_HPP}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}api.h"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classSimplex}{Simplex}}\ \{}
+\DoxyCodeLine{00015\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{static}\ std::optional<std::vector<double>>\ \mbox{\hyperlink{classSimplex_a2bac665ebf8bfe0945f9e01c4ea6a136}{solve}}(\textcolor{keyword}{const}\ std::vector<std::vector<double>>\&\ A\_in,}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<double>\&\ b\_in,}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<double>\&\ c\_in)\ \{}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{double}\ EPS\ =\ 1e-\/9;}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ m\ =\ (int)A\_in.size();}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ n\ =\ (int)c\_in.size();}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (m\ ==\ 0\ ||\ n\ ==\ 0)\ \textcolor{keywordflow}{throw}\ std::invalid\_argument(\textcolor{stringliteral}{"{}Empty\ LP\ input"{}});}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/\ 1)\ Handle\ unrestricted\ original\ variables\ by\ splitting:}}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ each\ original\ x\_j\ (free),\ create\ x\_j\_pos\ and\ x\_j\_neg,\ both\ >=\ 0,\ with\ x\_j\ =\ pos\ -\/\ neg.}}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ New\ variable\ count:}}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ n2\ =\ 2\ *\ n;}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Build\ A'\ (m\ x\ n2)\ and\ c'\ (n2)}}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ std::vector<std::vector<double>>\ A(m,\ std::vector<double>(n2,\ 0.0));}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ std::vector<double>\ c(n2,\ 0.0);}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \{}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ n;\ ++j)\ \{}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ A[i][2*j]\ \ \ \ \ =\ \ A\_in[i][j];\ \ \ \ \textcolor{comment}{//\ x\_j\_pos\ coef}}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ A[i][2*j\ +\ 1]\ =\ -\/A\_in[i][j];\ \ \ \ \textcolor{comment}{//\ x\_j\_neg\ coef\ (because\ x\ =\ pos\ -\/\ neg)}}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ n;\ ++j)\ \{}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ c[2*j]\ \ \ \ \ =\ \ c\_in[j];\ \ \ \textcolor{comment}{//\ objective\ c\string^T\ (pos)}}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ c[2*j\ +\ 1]\ =\ -\/c\_in[j];\ \ \ \textcolor{comment}{//\ objective\ for\ neg\ part\ is\ -\/c}}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/\ 2)\ Build\ constraint\ rows\ with\ slacks/surplus\ and\ possibly\ artificials.}}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ We'll\ convert\ each\ constraint\ (originally\ A\_in\ x\ <=\ b\_in)\ into\ an\ equality\ using:}}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ -\/\ if\ b\ >=\ 0:\ keep\ <=\ and\ add\ slack\ (makes\ easy\ basic\ var)}}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ -\/\ if\ b\ <\ 0:\ multiply\ row\ by\ -\/1\ =>\ it\ becomes\ >=\ with\ new\ rhs\ >=\ 0}}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ >=\ constraints\ we\ add\ a\ surplus\ (-\/s)\ and\ an\ artificial\ variable\ (a)\ which\ will\ be\ in\ basis.}}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ We'll\ track\ columns:\ [\ original\_vars\ (n2)\ |\ slacks\ |\ surplus\ (not\ kept\ separately)\ |\ artificials\ ]\ +\ RHS}}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ std::vector<int>\ rowType(m,\ 0);\ \textcolor{comment}{//\ 0:\ originally\ <=\ and\ b>=0\ (slack),\ 1:\ >=\ (we\ will\ add\ artificial),\ 2:\ equality\ (artificial)}}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ std::vector<std::vector<double>>\ rows(m);}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ std::vector<double>\ rhs(m);}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \{}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ copy\ A\ row}}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ rows[i]\ =\ A[i];}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ b\ =\ b\_in[i];}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b\ >=\ 0)\ \{}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ keep\ row\ as\ <=}}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rowType[i]\ =\ 0;\ \textcolor{comment}{//\ slack}}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rhs[i]\ =\ b;}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ multiply\ by\ -\/1\ =>\ becomes\ >=\ with\ positive\ rhs}}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rowType[i]\ =\ 1;\ \textcolor{comment}{//\ will\ need\ surplus\ +\ artificial}}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{double}\ \&val\ :\ rows[i])\ val\ =\ -\/val;}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rhs[i]\ =\ -\/b;}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Count\ slack\ and\ artificial\ vars}}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ slack\_count\ =\ 0;}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ art\_count\ =\ 0;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \{}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rowType[i]\ ==\ 0)\ slack\_count++;}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ art\_count++;\ \textcolor{comment}{//\ for\ >=\ we\ will\ add\ an\ artificial\ (and\ a\ surplus\ which\ is\ not\ basic)}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ totalCols\ =\ n2\ +\ slack\_count\ +\ art\_count;\ \textcolor{comment}{//\ exclude\ RHS}}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ slack\_start\ =\ n2;}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ art\_start\ =\ n2\ +\ slack\_count;}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Build\ full\ tableau\ (m\ constraint\ rows\ +\ 1\ objective\ row)\ with\ totalCols\ +\ 1\ (RHS)}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ cols\ =\ totalCols\ +\ 1;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ std::vector<std::vector<double>>\ tab(m\ +\ 1,\ std::vector<double>(cols,\ 0.0));}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ basis:\ for\ each\ row,\ which\ column\ is\ basic}}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ std::vector<int>\ basis(m,\ -\/1);}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Fill\ constraint\ rows}}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ s\_idx\ =\ 0;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ a\_idx\ =\ 0;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \{}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ copy\ variable\ columns}}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ n2;\ ++j)\ tab[i][j]\ =\ rows[i][j];}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rowType[i]\ ==\ 0)\ \{}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ add\ slack\ variable\ with\ coefficient\ +1\ and\ make\ it\ basic}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tab[i][slack\_start\ +\ s\_idx]\ =\ 1.0;}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basis[i]\ =\ slack\_start\ +\ s\_idx;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ s\_idx++;}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ rowType\ ==\ 1\ (>=\ after\ flipping):\ add\ surplus\ (coefficient\ -\/1)\ and\ an\ artificial\ (+1)}}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ won't\ keep\ surplus\ as\ basic;\ artificial\ will\ be\ basic}}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Surplus\ column\ is\ not\ tracked\ separately\ as\ a\ basic\ var;\ we\ simply\ put\ -\/1\ in\ some\ column\ if\ we\ wanted.}}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ simplicity,\ we\ omit\ creating\ an\ explicit\ surplus\ column\ and\ only\ add\ artificial\ column\ with\ +1}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ and\ put\ a\ -\/1\ where\ the\ surplus\ would\ be\ into\ the\ artificial's\ handling\ is\ standard.}}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ We'll\ add\ artificial\ var\ column\ and\ make\ it\ basic.}}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tab[i][art\_start\ +\ a\_idx]\ =\ 1.0;\ \textcolor{comment}{//\ artificial}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basis[i]\ =\ art\_start\ +\ a\_idx;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ a\_idx++;}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Note:\ the\ surplus\ column\ could\ be\ added\ if\ you\ want\ explicit\ variable\ indexing\ of\ surplus\ vars.}}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RHS}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ tab[i][cols\ -\/\ 1]\ =\ rhs[i];}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/\ Phase\ I\ setup:\ objective\ is\ minimize\ sum(artificials).}}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ We\ will\ do\ Phase\ I\ only\ if\ art\_count\ >\ 0\ (if\ art\_count==0\ then\ feasible\ start\ already).}}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ pivot\ =\ [\&](\textcolor{keywordtype}{int}\ prow,\ \textcolor{keywordtype}{int}\ pcol,\ \textcolor{keywordtype}{int}\ rowsTot,\ \textcolor{keywordtype}{int}\ colsTot,\ std::vector<std::vector<double>>\&\ T,\ std::vector<int>\&\ basisRef)\ \{}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ piv\ =\ T[prow][pcol];}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (std::abs(piv)\ <\ EPS)\ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Numerical\ instability\ (pivot\ too\ small)"{}});}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ normalize\ pivot\ row}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ colsTot;\ ++j)\ T[prow][j]\ /=\ piv;}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ eliminate\ other\ rows}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ rowsTot;\ ++i)\ \{}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (i\ ==\ prow)\ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ fac\ =\ T[i][pcol];}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (std::abs(fac)\ <\ EPS)\ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ colsTot;\ ++j)\ T[i][j]\ -\/=\ fac\ *\ T[prow][j];}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ basisRef[prow]\ =\ pcol;}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ simplex\_loop\ =\ [\&](std::vector<std::vector<double>>\&\ T,\ std::vector<int>\&\ basisRef,\ \textcolor{keywordtype}{int}\ rowsTot,\ \textcolor{keywordtype}{int}\ colsTot)\ -\/>\ \textcolor{keywordtype}{void}\ \{}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ T\ has\ rowsTot\ rows,\ colsTot\ columns\ (including\ RHS\ at\ colsTot-\/1).\ last\ row\ is\ objective\ row.}}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ entering\ column:\ most\ negative\ in\ objective\ row\ (we\ keep\ the\ same\ convention:\ T[last][j]\ <\ -\/EPS)}}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ last\ =\ rowsTot\ -\/\ 1;}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ enter\ =\ -\/1;}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ colsTot\ -\/\ 1;\ ++j)\ \{}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (T[last][j]\ <\ -\/EPS\ \&\&\ (enter\ ==\ -\/1\ ||\ T[last][j]\ <\ T[last][enter]))\ enter\ =\ j;}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (enter\ ==\ -\/1)\ \textcolor{keywordflow}{break};\ \textcolor{comment}{//\ optimal}}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ratio\ test\ for\ leaving\ row}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ leave\ =\ -\/1;}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ bestRatio\ =\ 0.0;}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ rowsTot\ -\/\ 1;\ ++i)\ \{}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (T[i][enter]\ >\ EPS)\ \{}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ ratio\ =\ T[i][colsTot\ -\/\ 1]\ /\ T[i][enter];}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ratio\ >=\ -\/EPS\ \&\&\ (leave\ ==\ -\/1\ ||\ ratio\ <\ bestRatio\ -\/\ EPS\ ||\ (std::abs(ratio\ -\/\ bestRatio)\ <\ EPS\ \&\&\ basisRef[i]\ <\ basisRef[leave])))\ \{}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ leave\ =\ i;}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bestRatio\ =\ ratio;}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (leave\ ==\ -\/1)\ \textcolor{keywordflow}{throw}\ std::runtime\_error(\textcolor{stringliteral}{"{}Unbounded\ LP\ (during\ simplex\ loop)"{}});}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pivot(leave,\ enter,\ rowsTot,\ colsTot,\ T,\ basisRef);}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ If\ there\ are\ artificial\ vars,\ prepare\ Phase\ I\ objective}}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (art\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ bottom\ row\ stores\ -\/c\ (as\ in\ your\ original\ code).\ For\ Phase\ I,\ objective\ we\ want\ to\ maximize\ -\/\ sum(artificials)}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ so\ c\_phase1\_j\ =\ -\/1\ for\ artificial\ columns,\ hence\ bottom\ entries\ =\ -\/c\_phase1\ =\ +1\ for\ art\ columns.}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ last\ =\ m;}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ cols;\ ++j)\ tab[last][j]\ =\ 0.0;}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ bottom\ row\ (initial\ -\/c\_phase1)}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ art\_start;\ j\ <\ art\_start\ +\ art\_count;\ ++j)\ \{}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tab[last][j]\ =\ 1.0;\ \textcolor{comment}{//\ -\/c\_phase1\ =\ -\/(-\/1)\ =\ +1}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ tab[last][cols\ -\/\ 1]\ =\ 0.0;}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ every\ artificial\ that\ is\ currently\ BASIC\ (we\ set\ them\ as\ basic\ for\ those\ rows),}}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ must\ zero\ its\ reduced\ cost\ by\ doing\ bottom\ +=\ c\_b\ *\ row,\ where\ c\_b\ =\ -\/1\ (coefficient\ in\ phase1\ objective)}}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ c\_b\ =\ -\/1\ =>\ bottom\ +=\ -\/1\ *\ row\ =>\ bottom\ -\/=\ row}}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \{}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ bcol\ =\ basis[i];}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bcol\ >=\ art\_start\ \&\&\ bcol\ <\ art\_start\ +\ art\_count)\ \{}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ c\_b\ =\ -\/1}}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ c\_b\ =\ -\/1.0;}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ cols;\ ++j)\ tab[last][j]\ +=\ c\_b\ *\ tab[i][j];}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Run\ Phase\ I\ simplex}}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ simplex\_loop(tab,\ basis,\ m\ +\ 1,\ cols);}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ phase1\_obj\ =\ tab[m][cols\ -\/\ 1];\ \textcolor{comment}{//\ bottom\ RHS\ is\ the\ maximized\ value\ of\ (-\/sum(art))}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ recall:\ Phase\ I\ objective\ w*\ =\ -\/phase1\_obj}}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (phase1\_obj\ <\ -\/EPS)\ \{}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ phase1\_obj\ negative\ means\ w*\ >\ 0\ =>\ infeasible}}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ throw\ std::runtime\_error("{}LP\ is\ infeasible\ (Phase\ I\ found\ positive\ artificial\ sum)"{});}}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::nullopt;}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Remove\ artificial\ columns\ from\ tableau.}}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ If\ an\ artificial\ is\ in\ basis,\ try\ to\ pivot\ it\ out\ using\ a\ non-\/artificial\ nonzero\ column\ in\ that\ row.}}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ a\ =\ 0;\ a\ <\ art\_count;\ ++a)\ \{}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ acol\ =\ art\_start\ +\ a;}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ If\ artificial\ column\ is\ basic\ in\ some\ row,\ remove\ it\ by\ pivoting\ if\ possible}}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ prow\ =\ -\/1;}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \textcolor{keywordflow}{if}\ (basis[i]\ ==\ acol)\ prow\ =\ i;}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (prow\ !=\ -\/1)\ \{}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ a\ nonzero\ column\ in\ this\ row\ that's\ not\ artificial\ to\ pivot\ on}}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ newcol\ =\ -\/1;}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ art\_start;\ ++j)\ \{}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (std::abs(tab[prow][j])\ >\ EPS)\ \{}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newcol\ =\ j;}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (newcol\ !=\ -\/1)\ \{}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pivot(prow,\ newcol,\ m\ +\ 1,\ cols,\ tab,\ basis);}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ entire\ row\ zero\ in\ non-\/art\ columns;\ artificial\ is\ zero\ variable\ and\ can\ be\ removed\ safely.}}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ mark\ basis\ as\ -\/1\ and\ continue;\ the\ column\ will\ be\ removed\ below.}}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basis[prow]\ =\ -\/1;}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Now\ physically\ remove\ artificial\ columns\ by\ creating\ a\ new\ tableau\ without\ them}}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ newTotalCols\ =\ art\_start;\ \textcolor{comment}{//\ drop\ everything\ from\ art\_start\ ..\ art\_start+art\_count-\/1}}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ newCols\ =\ newTotalCols\ +\ 1;}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<std::vector<double>>\ newTab(m\ +\ 1,\ std::vector<double>(newCols,\ 0.0));}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<int>\ newBasis(m,\ -\/1);}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m\ +\ 1;\ ++i)\ \{}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ newTotalCols;\ ++j)\ \{}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newTab[i][j]\ =\ tab[i][j];}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newTab[i][newCols\ -\/\ 1]\ =\ tab[i][cols\ -\/\ 1];}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ translate\ basis\ indices\ (anything\ >=\ art\_start\ now\ removed)}}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \{}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (basis[i]\ ==\ -\/1)\ newBasis[i]\ =\ -\/1;}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (basis[i]\ <\ art\_start)\ newBasis[i]\ =\ basis[i];}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ newBasis[i]\ =\ -\/1;\ \textcolor{comment}{//\ should\ not\ happen\ after\ our\ pivot\ attempts;\ but\ leave\ -\/1\ if\ so}}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ tab.swap(newTab);}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ basis.swap(newBasis);}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ cols\ =\ newCols;}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ totalCols\ =\ newTotalCols;}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ slack\_start\ and\ art\_start\ no\ longer\ needed}}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/\ Phase\ II:\ set\ objective\ to\ original\ c\ (on\ transformed\ variables).}}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ bottom\ row\ stores\ -\/c\ (as\ your\ original\ code).\ Build\ bottom\ row\ and\ then\ fix\ it\ using\ basis.}}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ last\_row\ =\ m;}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ cols;\ ++j)\ tab[last\_row][j]\ =\ 0.0;}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ c\ has\ length\ n2;\ we\ must\ copy\ to\ columns\ 0..n2-\/1\ (some\ columns\ may\ have\ been\ removed\ if\ artificials\ existed)}}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ (int)c.size()\ \&\&\ j\ <\ cols\ -\/\ 1;\ ++j)\ tab[last\_row][j]\ =\ -\/c[j];}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ tab[last\_row][cols\ -\/\ 1]\ =\ 0.0;}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ each\ basic\ variable\ with\ index\ bcol\ and\ corresponding\ objective\ coefficient\ c\_b\ (we\ need\ c\ vector\ extended\ by\ zeros\ for\ slacks),}}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ add\ c\_b\ *\ row\_i\ to\ bottom\ row\ to\ make\ reduced\ costs\ correct.\ c\_b\ for\ slack\ columns\ is\ 0.}}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \{}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ bcol\ =\ basis[i];}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ c\_b\ =\ 0.0;}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bcol\ >=\ 0\ \&\&\ bcol\ <\ (\textcolor{keywordtype}{int})c.size())\ c\_b\ =\ c[bcol];}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ else\ slack\ columns\ have\ c\_b\ =\ 0}}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (std::abs(c\_b)\ >\ 0.0)\ \{}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ cols;\ ++j)\ tab[last\_row][j]\ +=\ c\_b\ *\ tab[i][j];}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00288\ }
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Run\ Phase\ II\ simplex}}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ simplex\_loop(tab,\ basis,\ m\ +\ 1,\ cols);}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Extract\ solution\ for\ original\ variables\ (combine\ pos-\/neg\ pairs)}}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ std::vector<double>\ x\_orig(n,\ 0.0);}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ n;\ ++j)\ \{}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ col\_pos\ =\ 2*j;}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ col\_neg\ =\ 2*j\ +\ 1;}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ val\_pos\ =\ 0.0,\ val\_neg\ =\ 0.0;}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ pivotRow\ =\ -\/1;}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ if\ col\_pos\ is\ basic}}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \{}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (basis[i]\ ==\ col\_pos)\ \{\ pivotRow\ =\ i;\ \textcolor{keywordflow}{break};\ \}}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (pivotRow\ !=\ -\/1)\ val\_pos\ =\ tab[pivotRow][cols\ -\/\ 1];}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ find\ if\ col\_neg\ is\ basic}}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ \ pivotRow\ =\ -\/1;}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ m;\ ++i)\ \{}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (basis[i]\ ==\ col\_neg)\ \{\ pivotRow\ =\ i;\ \textcolor{keywordflow}{break};\ \}}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (pivotRow\ !=\ -\/1)\ val\_neg\ =\ tab[pivotRow][cols\ -\/\ 1];}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \ \ \ \ x\_orig[j]\ =\ val\_pos\ -\/\ val\_neg;}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x\_orig;}
+\DoxyCodeLine{00314\ \ \ \ \ \}}
+\DoxyCodeLine{00315\ \};}
+\DoxyCodeLine{00316\ }
+\DoxyCodeLine{00317\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ SIMPLEX\_HPP}}
+
+\end{DoxyCode}

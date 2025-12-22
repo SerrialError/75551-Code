@@ -17,3 +17,7 @@ temp.log
 temp.errors
 *.ini
 .d/
+
+# DOxygen
+docs/html/
+docs/latex/

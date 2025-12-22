@@ -1,0 +1,101 @@
+\doxysection{include/main.h File Reference}
+\hypertarget{main_8h}{}\label{main_8h}\index{include/main.h@{include/main.h}}
+{\ttfamily \#include "{}api.\+h"{}}\newline
+{\ttfamily \#include "{}structs.\+hpp"{}}\newline
+{\ttfamily \#include "{}drivetrain.\+hpp"{}}\newline
+{\ttfamily \#include "{}intake.\+hpp"{}}\newline
+{\ttfamily \#include "{}ff-\/velocity-\/controller.\+hpp"{}}\newline
+{\ttfamily \#include "{}motion-\/profiler.\+hpp"{}}\newline
+Include dependency graph for main.\+h\+:
+% FIG 0
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{main_8h_ab1b081349029f8bf68a7f2086732e42b}{PROS\+\_\+\+USE\+\_\+\+LITERALS}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{main_8h_a2df3d06bc5bced154da27fce393f991f}{autonomous}} (void)
+\item 
+void \mbox{\hyperlink{main_8h_a9efe22aaead3a5e936b5df459de02eba}{initialize}} (void)
+\item 
+void \mbox{\hyperlink{main_8h_a3ed01880f60e5a3afffc71f623174dbd}{disabled}} (void)
+\item 
+void \mbox{\hyperlink{main_8h_a16a77889800f9a99f69f9dd026013505}{competition\+\_\+initialize}} (void)
+\item 
+void \mbox{\hyperlink{main_8h_a1903abdb5ef0f301d660754c8315fc17}{opcontrol}} (void)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Contains common definitions and header files used throughout your PROS project.
+
+\begin{DoxyCopyright}{Copyright}
+Copyright (c) 2017-\/2024, Purdue University ACM SIGBots. All rights reserved.
+\end{DoxyCopyright}
+This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.\+0. If a copy of the MPL was not distributed with this file, You can obtain one at \href{http://mozilla.org/MPL/2.0/}{\texttt{http\+://mozilla.\+org/\+MPL/2.\+0/}}. 
+
+\label{doc-define-members}
+\Hypertarget{main_8h_doc-define-members}
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{main_8h_ab1b081349029f8bf68a7f2086732e42b}\index{main.h@{main.h}!PROS\_USE\_LITERALS@{PROS\_USE\_LITERALS}}
+\index{PROS\_USE\_LITERALS@{PROS\_USE\_LITERALS}!main.h@{main.h}}
+\doxysubsubsection{\texorpdfstring{PROS\_USE\_LITERALS}{PROS\_USE\_LITERALS}}
+{\footnotesize\ttfamily \label{main_8h_ab1b081349029f8bf68a7f2086732e42b} 
+\#define PROS\+\_\+\+USE\+\_\+\+LITERALS}
+
+If defined, some commonly used enums will have preprocessor macros which give a shorter, more convenient naming pattern. If this isn\textquotesingle{}t desired, simply comment the following line out.
+
+For instance, E\+\_\+\+CONTROLLER\+\_\+\+MASTER has a shorter name\+: CONTROLLER\+\_\+\+MASTER. E\+\_\+\+CONTROLLER\+\_\+\+MASTER is pedantically correct within the PROS styleguide, but not convenient for most student programmers. If defined, C++ literals will be available for use. All literals are in the pros\+::literals namespace.
+
+For instance, you can do {\ttfamily 4\+\_\+mtr = 50} to set motor 4\textquotesingle{}s target velocity to 50 
+
+\label{doc-func-members}
+\Hypertarget{main_8h_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{main_8h_a2df3d06bc5bced154da27fce393f991f}\index{main.h@{main.h}!autonomous@{autonomous}}
+\index{autonomous@{autonomous}!main.h@{main.h}}
+\doxysubsubsection{\texorpdfstring{autonomous()}{autonomous()}}
+{\footnotesize\ttfamily \label{main_8h_a2df3d06bc5bced154da27fce393f991f} 
+void autonomous (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+You should add more \#includes here If you find doing pros\+::\+Motor() to be tedious and you\textquotesingle{}d prefer just to do Motor, you can use the namespace with the following commented out line.
+
+IMPORTANT\+: Only the okapi or pros namespace may be used, not both concurrently! The okapi namespace will export all symbols inside the pros namespace. Prototypes for the competition control tasks are redefined here to ensure that they can be called from user code (i.\+e. calling autonomous from a button press in \doxylink{main_8h_a1903abdb5ef0f301d660754c8315fc17}{opcontrol()} for testing purposes).
+
+Runs the user autonomous code. This function will be started in its own task with the default priority and stack size whenever the robot is enabled via the Field Management System or the VEX Competition Switch in the autonomous mode. Alternatively, this function may be called in initialize or opcontrol for non-\/competition testing purposes.
+
+If the robot is disabled or communications is lost, the autonomous task will be stopped. Re-\/enabling the robot will restart the task, not re-\/start it from where it left off. \Hypertarget{main_8h_a16a77889800f9a99f69f9dd026013505}\index{main.h@{main.h}!competition\_initialize@{competition\_initialize}}
+\index{competition\_initialize@{competition\_initialize}!main.h@{main.h}}
+\doxysubsubsection{\texorpdfstring{competition\_initialize()}{competition\_initialize()}}
+{\footnotesize\ttfamily \label{main_8h_a16a77889800f9a99f69f9dd026013505} 
+void competition\+\_\+initialize (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+Runs after \doxylink{main_8h_a9efe22aaead3a5e936b5df459de02eba}{initialize()}, and before autonomous when connected to the Field Management System or the VEX Competition Switch. This is intended for competition-\/specific initialization routines, such as an autonomous selector on the LCD.
+
+This task will exit when the robot is enabled and autonomous or opcontrol starts. \Hypertarget{main_8h_a3ed01880f60e5a3afffc71f623174dbd}\index{main.h@{main.h}!disabled@{disabled}}
+\index{disabled@{disabled}!main.h@{main.h}}
+\doxysubsubsection{\texorpdfstring{disabled()}{disabled()}}
+{\footnotesize\ttfamily \label{main_8h_a3ed01880f60e5a3afffc71f623174dbd} 
+void disabled (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+Runs while the robot is in the disabled state of Field Management System or the VEX Competition Switch, following either autonomous or opcontrol. When the robot is enabled, this task will exit. \Hypertarget{main_8h_a9efe22aaead3a5e936b5df459de02eba}\index{main.h@{main.h}!initialize@{initialize}}
+\index{initialize@{initialize}!main.h@{main.h}}
+\doxysubsubsection{\texorpdfstring{initialize()}{initialize()}}
+{\footnotesize\ttfamily \label{main_8h_a9efe22aaead3a5e936b5df459de02eba} 
+void initialize (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+Runs initialization code. This occurs as soon as the program is started.
+
+All other competition modes are blocked by initialize; it is recommended to keep execution time for this mode under a few seconds. \Hypertarget{main_8h_a1903abdb5ef0f301d660754c8315fc17}\index{main.h@{main.h}!opcontrol@{opcontrol}}
+\index{opcontrol@{opcontrol}!main.h@{main.h}}
+\doxysubsubsection{\texorpdfstring{opcontrol()}{opcontrol()}}
+{\footnotesize\ttfamily \label{main_8h_a1903abdb5ef0f301d660754c8315fc17} 
+void opcontrol (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+Runs the operator control code. This function will be started in its own task with the default priority and stack size whenever the robot is enabled via the Field Management System or the VEX Competition Switch in the operator control mode.
+
+If no competition control is connected, this function will run immediately following \doxylink{main_8h_a9efe22aaead3a5e936b5df459de02eba}{initialize()}.
+
+If the robot is disabled or communications is lost, the operator control task will be stopped. Re-\/enabling the robot will restart the task, not resume it from where it left off. 

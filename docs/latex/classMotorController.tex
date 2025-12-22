@@ -1,0 +1,282 @@
+\doxysection{Motor\+Controller Class Reference}
+\hypertarget{classMotorController}{}\label{classMotorController}\index{MotorController@{MotorController}}
+
+
+Individual motor controller with feedforward control.  
+
+
+
+
+{\ttfamily \#include $<$motor-\/controller.\+hpp$>$}
+
+
+
+Collaboration diagram for Motor\+Controller\+:
+% FIG 0
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classMotorController_a1382ed2cfc8628c9857e91e7fa79bbac}{Motor\+Controller}} (const std\+::reference\+\_\+wrapper$<$ pros\+::\+Motor $>$ \&motor\+\_\+, const \mbox{\hyperlink{structff__constants}{ff\+\_\+constants}} \&motor\+\_\+constants\+\_\+, std\+::string\+\_\+view motor\+\_\+name\+\_\+)
+\begin{DoxyCompactList}\small\item\em Constructs a motor controller with a motor and constants. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classMotorController_a316bfedd146d7211fc1d8c09be31bba6}{print\+\_\+vector}} ()
+\begin{DoxyCompactList}\small\item\em Prints the stored motor data vector. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classMotorController_aa79686cf7c620df5beab7665c01d0813}{update\+\_\+motor\+\_\+data}} ()
+\begin{DoxyCompactList}\small\item\em Updates the stored motor data with current measurements. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classMotorController_a640bc078f40cf196b00ef10ab6612472}{move\+\_\+motor\+\_\+acceleration}} (const \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} \&desired\+\_\+acceleration)
+\begin{DoxyCompactList}\small\item\em Applies a desired acceleration using feedforward control. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classMotorController_ac30d434c950e7ae1deb189060f5c7603}{bound\+\_\+velocity\+\_\+to\+\_\+deadband}} (double desired\+\_\+velocity)
+\begin{DoxyCompactList}\small\item\em Bounds velocity to zero if within deadband range. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classMotorController_ae90923cd2b746b790cdd19b1f13dcae1}{get\+\_\+motor\+\_\+max\+\_\+accel}} (bool reverse, int direction)
+\begin{DoxyCompactList}\small\item\em Calculates maximum achievable acceleration in a given direction. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classMotorController_a35c5fb195efabfec25c443065e51663c}{move\+\_\+motor\+\_\+voltage}} (const double \&voltage)
+\begin{DoxyCompactList}\small\item\em Applies a voltage directly to the motor. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classMotorController_af6989789de053ffbe8acb46edf83a684}{move\+\_\+motor\+\_\+volts\+\_\+time}} (const double \&voltage, const int \&time)
+\begin{DoxyCompactList}\small\item\em Applies a voltage for a specified duration. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} \mbox{\hyperlink{classMotorController_adb6ed0d3835939bb2687d6cc2c4c935f}{get\+\_\+motor\+\_\+vel\+\_\+bounds}} (const double \&dt)
+\begin{DoxyCompactList}\small\item\em Calculates achievable velocity bounds for the next time step. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classMotorController_a5d51a139c40bad97a8be37e6dea927f8}{get\+\_\+desired\+\_\+motor\+\_\+acceleration}} (const double \&desired\+\_\+motor\+\_\+vels, const double \&dt)
+\begin{DoxyCompactList}\small\item\em Calculates desired acceleration from desired velocity. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{classMotorController_a89b40f20066559f533fd8d886a6aaf93}{bound\+\_\+desired\+\_\+motor\+\_\+velocity}} (const double \&desired\+\_\+velocity, const double \&dt)
+\begin{DoxyCompactList}\small\item\em Bounds desired velocity to achievable limits. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classMotorController_a1a74b011c29ae9ec2000589b94798f71}\label{classMotorController_a1a74b011c29ae9ec2000589b94798f71} 
+\mbox{\hyperlink{structff__constants}{ff\+\_\+constants}} {\bfseries motor\+\_\+constants}
+\item 
+\Hypertarget{classMotorController_a21fbd19c8e0f6fbecc4e712e3bf93ff0}\label{classMotorController_a21fbd19c8e0f6fbecc4e712e3bf93ff0} 
+std\+::reference\+\_\+wrapper$<$ pros\+::\+Motor $>$ {\bfseries motor}
+\item 
+\Hypertarget{classMotorController_a4c1e3b5b9d72194f784afb492444a1a6}\label{classMotorController_a4c1e3b5b9d72194f784afb492444a1a6} 
+std\+::string\+\_\+view {\bfseries motor\+\_\+name}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classMotorController_ac7fc3020ef04695d58f7dce4f17d6d57}\label{classMotorController_ac7fc3020ef04695d58f7dce4f17d6d57} 
+\mbox{\hyperlink{classDCff}{DCff}} {\bfseries motor\+\_\+ff}
+\item 
+\Hypertarget{classMotorController_a9d12821978e31a913ee54799b5009756}\label{classMotorController_a9d12821978e31a913ee54799b5009756} 
+std\+::vector$<$ \mbox{\hyperlink{structinput__output}{input\+\_\+output}} $>$ {\bfseries motor\+\_\+data}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Individual motor controller with feedforward control. 
+
+Provides high-\/level control for a single motor using feedforward control based on motor constants. The controller can apply voltages, accelerations, and velocities while respecting physical constraints and deadbands. It also tracks motor data for system identification purposes. 
+
+\label{doc-constructors}
+\Hypertarget{classMotorController_doc-constructors}
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classMotorController_a1382ed2cfc8628c9857e91e7fa79bbac}\index{MotorController@{MotorController}!MotorController@{MotorController}}
+\index{MotorController@{MotorController}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{MotorController()}{MotorController()}}
+{\footnotesize\ttfamily \label{classMotorController_a1382ed2cfc8628c9857e91e7fa79bbac} 
+Motor\+Controller\+::\+Motor\+Controller (\begin{DoxyParamCaption}\item[{const std\+::reference\+\_\+wrapper$<$ pros\+::\+Motor $>$ \&}]{motor\+\_\+}{, }\item[{const \mbox{\hyperlink{structff__constants}{ff\+\_\+constants}} \&}]{motor\+\_\+constants\+\_\+}{, }\item[{std\+::string\+\_\+view}]{motor\+\_\+name\+\_\+}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Constructs a motor controller with a motor and constants. 
+
+Initializes the controller with a reference to a PROS motor, feedforward constants for control, and a name for identification. Creates an internal feedforward controller using the provided constants.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em motor\+\_\+} & Reference wrapper to the PROS motor to control \\
+\hline
+\mbox{\texttt{in}}  & {\em motor\+\_\+constants\+\_\+} & Feedforward constants (K\+\_\+a, K\+\_\+v, K\+\_\+s, etc.) \\
+\hline
+\mbox{\texttt{in}}  & {\em motor\+\_\+name\+\_\+} & Name identifier for this motor (for debugging/logging) \\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-func-members}
+\Hypertarget{classMotorController_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classMotorController_a89b40f20066559f533fd8d886a6aaf93}\index{MotorController@{MotorController}!bound\_desired\_motor\_velocity@{bound\_desired\_motor\_velocity}}
+\index{bound\_desired\_motor\_velocity@{bound\_desired\_motor\_velocity}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{bound\_desired\_motor\_velocity()}{bound\_desired\_motor\_velocity()}}
+{\footnotesize\ttfamily \label{classMotorController_a89b40f20066559f533fd8d886a6aaf93} 
+double Motor\+Controller\+::bound\+\_\+desired\+\_\+motor\+\_\+velocity (\begin{DoxyParamCaption}\item[{const double \&}]{desired\+\_\+velocity}{, }\item[{const double \&}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Bounds desired velocity to achievable limits. 
+
+Limits a desired velocity to values that can be achieved within the given time step, accounting for maximum acceleration constraints and current motor velocity. Also applies deadband filtering to prevent small commands. This prevents the controller from requesting velocities that would require impossible accelerations.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+velocity} & Target velocity in rad/s \\
+\hline
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for calculating velocity change limits\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Bounded velocity that is achievable within the time step 
+\end{DoxyReturn}
+\Hypertarget{classMotorController_ac30d434c950e7ae1deb189060f5c7603}\index{MotorController@{MotorController}!bound\_velocity\_to\_deadband@{bound\_velocity\_to\_deadband}}
+\index{bound\_velocity\_to\_deadband@{bound\_velocity\_to\_deadband}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{bound\_velocity\_to\_deadband()}{bound\_velocity\_to\_deadband()}}
+{\footnotesize\ttfamily \label{classMotorController_ac30d434c950e7ae1deb189060f5c7603} 
+double Motor\+Controller\+::bound\+\_\+velocity\+\_\+to\+\_\+deadband (\begin{DoxyParamCaption}\item[{double}]{desired\+\_\+velocity}{}\end{DoxyParamCaption})}
+
+
+
+Bounds velocity to zero if within deadband range. 
+
+Sets the desired velocity to zero if it falls within the deadband range, which is calculated based on motor constants. This prevents small voltage commands that would be insufficient to overcome static friction, reducing motor jitter and power consumption.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+velocity} & Desired velocity in rad/s\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Bounded velocity (0 if in deadband, otherwise unchanged) 
+\end{DoxyReturn}
+\Hypertarget{classMotorController_a5d51a139c40bad97a8be37e6dea927f8}\index{MotorController@{MotorController}!get\_desired\_motor\_acceleration@{get\_desired\_motor\_acceleration}}
+\index{get\_desired\_motor\_acceleration@{get\_desired\_motor\_acceleration}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{get\_desired\_motor\_acceleration()}{get\_desired\_motor\_acceleration()}}
+{\footnotesize\ttfamily \label{classMotorController_a5d51a139c40bad97a8be37e6dea927f8} 
+double Motor\+Controller\+::get\+\_\+desired\+\_\+motor\+\_\+acceleration (\begin{DoxyParamCaption}\item[{const double \&}]{desired\+\_\+motor\+\_\+vels}{, }\item[{const double \&}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Calculates desired acceleration from desired velocity. 
+
+Computes the acceleration needed to reach a desired velocity within the given time step. This is a simple calculation\+: (desired\+\_\+vel -\/ current\+\_\+vel) / dt. Used for feedforward control to improve velocity tracking.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+motor\+\_\+vels} & Target velocity in rad/s \\
+\hline
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for acceleration calculation\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Desired acceleration in rad/s\texorpdfstring{$^\wedge$}{\string^}2 
+\end{DoxyReturn}
+\Hypertarget{classMotorController_ae90923cd2b746b790cdd19b1f13dcae1}\index{MotorController@{MotorController}!get\_motor\_max\_accel@{get\_motor\_max\_accel}}
+\index{get\_motor\_max\_accel@{get\_motor\_max\_accel}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{get\_motor\_max\_accel()}{get\_motor\_max\_accel()}}
+{\footnotesize\ttfamily \label{classMotorController_ae90923cd2b746b790cdd19b1f13dcae1} 
+double Motor\+Controller\+::get\+\_\+motor\+\_\+max\+\_\+accel (\begin{DoxyParamCaption}\item[{bool}]{reverse}{, }\item[{int}]{direction}{}\end{DoxyParamCaption})}
+
+
+
+Calculates maximum achievable acceleration in a given direction. 
+
+Determines the maximum acceleration the motor can achieve based on current velocity, voltage limits, and motor constants. Accounts for direction of motion and whether the motor is reversing. The calculation uses the feedforward model to find the acceleration limit.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em reverse} & True if calculating acceleration in reverse direction \\
+\hline
+\mbox{\texttt{in}}  & {\em direction} & Sign of desired motion (-\/1 or 1) for static friction calculation\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Maximum achievable acceleration in rad/s\texorpdfstring{$^\wedge$}{\string^}2 
+\end{DoxyReturn}
+\Hypertarget{classMotorController_adb6ed0d3835939bb2687d6cc2c4c935f}\index{MotorController@{MotorController}!get\_motor\_vel\_bounds@{get\_motor\_vel\_bounds}}
+\index{get\_motor\_vel\_bounds@{get\_motor\_vel\_bounds}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{get\_motor\_vel\_bounds()}{get\_motor\_vel\_bounds()}}
+{\footnotesize\ttfamily \label{classMotorController_adb6ed0d3835939bb2687d6cc2c4c935f} 
+\mbox{\hyperlink{structwheel__vel__bounds}{wheel\+\_\+vel\+\_\+bounds}} Motor\+Controller\+::get\+\_\+motor\+\_\+vel\+\_\+bounds (\begin{DoxyParamCaption}\item[{const double \&}]{dt}{}\end{DoxyParamCaption})}
+
+
+
+Calculates achievable velocity bounds for the next time step. 
+
+Determines the minimum and maximum velocities the motor can achieve in the next time step based on current velocity and maximum acceleration limits. The bounds account for both forward and reverse acceleration capabilities.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em dt} & Time step in seconds for calculating velocity change limits\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Velocity bounds (min, max) in rad/s 
+\end{DoxyReturn}
+\Hypertarget{classMotorController_a640bc078f40cf196b00ef10ab6612472}\index{MotorController@{MotorController}!move\_motor\_acceleration@{move\_motor\_acceleration}}
+\index{move\_motor\_acceleration@{move\_motor\_acceleration}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{move\_motor\_acceleration()}{move\_motor\_acceleration()}}
+{\footnotesize\ttfamily \label{classMotorController_a640bc078f40cf196b00ef10ab6612472} 
+void Motor\+Controller\+::move\+\_\+motor\+\_\+acceleration (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structmotorVelocityType}{motor\+Velocity\+Type}} \&}]{desired\+\_\+acceleration}{}\end{DoxyParamCaption})}
+
+
+
+Applies a desired acceleration using feedforward control. 
+
+Calculates and applies the voltage needed to achieve a desired acceleration at the current motor velocity. Uses the feedforward controller to compute the required voltage. If the desired acceleration is zero and brake mode is hold, applies the brake instead of voltage.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em desired\+\_\+acceleration} & Desired acceleration in rad/s\texorpdfstring{$^\wedge$}{\string^}2 with brake mode \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classMotorController_a35c5fb195efabfec25c443065e51663c}\index{MotorController@{MotorController}!move\_motor\_voltage@{move\_motor\_voltage}}
+\index{move\_motor\_voltage@{move\_motor\_voltage}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{move\_motor\_voltage()}{move\_motor\_voltage()}}
+{\footnotesize\ttfamily \label{classMotorController_a35c5fb195efabfec25c443065e51663c} 
+void Motor\+Controller\+::move\+\_\+motor\+\_\+voltage (\begin{DoxyParamCaption}\item[{const double \&}]{voltage}{}\end{DoxyParamCaption})}
+
+
+
+Applies a voltage directly to the motor. 
+
+Sets the motor voltage, clamping it to the maximum voltage limit defined in motor constants. The voltage is converted from volts to millivolts for the PROS motor API. This is a low-\/level control method that bypasses velocity and acceleration limiting.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em voltage} & Desired voltage in volts (will be clamped to max\+\_\+voltage) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classMotorController_af6989789de053ffbe8acb46edf83a684}\index{MotorController@{MotorController}!move\_motor\_volts\_time@{move\_motor\_volts\_time}}
+\index{move\_motor\_volts\_time@{move\_motor\_volts\_time}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{move\_motor\_volts\_time()}{move\_motor\_volts\_time()}}
+{\footnotesize\ttfamily \label{classMotorController_af6989789de053ffbe8acb46edf83a684} 
+void Motor\+Controller\+::move\+\_\+motor\+\_\+volts\+\_\+time (\begin{DoxyParamCaption}\item[{const double \&}]{voltage}{, }\item[{const int \&}]{time}{}\end{DoxyParamCaption})}
+
+
+
+Applies a voltage for a specified duration. 
+
+Sets the motor voltage and maintains it for the given time period. The function loops in 10ms increments to maintain the voltage for the requested duration.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{in}}  & {\em voltage} & Desired voltage in volts \\
+\hline
+\mbox{\texttt{in}}  & {\em time} & Duration to maintain voltage in milliseconds \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classMotorController_a316bfedd146d7211fc1d8c09be31bba6}\index{MotorController@{MotorController}!print\_vector@{print\_vector}}
+\index{print\_vector@{print\_vector}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{print\_vector()}{print\_vector()}}
+{\footnotesize\ttfamily \label{classMotorController_a316bfedd146d7211fc1d8c09be31bba6} 
+void Motor\+Controller\+::print\+\_\+vector (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Prints the stored motor data vector. 
+
+Outputs the collected motor input-\/output data to the console. This is useful for debugging and system identification purposes. \Hypertarget{classMotorController_aa79686cf7c620df5beab7665c01d0813}\index{MotorController@{MotorController}!update\_motor\_data@{update\_motor\_data}}
+\index{update\_motor\_data@{update\_motor\_data}!MotorController@{MotorController}}
+\doxysubsubsection{\texorpdfstring{update\_motor\_data()}{update\_motor\_data()}}
+{\footnotesize\ttfamily \label{classMotorController_aa79686cf7c620df5beab7665c01d0813} 
+void Motor\+Controller\+::update\+\_\+motor\+\_\+data (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Updates the stored motor data with current measurements. 
+
+Records the current motor state (voltage input and velocity output) into the motor\+\_\+data vector. This data can be used for system identification or analysis of motor performance. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/motor-\/controller.\+hpp\item 
+src/motor-\/controller.\+cpp\end{DoxyCompactItemize}

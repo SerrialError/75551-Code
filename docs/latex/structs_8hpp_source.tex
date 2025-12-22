@@ -1,0 +1,154 @@
+\doxysection{structs.\+hpp}
+\hypertarget{structs_8hpp_source}{}\label{structs_8hpp_source}\index{include/structs.hpp@{include/structs.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ structs.hpp}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#ifndef\ STRUCTS\_HPP}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#define\ STRUCTS\_HPP}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}api.h"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00016\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00017\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structwheels}{wheels}}\ \{}
+\DoxyCodeLine{00018\ \ \ \ \ T\ m1,\ m2,\ o1,\ o2,\ m3,\ m4;}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{comment}{//\ non-\/const\ view\ as\ array\ of\ reference\_wrapper}}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keyword}{auto}\ asArray()\ \{}
+\DoxyCodeLine{00022\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::array<std::reference\_wrapper<T>,\ 6>\{}
+\DoxyCodeLine{00023\ \ \ \ \ \ \ \ \ \ \ \ \ std::ref(m1),\ std::ref(m2),\ std::ref(o1),}
+\DoxyCodeLine{00024\ \ \ \ \ \ \ \ \ \ \ \ \ std::ref(o2),\ std::ref(m3),\ std::ref(m4)}
+\DoxyCodeLine{00025\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00026\ \ \ \ \ \}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{comment}{//\ const-\/view:\ reference\ to\ const\ T}}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keyword}{auto}\ asArray()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::array<std::reference\_wrapper<const\ T>,\ 6>\{}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \ \ \ \ std::cref(m1),\ std::cref(m2),\ std::cref(o1),}
+\DoxyCodeLine{00032\ \ \ \ \ \ \ \ \ \ \ \ \ std::cref(o2),\ std::cref(m3),\ std::cref(m4)}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00034\ \ \ \ \ \}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{comment}{//\ convenient\ index\ access\ (non-\/const)}}
+\DoxyCodeLine{00037\ \ \ \ \ T\&\ operator[](\textcolor{keywordtype}{size\_t}\ i)\ \{}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (i)\ \{}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0:\ \textcolor{keywordflow}{return}\ m1;}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1:\ \textcolor{keywordflow}{return}\ m2;}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 2:\ \textcolor{keywordflow}{return}\ o1;}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3:\ \textcolor{keywordflow}{return}\ o2;}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 4:\ \textcolor{keywordflow}{return}\ m3;}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:\ \textcolor{keywordflow}{return}\ m4;}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00046\ \ \ \ \ \}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{comment}{//\ index\ access\ const}}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keyword}{const}\ T\&\ operator[](\textcolor{keywordtype}{size\_t}\ i)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (i)\ \{}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0:\ \textcolor{keywordflow}{return}\ m1;}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1:\ \textcolor{keywordflow}{return}\ m2;}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 2:\ \textcolor{keywordflow}{return}\ o1;}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3:\ \textcolor{keywordflow}{return}\ o2;}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 4:\ \textcolor{keywordflow}{return}\ m3;}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:\ \textcolor{keywordflow}{return}\ m4;}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00058\ \ \ \ \ \}}
+\DoxyCodeLine{00059\ \};}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00070\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00071\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structrollers}{rollers}}\ \{}
+\DoxyCodeLine{00072\ \ \ \ \ T\ front;}
+\DoxyCodeLine{00073\ \ \ \ \ T\ back;}
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{keyword}{auto}\ \mbox{\hyperlink{structrollers_a32df3dcc3a181b51d48602630eb378bd}{asArray}}()\ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::array<std::reference\_wrapper<T>,\ 2>\{}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ std::ref(front),\ std::ref(back)}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00086\ \ \ \ \ \}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keyword}{auto}\ \mbox{\hyperlink{structrollers_a5e4362b6d4a15d88fac8532a9cf694d5}{asArray}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::array<std::reference\_wrapper<const\ T>,\ 2>\{}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ std::cref(front),\ std::cref(back)}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00100\ \ \ \ \ \}}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00111\ \ \ \ \ T\&\ \mbox{\hyperlink{structrollers_aae51a33bc86cf9dd17fb4490f272dfa7}{operator[]}}(\textcolor{keywordtype}{size\_t}\ i)\ \{}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (i)\ \{}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0:\ \textcolor{keywordflow}{return}\ front;}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1:\ \textcolor{keywordflow}{return}\ back;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00116\ \ \ \ \ \}}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keyword}{const}\ T\&\ \mbox{\hyperlink{structrollers_ae3310e7b9408d5300563c61693f05d91}{operator[]}}(\textcolor{keywordtype}{size\_t}\ i)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (i)\ \{}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 0:\ \textcolor{keywordflow}{return}\ front;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1:\ \textcolor{keywordflow}{return}\ back;}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00132\ \ \ \ \ \}}
+\DoxyCodeLine{00133\ \};}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00141\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structpose}{pose}}\ \{}
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structpose_af8b15bcca2a7661857ff40d5778a8074}{x}};\ \ \ \ \ \ }
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structpose_a2312d76b7d2911d3417a7089b72c0fcd}{y}};\ \ \ \ \ \ }
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structpose_ac1447bd931b49036fa197c312bf91ed7}{theta}};\ \ }
+\DoxyCodeLine{00145\ \};}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00154\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structff__constants}{ff\_constants}}\ \{}
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structff__constants_aae7bd38e427d2c58f2596abde0db48e7}{K\_a}};\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structff__constants_a41940f11a2461ce54dc1fe64807d4b97}{K\_v}};\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structff__constants_a5131cef83c086aa57658661be1e4d870}{K\_s}};\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00158\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structff__constants_ad64277eb0ed672bcd91917a5c59d75ee}{max\_ang\_vel}};\ }
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structff__constants_ac3135ad8dc2aa5cfbcec432d12c884a2}{max\_voltage}};\ }
+\DoxyCodeLine{00160\ \};}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00168\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structwheel__vel__bounds}{wheel\_vel\_bounds}}\ \{}
+\DoxyCodeLine{00169\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structwheel__vel__bounds_a7cd17c0278444ecc9c17f7e33956bc6d}{min}};\ }
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structwheel__vel__bounds_a4de9ad12f3740482d6fa80a418f17eb8}{max}};\ }
+\DoxyCodeLine{00171\ \};}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00179\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structinput__output}{input\_output}}\ \{}
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structinput__output_aaa7fc991b3da3ee2ee0323dac2a9995e}{u}};\ }
+\DoxyCodeLine{00181\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structinput__output_aee647d543b15fb91ff3a10ca804a60d5}{x}};\ }
+\DoxyCodeLine{00182\ \};}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00190\ \textcolor{keyword}{enum}\ rollerStateType\ \{}
+\DoxyCodeLine{00191\ \ \ \ \ intakeOff,\ \ \ }
+\DoxyCodeLine{00192\ \ \ \ \ intakeOnly,\ \ }
+\DoxyCodeLine{00193\ \ \ \ \ bottomScore,\ }
+\DoxyCodeLine{00194\ \ \ \ \ midScore,\ \ \ \ }
+\DoxyCodeLine{00195\ \ \ \ \ topScore\ \ \ \ \ }
+\DoxyCodeLine{00196\ \};}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00204\ \textcolor{keyword}{enum\ class}\ SpecialState\ \{\ hold,\ off\ \};}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00212\ \textcolor{keyword}{using\ }motorStateType\ =\ std::variant<double,\ SpecialState>;}
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00224\ \textcolor{keyword}{inline}\ motorStateType\ make\_running(\textcolor{keywordtype}{double}\ s)\ \{\ \textcolor{keywordflow}{return}\ s;\ \}}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00233\ \textcolor{keyword}{inline}\ motorStateType\ make\_hold()\ \{\ \textcolor{keywordflow}{return}\ SpecialState::hold;\ \}}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00242\ \textcolor{keyword}{inline}\ motorStateType\ make\_off()\ \ \{\ \textcolor{keywordflow}{return}\ SpecialState::off;\ \}}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00250\ \textcolor{keyword}{enum}\ color\ \{}
+\DoxyCodeLine{00251\ \ \ \ \ red,\ \ }
+\DoxyCodeLine{00252\ \ \ \ \ blue,\ }
+\DoxyCodeLine{00253\ \ \ \ \ none\ \ }
+\DoxyCodeLine{00254\ \};}
+\DoxyCodeLine{00255\ }
+\DoxyCodeLine{00262\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structmotorVelocityType}{motorVelocityType}}\ \{}
+\DoxyCodeLine{00263\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structmotorVelocityType_a5bbda98590c0e92ce5acb72f868ed6db}{velocity}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00264\ \ \ \ \ pros::motor\_brake\_mode\_e\ \ \mbox{\hyperlink{structmotorVelocityType_a8d123c67ae623755f1bd17e449630506}{brakeMode}};\ }
+\DoxyCodeLine{00265\ \};}
+\DoxyCodeLine{00266\ }
+\DoxyCodeLine{00273\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structdifferentialVels}{differentialVels}}\ \{}
+\DoxyCodeLine{00274\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structdifferentialVels_a9c14558fe737332abd3fe45996cbf605}{linear}};\ \ }
+\DoxyCodeLine{00275\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{structdifferentialVels_a81e8419771cfd53b2f0c8de27b69a0b9}{angular}};\ }
+\DoxyCodeLine{00276\ \};}
+\DoxyCodeLine{00277\ }
+\DoxyCodeLine{00284\ \textcolor{keyword}{enum}\ autons\ \{}
+\DoxyCodeLine{00285\ \ \ \ \ blueRight,\ }
+\DoxyCodeLine{00286\ \ \ \ \ blueLeft,\ \ }
+\DoxyCodeLine{00287\ \ \ \ \ redRight,\ \ }
+\DoxyCodeLine{00288\ \ \ \ \ redLeft\ \ \ \ }
+\DoxyCodeLine{00289\ \};}
+\DoxyCodeLine{00290\ }
+\DoxyCodeLine{00291\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ STRUCTS\_HPP}}
+
+\end{DoxyCode}
