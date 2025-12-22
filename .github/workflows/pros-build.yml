@@ -38,7 +38,7 @@ jobs:
       - name: Run PROS make inside flake devShell
         run: |
           # run the pros build inside your flake's devShell
-          nix develop .#devShells.x86_64-linux.default --command "pros make -- -j$(nproc)"
+          nix develop .#devShells.x86_64-linux.default --command "pros-cli make -- -j$(nproc)"
         working-directory: ${{ github.workspace }}
 
       - name: Upload Artifact
