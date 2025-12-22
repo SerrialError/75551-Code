@@ -17,26 +17,19 @@ jobs:
       - name: Install Nix (via cachix/install-nix-action)
         uses: cachix/install-nix-action@v31
         with:
-          # optional: pin the nixpkgs channel to use in the action's nix_path
-          nix_path: nixpkgs=channel:nixos-unstable
-          # enable flakes and the nix CLI in one go
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          # ensure flakes + nix-command are enabled (action enables them by default,
+          # but this makes it explicit)
           extra_nix_config: |
             experimental-features = nix-command flakes
-          # avoid GitHub API rate limiting for Nix fetches
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Show Nix version (diagnostic)
-        run: |
-          # ensure the action's profile is loaded
-          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-          nix --version
-          echo "nixpkgs version:"
-          nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version'
+      # Optional: pre-build the devShell so the workflow shows a clear failure
+      - name: Pre-build devShell (optional, fails early if shell won't build)
+        run: nix build --no-link .#devShells.x86_64-linux.default
 
-      - name: Run PROS build inside the flake devShell
+      - name: Run PROS make inside flake devShell
         run: |
-          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-          # use your flake's devShell attribute and run pros make
+          # run the pros build inside your flake's devShell
           nix develop .#devShells.x86_64-linux.default --command "pros make -- -j$(nproc)"
         working-directory: ${{ github.workspace }}
 
