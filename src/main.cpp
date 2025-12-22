@@ -43,7 +43,7 @@ const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 
 const rollers<ff_constants> intakeConsts {
 	{0.00681526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618},
-	{0.00681526983289, 0.276443936704, 0.28522177916, 70.590165, 12.618}
+	{0.00981526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618}
 };
 
 intake Intake(intakeMotors, intakeConsts);
@@ -166,11 +166,11 @@ void autonomous() {
 	 			Intake.update_intake_state(dt_);
         			pros::delay(static_cast<int>(dt_*1000.0));
 			}
-			dt.linear_mp(45.0 * 0.0254);
-			pros::delay(1000);
-			dt.angular_mp(114.0 * M_PI / 180.0 * 0.0254);
-			pros::delay(1000);
-			dt.linear_mp(8.0 * 0.0254);
+			dt.linear_mp(40 * 0.0254);
+			pros::delay(500);
+			dt.angular_mp(162.0 * M_PI / 180.0 * 0.0254);
+			pros::delay(500);
+			dt.linear_mp(21.0 * 0.0254);
 			Intake.intakeState = bottomScore;
 			for (int i = 0; i < 20; i++) {
 	 			Intake.update_intake_state(dt_);

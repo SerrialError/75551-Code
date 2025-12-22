@@ -17,7 +17,7 @@ private:
 	const double trackwidth_length;
 	static constexpr double wheel_radius = 2.0 / 2.0 * 0.0254;
 	static constexpr double b_gain = 2.0;
-	static constexpr double decimal_of_max_velocity = 0.3;
+	static constexpr double decimal_of_max_velocity = 0.195;
 	static constexpr double decimal_of_max_acceleration = 0.3;
 	static constexpr double gear_ratio = 48.0/36.0;
 	const double max_wheels_ang_vel;
