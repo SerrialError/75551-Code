@@ -1127,7 +1127,7 @@ EXCLUDE_SYMLINKS       = NO
 # exclude all test directories for example use the pattern */test/*
 
 EXCLUDE_PATTERNS += \
-  */include/libvgl/* \
+  */include/liblvgl/* \
   */include/pros/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
