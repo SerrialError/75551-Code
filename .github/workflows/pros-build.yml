@@ -23,9 +23,17 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      # Optional: pre-build the devShell so the workflow shows a clear failure
       - name: Pre-build devShell (optional, fails early if shell won't build)
         run: nix build --no-link .#devShells.x86_64-linux.default
+
+      - name: Diagnostic: show PATH and search for pros
+        run: |
+          echo "PATH=$PATH"
+          which pros || echo "which pros: not found"
+          echo "Look for pros in devShell outputs (/nix/store/*pros*):"
+          ls -l /nix/store/*pros* 2>/dev/null || true
+          echo "Search for an executable named 'pros' (may be slow):"
+          find /nix/store -maxdepth 3 -type f -name 'pros' -executable -print || true
 
       - name: Run PROS make inside flake devShell
         run: |
