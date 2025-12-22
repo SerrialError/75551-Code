@@ -1,11 +1,10 @@
-name: PROS Build Template
+name: PROS Build (via Nix flake)
 
 on:
   push:
     branches: "**"
   pull_request:
     branches: "**"
-
   workflow_dispatch:
 
 jobs:
@@ -13,14 +12,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Run LemLib/pros-build
-        id: test
-        uses: LemLib/pros-build@v4.0.1
+      - name: Install Nix (via cachix/install-nix-action)
+        uses: cachix/install-nix-action@v31
+        with:
+          # optional: pin the nixpkgs channel to use in the action's nix_path
+          nix_path: nixpkgs=channel:nixos-unstable
+          # enable flakes and the nix CLI in one go
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+          # avoid GitHub API rate limiting for Nix fetches
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Show Nix version (diagnostic)
+        run: |
+          # ensure the action's profile is loaded
+          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+          nix --version
+          echo "nixpkgs version:"
+          nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version'
+
+      - name: Run PROS build inside the flake devShell
+        run: |
+          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+          # use your flake's devShell attribute and run pros make
+          nix develop .#devShells.x86_64-linux.default --command "pros make -- -j$(nproc)"
+        working-directory: ${{ github.workspace }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.test.outputs.name }}
+          name: pros-template
           path: ${{ github.workspace }}/template/*
