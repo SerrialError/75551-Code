@@ -18,6 +18,6 @@ temp.errors
 *.ini
 .d/
 
-# DOxygen
+# Doxygen
 docs/html/
 docs/latex/
