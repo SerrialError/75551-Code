@@ -25,7 +25,7 @@
         owner = "purduesigbots";
         repo = pname;
         rev = version;
-        sha256 = "sha256-Lw3NJaFmJFt0g3N+jgmGLG5AMeMB4Tqk3d4mPPWvC/c=";
+	sha256 = "sha256-FuqXQk3hnOFipOZZWiLIk9q4P33N+I87NBBf2N+6OOA=";
       };
 
       postInstall = ''
