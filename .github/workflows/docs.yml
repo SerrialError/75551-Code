@@ -27,7 +27,7 @@ jobs:
         id: upload
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./docs/api/html
+          path: ./docs/html
 
   deploy:
     needs: build
