@@ -23,4 +23,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.test.outputs.name }}
-          path: ${{ github.workspace }}/template/*         path: ${{ github.workspace }}/template/*
+          path: ${{ github.workspace }}/template/*
