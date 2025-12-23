@@ -1,10 +1,11 @@
-name: PROS Build (via Nix flake)
+name: PROS Build Template
 
 on:
   push:
     branches: "**"
   pull_request:
     branches: "**"
+
   workflow_dispatch:
 
 jobs:
@@ -12,37 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      - name: Install Nix (via cachix/install-nix-action)
-        uses: cachix/install-nix-action@v31
-        with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          # ensure flakes + nix-command are enabled (action enables them by default,
-          # but this makes it explicit)
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-
-      - name: Pre-build devShell (optional, fails early if shell won't build)
-        run: nix build --no-link .#devShells.x86_64-linux.default
-
-      - name: show PATH and search for pros
-        run: |
-          echo "PATH=$PATH"
-          which pros || echo "which pros: not found"
-          echo "Look for pros in devShell outputs (/nix/store/*pros*):"
-          ls -l /nix/store/*pros* 2>/dev/null || true
-          echo "Search for an executable named 'pros' (may be slow):"
-          find /nix/store -maxdepth 3 -type f -name 'pros' -executable -print || true
-
-      - name: Run PROS make inside flake devShell
-        run: |
-          # run the pros build inside your flake's devShell
-          nix develop .#devShells.x86_64-linux.default --command "pros make -- -j$(nproc)"
-        working-directory: ${{ github.workspace }}
+      - name: Run LemLib/pros-build
+        id: test
+        uses: LemLib/pros-build@test
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pros-template
+          name: ${{ steps.test.outputs.name }}
           path: ${{ github.workspace }}/template/*
