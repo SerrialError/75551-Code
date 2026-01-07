@@ -15,6 +15,64 @@
 #include "structs.hpp"
 #include "helper-functions.hpp"
 
+
+enum class ControllerType { Feedback, Feedforward };
+
+// Forward declaration of primary template
+template <
+    typename Constants,
+    typename State,
+    typename Output,
+    typename Input,
+    ControllerType controller>
+class Controller;
+
+template <typename Constants, typename State, typename Output, typename Input>
+class Controller<Constants, State, Output, Input, ControllerType::Feedback> {
+protected:
+    Constants constants;
+public:
+    explicit Controller(Constants constants_) : constants(std::move(constants_)) {}
+    virtual ~Controller() = default;
+
+    virtual Input compute(const State& setpoint, const Output& output) = 0;
+};
+
+template <typename Constants, typename State, typename Output, typename Input>
+class Controller<Constants, State, Output, Input, ControllerType::Feedforward> {
+protected:
+    Constants constants;
+public:
+    explicit Controller(Constants constants_) : constants(std::move(constants_)) {}
+    virtual ~Controller() = default;
+
+    virtual Input compute(const State& setpoint) = 0;
+};
+
+struct PIDConstants { double Kp, Ki, Kd; };
+
+class PID : public Controller<PIDConstants, double, double, double, ControllerType::Feedback> {
+private:
+    double timestep;
+    double previous_error = 0.0;
+    double error_integral = 0.0;
+
+public:
+    using Base = Controller<PIDConstants, double, double, double, ControllerType::Feedback>;
+
+    explicit PID(PIDConstants constants_, double timestep_)
+        : Base(std::move(constants_)), timestep(timestep_) {}
+
+    // Override the concrete virtual function
+    double compute(const double& setpoint, const double& output) override {
+        double error = setpoint - output;
+        error_integral += error * timestep;
+        double error_derivative = (error - previous_error) / timestep;
+        previous_error = error;
+        return constants.Kp * error + constants.Ki * error_integral + constants.Kd * error_derivative;
+    }
+};
+
 /**
  * @brief DC motor feedforward controller
  *
@@ -23,56 +81,22 @@
  * achieve a desired acceleration and velocity, accounting for back-EMF,
  * acceleration torque, and static friction.
  */
-class DCff {
-private:
-    ff_constants constants;
+
+struct FirstOrderFeedforwardConstants { double Kv, Ka, Ks; };
+
+struct FirstOrderFeedforwardState { double acceleration, velocity };
+
+class FirstOrderFeedforward : Controller<FirstOrderFeedforwardConstants, FirstOrderFeedforwardState, double, double, ControllerType::Feedforward> {
 public:
-    /**
-     * @brief Constructs a feedforward controller with motor constants
-     *
-     * Initializes the controller with feedforward constants that characterize
-     * the motor's response. These constants are typically obtained through
-     * system identification.
-     *
-     * @param[in] constants_ Feedforward constants (K_a, K_v, K_s, max_ang_vel, max_voltage)
-     */
-    DCff(ff_constants constants_) : constants(constants_) {}
+    using Base = Controller<FirstOrderFeedforwardConstants, FirstOrderFeedforwardState, double, double, ControllerType::Feedforward>;
     
-    /**
-     * @brief Computes the voltage needed to achieve desired acceleration and velocity
-     *
-     * Calculates the control voltage using the feedforward model:
-     * u = K_a * alpha + K_v * omega + K_s * sign(omega)
-     * where K_a accounts for acceleration torque, K_v for back-EMF, and
-     * K_s for static friction. The sign function ensures friction opposes motion.
-     *
-     * @param[in] alpha Desired angular acceleration in rad/s^2
-     * @param[in] omega Current angular velocity in rad/s
-     *
-     * @return Required voltage in volts to achieve the desired acceleration
-     */
-    double compute_voltage(double alpha /*rad/s^2*/, double omega /*rad/s*/) const {
-        double u = constants.K_a * alpha + constants.K_v * omega + constants.K_s * sign(omega);
-        return u;
+	explicit FirstOrderFeedforward(FirstOrderFeedforwardConstants constants_)
+        : Base(std::move(constants_)) {}
+
+    // Override the concrete virtual function with the plant inversion feedforard
+    double compute(const FirstOrderFeedforwardState& setpoint) override {
+        return constants.Ka * setpoint.acceleration + constants.Kv * setpoint.velocity + constants.Ks * sign(setpoint.velocity);
     }
 };
 
-/**
- * @brief Proportional-Derivative (PD) controller class
- *
- * A PD controller for velocity control that uses proportional and derivative
- * terms to reduce error between desired and measured velocity. This class
- * is currently incomplete and not fully implemented.
- */
-class pd {
-private:
-    double r; //setpoint(desired velocity)
-    double u; //control input
-    double e; //error(aceleration)
-    double y; //output(measured velocity)
-
-
-public:
-
-};
 #endif // ff-velocity-controller.hpp

@@ -40,45 +40,11 @@
 
       pyproject = false;
     };
-    pros-bin = pkgs.stdenv.mkDerivation {
-	    pname = "pros";
-	    version = "4.2.1"; # change if needed
-
-      	    src = pkgs.fetchFromGitHub {
-        	owner = "purduesigbots";
-        	repo = pname;
-        	rev = version;
-		sha256 = "sha256-FuqXQk3hnOFipOZZWiLIk9q4P33N+I87NBBf2N+6OOA=";
-            };
-
-	    nativeBuildInputs = [ pkgs.gnutar ];
-	    unpackPhase = "true";
-	    buildPhase = ''
-		    mkdir -p $out
-		    tmpdir=$PWD/tmppros
-		    rm -rf "$tmpdir"
-		    mkdir -p "$tmpdir"
-		    tar -xzf ${src} -C "$tmpdir"
-# adjust below to the path inside the tarball to the pros binary
-# common layouts: bin/pros or pros/bin/pros
-		    if [ -x "$tmpdir/bin/pros" ]; then
-			    install -D "$tmpdir/bin/pros" $out/bin/pros
-				    elif [ -x "$tmpdir/pros/bin/pros" ]; then
-				    install -D "$tmpdir/pros/bin/pros" $out/bin/pros
-		    else
-			    echo "Could not find pros binary in release archive" >&2
-				    ls -la "$tmpdir" >&2
-				    exit 1
-				    fi
-				    '';
-	    meta = with pkgs.lib; { description = "PROS CLI binary (packaged)"; };
-    };
 
   in
   {
     devShells.x86_64-linux.default = pkgs.mkShell {
       buildInputs = [
-      	pros-bin
         pros-cli
         pkgs.gcc
         pkgs.python3
