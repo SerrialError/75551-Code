@@ -154,21 +154,6 @@ struct pose {
 };
 
 /**
- * @brief Feedforward motor constants
- *
- * Contains the constants used in the feedforward motor model:
- * u = K_a * alpha + K_v * omega + K_s * sign(omega)
- * where u is voltage, alpha is acceleration, and omega is velocity.
- */
-struct ff_constants {
-    double K_a;         /**< Acceleration constant (V/(rad/s^2)) */
-    double K_v;         /**< Velocity constant (V/(rad/s)) */
-    double K_s;         /**< Static friction constant (V) */
-    double max_ang_vel; /**< Maximum angular velocity (rad/s) */
-    double max_voltage; /**< Maximum voltage (V) */
-};
-
-/**
  * @brief Velocity bounds for a wheel
  *
  * Represents the minimum and maximum achievable velocities for a wheel

@@ -13,7 +13,7 @@
 void MotorController::move_motor_acceleration(const motorVelocityType& desired_acceleration) {
     // Convert measured speed from RPM to rad/s for feedforward computation.
     double current_velocity = motor.get().get_actual_velocity() * 2.0 * M_PI / 60.0;
-    double voltage = motor_ff.compute_voltage(desired_acceleration.velocity, current_velocity);
+    double voltage = motor_ff.compute({desired_acceleration.velocity, current_velocity});
     if (voltage == 0.0 && desired_acceleration.brakeMode == pros::motor_brake_mode_e::E_MOTOR_BRAKE_HOLD) {
         motor.get().set_brake_mode(desired_acceleration.brakeMode);
         motor.get().brake();
@@ -28,18 +28,18 @@ double MotorController::get_motor_max_accel(bool reverse, int direction) {
     double motor_max_acceleration = 0.0;
     if (!reverse) {
         if (motor_velocity == 0.0) {
-            motor_max_acceleration = (motor_constants.max_voltage - motor_velocity * motor_constants.K_v - direction * motor_constants.K_s) / motor_constants.K_a;
+            motor_max_acceleration = (motor_constants.max_voltage - motor_velocity * motor_constants.Kv - direction * motor_constants.Ks) / motor_constants.Ka;
         }
         else {
-            motor_max_acceleration = (motor_constants.max_voltage - motor_velocity * motor_constants.K_v - sign(motor_velocity) * motor_constants.K_s) / motor_constants.K_a;
+            motor_max_acceleration = (motor_constants.max_voltage - motor_velocity * motor_constants.Kv - sign(motor_velocity) * motor_constants.Ks) / motor_constants.Ka;
         }
     }
     else {
         if (motor_velocity == 0.0) {
-            motor_max_acceleration = (-1.0 * motor_constants.max_voltage - motor_velocity * motor_constants.K_v - direction * motor_constants.K_s) / motor_constants.K_a;
+            motor_max_acceleration = (-1.0 * motor_constants.max_voltage - motor_velocity * motor_constants.Kv - direction * motor_constants.Ks) / motor_constants.Ka;
         }
         else {
-            motor_max_acceleration = (-1.0 * motor_constants.max_voltage - motor_velocity * motor_constants.K_v - sign(motor_velocity) * motor_constants.K_s) / motor_constants.K_a;
+            motor_max_acceleration = (-1.0 * motor_constants.max_voltage - motor_velocity * motor_constants.Kv - sign(motor_velocity) * motor_constants.Ks) / motor_constants.Ka;
         }
     }
 
@@ -71,7 +71,7 @@ double MotorController::get_desired_motor_acceleration(const double& desired_mot
 }
 
 double MotorController::bound_velocity_to_deadband(double desired_velocity) {
-	const double ZERO_DEADBAND_RAD_PER_S = 1.2 * motor_constants.K_s / motor_constants.K_v;
+	const double ZERO_DEADBAND_RAD_PER_S = 1.2 * motor_constants.Ks / motor_constants.Kv;
 	if (std::abs(desired_velocity) < ZERO_DEADBAND_RAD_PER_S) {
 		desired_velocity = 0.0;
 	}

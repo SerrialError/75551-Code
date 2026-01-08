@@ -13,12 +13,12 @@
 
 #include "api.h"
 #include "structs.hpp"
-#include "ff-velocity-controller.hpp"
 #include "localization.hpp"
 #include "helper-functions.hpp"
 #include "motor-controller.hpp"
 #include "motion-profiler.hpp"
 #include "system-identification.hpp"
+#include "controllers/first-order-feedforward.hpp"
 
 /**
  * @brief Main drivetrain class for holonomic robot control
@@ -55,7 +55,7 @@ public:
 	 * @param[in] motors_ Reference wrapper array of six PROS motor objects
 	 * @param[in] wheelbase_length_ Distance between front and back wheels in meters
 	 * @param[in] trackwidth_length_ Distance between left and right wheels in meters
-	 * @param[in] motor_constants_ Feedforward constants for each motor (K_a, K_v, K_s)
+	 * @param[in] motor_constants_ Feedforward constants for each motor (Ka, Kv, Ks)
 	 * @param[in] linear_wheel_ Rotation sensor for measuring forward/backward movement
 	 * @param[in] horizontal_wheel_ Rotation sensor for measuring sideways movement
 	 * @param[in] imu_ Inertial measurement unit for orientation tracking
@@ -64,7 +64,7 @@ public:
 	drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
 			const double wheelbase_length_,
 			const double trackwidth_length_,
-			const wheels<ff_constants>& motor_constants_,
+			const wheels<FirstOrderFeedforwardConstants>& motor_constants_,
 			pros::Rotation& linear_wheel_,
 			pros::Rotation& horizontal_wheel_,
 			pros::Imu& imu_,
@@ -89,8 +89,8 @@ public:
 	 *
 	 * @return Maximum angular velocity in rad/s that can be achieved
 	 */
-	double angular_velocity(const double angular_acceleration, ff_constants motor_constant) {
-		return ((motor_constant.max_voltage-(motor_constant.K_a * angular_acceleration)-motor_constant.K_s)/motor_constant.K_v);
+	double angular_velocity(const double angular_acceleration, FirstOrderFeedforwardConstants motor_constant) {
+		return ((motor_constant.max_voltage-(motor_constant.Ka * angular_acceleration)-motor_constant.Ks)/motor_constant.Kv);
 	};
 
 	/**
@@ -106,8 +106,8 @@ public:
 	 *
 	 * @return Maximum angular acceleration in rad/s^2 that can be achieved
 	 */
-	double angular_acceleration(const double angular_velocity, ff_constants motor_constant) {
-		return ((motor_constant.max_voltage-(motor_constant.K_v * angular_velocity)-motor_constant.K_s)/motor_constant.K_a);
+	double angular_acceleration(const double angular_velocity, FirstOrderFeedforwardConstants motor_constant) {
+		return ((motor_constant.max_voltage-(motor_constant.Kv * angular_velocity)-motor_constant.Ks)/motor_constant.Ka);
 	};
 
 	pros::Controller master{pros::E_CONTROLLER_MASTER};
@@ -383,7 +383,7 @@ public:
 	 * @brief Calculates and prints feedforward constants for all motors
 	 *
 	 * Performs system identification on all six motors to determine their
-	 * feedforward constants (K_v, K_a, K_s). The results are printed to the
+	 * feedforward constants (Kv, Ka, Ks). The results are printed to the
 	 * console for use in motor control. This function blocks while performing
 	 * the identification process.
 	 */

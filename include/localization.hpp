@@ -12,7 +12,6 @@
 
 #include "api.h"
 #include "structs.hpp"
-#include "ff-velocity-controller.hpp"
 #include "helper-functions.hpp"
 
 /**

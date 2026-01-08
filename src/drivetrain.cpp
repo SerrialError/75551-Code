@@ -13,7 +13,7 @@
 drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
                        const double wheelbase_length_,
                        const double trackwidth_length_,
-                       const wheels<ff_constants>& motor_constants_,
+                       const wheels<FirstOrderFeedforwardConstants>& motor_constants_,
                        pros::Rotation& linear_wheel_,
                        pros::Rotation& horizontal_wheel_,
                        pros::Imu& imu_,

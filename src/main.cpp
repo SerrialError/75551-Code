@@ -30,7 +30,7 @@ const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 };
 
 // kA, kV, kS, max rad/s (calculated at 12 V), max voltage
-const wheels<ff_constants> dtConsts{ 
+const wheels<FirstOrderFeedforwardConstants> dtConsts{ 
 	{0.0045870351481, 0.166157827462, 0.120535260966, 75.858991, 12.24}, 
 	{0.00346235990182, 0.16618573907, 0.103286863565, 74.351026, 12.055}, 
 	{0.0011750526572, 0.156487380984, 0.133576249675, 80.215332, 12.055}, 
@@ -50,7 +50,7 @@ const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 	std::ref(back)
 };
 
-const rollers<ff_constants> intakeConsts {
+const rollers<FirstOrderFeedforwardConstants> intakeConsts {
 	{0.00681526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618},
 	{0.00981526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618}
 };

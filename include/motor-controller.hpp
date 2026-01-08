@@ -12,7 +12,7 @@
 
 #include "api.h"
 #include "structs.hpp"
-#include "ff-velocity-controller.hpp"
+#include "controllers/first-order-feedforward.hpp"
 #include "helper-functions.hpp"
 
 /**
@@ -25,7 +25,7 @@
  */
 class MotorController {
 private:
-    DCff motor_ff;
+    FirstOrderFeedforward motor_ff;
     std::vector<input_output> motor_data;
 
 public:
@@ -41,14 +41,14 @@ public:
      * @param[in] motor_name_ Name identifier for this motor (for debugging/logging)
      */
     MotorController(const std::reference_wrapper<pros::Motor>& motor_,
-              const ff_constants& motor_constants_,
+              const FirstOrderFeedforwardConstants& motor_constants_,
               std::string_view motor_name_)
         : motor(motor_),
           motor_constants(motor_constants_),
           motor_ff(motor_constants_),
           motor_name(motor_name_)
     {}
-    ff_constants motor_constants;
+    FirstOrderFeedforwardConstants motor_constants;
 
 	/**
 	 * @brief Prints the stored motor data vector

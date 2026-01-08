@@ -12,7 +12,7 @@
 
 #include "api.h"
 #include "structs.hpp"
-#include "ff-velocity-controller.hpp"
+#include "controllers/first-order-feedforward.hpp"
 #include "motor-controller.hpp"
 #include "helper-functions.hpp"
 
@@ -46,7 +46,7 @@ public:
      * @param[in] motor_constants_ Feedforward constants for each motor
      */
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_,
-              const rollers<ff_constants>& motor_constants_)
+              const rollers<FirstOrderFeedforwardConstants>& motor_constants_)
         : motors{ MotorController(motors_.front, motor_constants_.front, "front"),
                   MotorController(motors_.back, motor_constants_.back, "back") }
     {}
