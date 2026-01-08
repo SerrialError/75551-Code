@@ -3,24 +3,24 @@
 #include "controller.hpp"
 
 struct FirstOrderFeedforwardConstants {
-    double Ka;         /**< Acceleration constant (V/(rad/s^2)) */
-    double Kv;         /**< Velocity constant (V/(rad/s)) */
-    double Ks;         /**< Static friction constant (V) */
-    double max_ang_vel; /**< Maximum angular velocity (rad/s) */
-    double max_voltage; /**< Maximum voltage (V) */ 
+    float Ka;         /**< Acceleration constant (V/(rad/s^2)) */
+    float Kv;         /**< Velocity constant (V/(rad/s)) */
+    float Ks;         /**< Static friction constant (V) */
+    float max_ang_vel; /**< Maximum angular velocity (rad/s) */
+    float max_voltage; /**< Maximum voltage (V) */ 
 };
 
-struct FirstOrderFeedforwardState { double acceleration, velocity; };
+struct FirstOrderFeedforwardState { float acceleration, velocity; };
 
-class FirstOrderFeedforward : Controller<FirstOrderFeedforwardConstants, FirstOrderFeedforwardState, double, double, ControllerType::Feedforward> {
+class FirstOrderFeedforward : Controller<FirstOrderFeedforwardConstants, FirstOrderFeedforwardState, float, float, ControllerType::Feedforward> {
 public:
-    using Base = Controller<FirstOrderFeedforwardConstants, FirstOrderFeedforwardState, double, double, ControllerType::Feedforward>;
+    using Base = Controller<FirstOrderFeedforwardConstants, FirstOrderFeedforwardState, float, float, ControllerType::Feedforward>;
     
 	explicit FirstOrderFeedforward(FirstOrderFeedforwardConstants constants_)
         : Base(std::move(constants_)) {}
 
     // Override the concrete virtual function with the plant inversion feedforard
-    double compute(const FirstOrderFeedforwardState& setpoint) override;
+    float compute(const FirstOrderFeedforwardState& setpoint) override;
 };
 
 #endif // first-order-feedforward.hpp

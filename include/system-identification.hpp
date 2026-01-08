@@ -40,7 +40,7 @@ private:
 	 *
 	 * @return Vector of mean velocities in rad/s, one per motor
 	 */
-	static std::vector<double> calculate_mean_velocities(double voltage, std::vector<MotorController>& motors);
+	static std::vector<float> calculate_mean_velocities(float voltage, std::vector<MotorController>& motors);
 
 	/**
 	 * @brief Calculates K_v and K_s constants for all motors
@@ -54,7 +54,7 @@ private:
 	 *
 	 * @return Vector of (K_v, K_s) pairs, one per motor
 	 */
-	static std::vector<std::pair<double,double>> calculate_Kv_and_Ks_s(std::vector<MotorController>& motors);
+	static std::vector<std::pair<float,float>> calculate_Kv_and_Ks_s(std::vector<MotorController>& motors);
 
 	/**
 	 * @brief Fits K_v and K_s constants from voltage-velocity data
@@ -67,7 +67,7 @@ private:
 	 *
 	 * @return Pair of (K_v, K_s) constants
 	 */
-	static std::pair<double,double> fit_Kv_and_Ks_with_sign(const std::vector<std::pair<double,double>>& points);
+	static std::pair<float,float> fit_Kv_and_Ks_with_sign(const std::vector<std::pair<float,float>>& points);
 	
 	/**
 	 * @brief Performs linear regression on a set of points
@@ -79,7 +79,7 @@ private:
 	 *
 	 * @return Pair of (slope, intercept) for the fitted line
 	 */
-	static std::pair<double,double> linear_reg(const std::vector<std::pair<double,double>>& points);
+	static std::pair<float,float> linear_reg(const std::vector<std::pair<float,float>>& points);
 
 	/**
 	 * @brief Collects acceleration data for motors at a given voltage
@@ -95,7 +95,7 @@ private:
 	 * @return Tuple of (V, w, alpha) vectors, where each vector contains
 	 *         measurements for all motors
 	 */
-	static std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, std::vector<std::vector<double>>> get_acceleration_data(double voltage, std::vector<MotorController>& motors);
+	static std::tuple<std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> get_acceleration_data(float voltage, std::vector<MotorController>& motors);
 
 	/**
 	 * @brief Calculates K_a constants for all motors
@@ -109,7 +109,7 @@ private:
 	 *
 	 * @return Vector of K_a values, one per motor
 	 */
-	static std::vector<double> calculate_Ka_s(std::vector<std::pair<double, double>> Kv_and_Ks_s, std::vector<MotorController>& motors);
+	static std::vector<float> calculate_Ka_s(std::vector<std::pair<float, float>> Kv_and_Ks_s, std::vector<MotorController>& motors);
 
 	/**
 	 * @brief Fits K_a constant using data that must pass through origin
@@ -127,7 +127,7 @@ private:
 	 *
 	 * @return Fitted K_a constant
 	 */
-	static double through_origin_fit(const std::vector<double>& V, const std::vector<double>& w, const std::vector<double>& alpha, double Kv, double Ks);
+	static float through_origin_fit(const std::vector<float>& V, const std::vector<float>& w, const std::vector<float>& alpha, float Kv, float Ks);
 
 public:
 	/**
@@ -142,7 +142,7 @@ public:
 	 *
 	 * @return Vector of (K_v, K_a, K_s) tuples, one per motor
 	 */
-	static std::vector<std::tuple<double, double, double>> calculate_Kv_Ka_and_Ks_s(std::vector<MotorController>& motors);
+	static std::vector<std::tuple<float, float, float>> calculate_Kv_Ka_and_Ks_s(std::vector<MotorController>& motors);
 	
 	/**
 	 * @brief Calculates and prints feedforward constants for motors

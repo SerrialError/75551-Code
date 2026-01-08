@@ -20,7 +20,7 @@
  * (m1, m2, m3, m4) and two omni wheels (o1, o2). Provides array-like access
  * and iteration capabilities for uniform processing of all wheels.
  *
- * @tparam T Type of data stored for each wheel (e.g., MotorController, double, etc.)
+ * @tparam T Type of data stored for each wheel (e.g., MotorController, float, etc.)
  */
 template<typename T>
 struct wheels {
@@ -74,7 +74,7 @@ struct wheels {
  * array-like access and iteration capabilities for uniform processing
  * of both rollers.
  *
- * @tparam T Type of data stored for each roller (e.g., MotorController, double, etc.)
+ * @tparam T Type of data stored for each roller (e.g., MotorController, float, etc.)
  */
 template<typename T>
 struct rollers {
@@ -148,9 +148,9 @@ struct rollers {
  * Coordinates are typically in meters, and theta is in radians.
  */
 struct pose {
-    double x;      /**< X coordinate in meters */
-    double y;      /**< Y coordinate in meters */
-    double theta;  /**< Orientation angle in radians */
+    float x;      /**< X coordinate in meters */
+    float y;      /**< Y coordinate in meters */
+    float theta;  /**< Orientation angle in radians */
 };
 
 /**
@@ -160,8 +160,8 @@ struct pose {
  * at a given point in time, accounting for acceleration constraints.
  */
 struct wheel_vel_bounds {
-    double min; /**< Minimum achievable velocity */
-    double max; /**< Maximum achievable velocity */
+    float min; /**< Minimum achievable velocity */
+    float max; /**< Maximum achievable velocity */
 };
 
 /**
@@ -171,8 +171,8 @@ struct wheel_vel_bounds {
  * for use in system identification and motor characterization.
  */
 struct input_output {
-    double u; /**< Input voltage (V) */
-    double x; /**< Output velocity (rad/s) */
+    float u; /**< Input voltage (V) */
+    float x; /**< Output velocity (rad/s) */
 };
 
 /**
@@ -200,10 +200,10 @@ enum class SpecialState { hold, off };
 /**
  * @brief Motor state type that can be a velocity or special state
  *
- * A variant type that can hold either a double (velocity scale factor)
+ * A variant type that can hold either a float (velocity scale factor)
  * or a SpecialState (hold or off). This allows flexible motor control.
  */
-using motorStateType = std::variant<double, SpecialState>;
+using motorStateType = std::variant<float, SpecialState>;
 
 /**
  * @brief Creates a running motor state with velocity scale
@@ -215,7 +215,7 @@ using motorStateType = std::variant<double, SpecialState>;
  *
  * @return Motor state with the specified velocity scale
  */
-inline motorStateType make_running(double s) { return s; }
+inline motorStateType make_running(float s) { return s; }
 
 /**
  * @brief Creates a hold motor state
@@ -254,7 +254,7 @@ enum color {
  * The brake mode determines behavior when velocity is zero.
  */
 struct motorVelocityType {
-    double velocity;                    /**< Desired velocity in rad/s */
+    float velocity;                    /**< Desired velocity in rad/s */
     pros::motor_brake_mode_e  brakeMode; /**< Brake mode (coast, brake, or hold) */
 };
 
@@ -265,8 +265,8 @@ struct motorVelocityType {
  * drive robot (or holonomic robot using differential drive control).
  */
 struct differentialVels {
-    double linear;  /**< Linear velocity in m/s (forward/backward) */
-    double angular; /**< Angular velocity in rad/s (rotation) */
+    float linear;  /**< Linear velocity in m/s (forward/backward) */
+    float angular; /**< Angular velocity in rad/s (rotation) */
 };
 
 /**

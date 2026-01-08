@@ -24,7 +24,7 @@
  *
  * @return 1 if x > 0, -1 if x < 0, 0 if x == 0
  */
-constexpr static double sign(double x) {
+constexpr static float sign(float x) {
         return (x > 0) - (x < 0);
 }
 
@@ -39,10 +39,10 @@ constexpr static double sign(double x) {
  *
  * @return Angle normalized to [-PI, PI) range
  */
-constexpr static double wrapToPi(double a) {
-    double r = std::fmod(a + M_PI, 2.0*M_PI);
-    if (r < 0) r += 2.0*M_PI;
-    return r - M_PI;
+constexpr static float wrapToPi(float a) {
+    float r = std::fmod(a + static_cast<float>(M_PI), 2.0*static_cast<float>(M_PI));
+    if (r < 0) r += 2.0*static_cast<float>(M_PI);
+    return r - static_cast<float>(M_PI);
 }
 
 /**
@@ -57,9 +57,9 @@ constexpr static double wrapToPi(double a) {
  *
  * @return Angle in radians, normalized to [-PI, PI), with counterclockwise positive
  */
-constexpr static double DEG_TO_RAD_NORM(double deg_cw) {
+constexpr static float DEG_TO_RAD_NORM(float deg_cw) {
     // Convert degrees to radians and flip sign (CW -> CCW is a sign change)
-    double rad = -deg_cw * (M_PI / 180.0);
+    float rad = -deg_cw * (static_cast<float>(M_PI) / 180.0);
 
     // Normalize into [-PI, PI)
     rad = wrapToPi(rad);
@@ -78,7 +78,7 @@ constexpr static double DEG_TO_RAD_NORM(double deg_cw) {
  *
  * @return sin(x)/x if |x| >= 1e-5, 1.0 otherwise
  */
-constexpr static double sinc(double x) {
+constexpr static float sinc(float x) {
     return (std::abs(x) < 1e-5f) ? 1.0f : std::sin(x) / x;
 }
 

@@ -27,9 +27,9 @@ private:
     pros::Rotation& linear_wheel;
     pros::Rotation& horizontal_wheel;
     pros::Imu& imu;
-    double prev_angle = 0.0;
-    double prev_linear_wheel = 0.0;
-    double prev_horizontal_wheel = 0.0;
+    float prev_angle = 0.0;
+    float prev_linear_wheel = 0.0;
+    float prev_horizontal_wheel = 0.0;
 
 public:
     /**

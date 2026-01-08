@@ -7,10 +7,10 @@
  */
 #include "controllers/pid.hpp"
 
-double PID::compute(const double& setpoint, const double& output) {
-    double error = setpoint - output;
+float PID::compute(const float& setpoint, const float& output) {
+    float error = setpoint - output;
     error_integral += error * timestep;
-    double error_derivative = (error - previous_error) / timestep;
+    float error_derivative = (error - previous_error) / timestep;
     previous_error = error;
     return constants.Kp * error + constants.Ki * error_integral + constants.Kd * error_derivative;
 }

@@ -43,10 +43,10 @@ public:
      * @return Optional vector of optimal variable values (length n) if solution exists,
      *         empty optional if problem is infeasible
      */
-    static std::optional<std::vector<double>> solve(const std::vector<std::vector<double>>& A_in,
-                                     const std::vector<double>& b_in,
-                                     const std::vector<double>& c_in) {
-        const double EPS = 1e-9;
+    static std::optional<std::vector<float>> solve(const std::vector<std::vector<float>>& A_in,
+                                     const std::vector<float>& b_in,
+                                     const std::vector<float>& c_in) {
+        const float EPS = 1e-9;
         int m = (int)A_in.size();
         int n = (int)c_in.size();
         if (m == 0 || n == 0) throw std::invalid_argument("Empty LP input");
@@ -57,8 +57,8 @@ public:
         int n2 = 2 * n;
 
         // Build A' (m x n2) and c' (n2)
-        std::vector<std::vector<double>> A(m, std::vector<double>(n2, 0.0));
-        std::vector<double> c(n2, 0.0);
+        std::vector<std::vector<float>> A(m, std::vector<float>(n2, 0.0));
+        std::vector<float> c(n2, 0.0);
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < n; ++j) {
                 A[i][2*j]     =  A_in[i][j];    // x_j_pos coef
@@ -79,13 +79,13 @@ public:
         // We'll track columns: [ original_vars (n2) | slacks | surplus (not kept separately) | artificials ] + RHS
 
         std::vector<int> rowType(m, 0); // 0: originally <= and b>=0 (slack), 1: >= (we will add artificial), 2: equality (artificial)
-        std::vector<std::vector<double>> rows(m);
-        std::vector<double> rhs(m);
+        std::vector<std::vector<float>> rows(m);
+        std::vector<float> rhs(m);
 
         for (int i = 0; i < m; ++i) {
             // copy A row
             rows[i] = A[i];
-            double b = b_in[i];
+            float b = b_in[i];
             if (b >= 0) {
                 // keep row as <=
                 rowType[i] = 0; // slack
@@ -93,7 +93,7 @@ public:
             } else {
                 // multiply by -1 => becomes >= with positive rhs
                 rowType[i] = 1; // will need surplus + artificial
-                for (double &val : rows[i]) val = -val;
+                for (float &val : rows[i]) val = -val;
                 rhs[i] = -b;
             }
         }
@@ -112,7 +112,7 @@ public:
 
         // Build full tableau (m constraint rows + 1 objective row) with totalCols + 1 (RHS)
         int cols = totalCols + 1;
-        std::vector<std::vector<double>> tab(m + 1, std::vector<double>(cols, 0.0));
+        std::vector<std::vector<float>> tab(m + 1, std::vector<float>(cols, 0.0));
         // basis: for each row, which column is basic
         std::vector<int> basis(m, -1);
 
@@ -147,22 +147,22 @@ public:
 
         // ---- Phase I setup: objective is minimize sum(artificials).
         // We will do Phase I only if art_count > 0 (if art_count==0 then feasible start already).
-        auto pivot = [&](int prow, int pcol, int rowsTot, int colsTot, std::vector<std::vector<double>>& T, std::vector<int>& basisRef) {
-            double piv = T[prow][pcol];
+        auto pivot = [&](int prow, int pcol, int rowsTot, int colsTot, std::vector<std::vector<float>>& T, std::vector<int>& basisRef) {
+            float piv = T[prow][pcol];
             if (std::abs(piv) < EPS) throw std::runtime_error("Numerical instability (pivot too small)");
             // normalize pivot row
             for (int j = 0; j < colsTot; ++j) T[prow][j] /= piv;
             // eliminate other rows
             for (int i = 0; i < rowsTot; ++i) {
                 if (i == prow) continue;
-                double fac = T[i][pcol];
+                float fac = T[i][pcol];
                 if (std::abs(fac) < EPS) continue;
                 for (int j = 0; j < colsTot; ++j) T[i][j] -= fac * T[prow][j];
             }
             basisRef[prow] = pcol;
         };
 
-        auto simplex_loop = [&](std::vector<std::vector<double>>& T, std::vector<int>& basisRef, int rowsTot, int colsTot) -> void {
+        auto simplex_loop = [&](std::vector<std::vector<float>>& T, std::vector<int>& basisRef, int rowsTot, int colsTot) -> void {
             // T has rowsTot rows, colsTot columns (including RHS at colsTot-1). last row is objective row.
             while (true) {
                 // find entering column: most negative in objective row (we keep the same convention: T[last][j] < -EPS)
@@ -175,10 +175,10 @@ public:
 
                 // ratio test for leaving row
                 int leave = -1;
-                double bestRatio = 0.0;
+                float bestRatio = 0.0;
                 for (int i = 0; i < rowsTot - 1; ++i) {
                     if (T[i][enter] > EPS) {
-                        double ratio = T[i][colsTot - 1] / T[i][enter];
+                        float ratio = T[i][colsTot - 1] / T[i][enter];
                         if (ratio >= -EPS && (leave == -1 || ratio < bestRatio - EPS || (std::abs(ratio - bestRatio) < EPS && basisRef[i] < basisRef[leave]))) {
                             leave = i;
                             bestRatio = ratio;
@@ -210,7 +210,7 @@ public:
                 int bcol = basis[i];
                 if (bcol >= art_start && bcol < art_start + art_count) {
                     // c_b = -1
-                    double c_b = -1.0;
+                    float c_b = -1.0;
                     for (int j = 0; j < cols; ++j) tab[last][j] += c_b * tab[i][j];
                 }
             }
@@ -218,7 +218,7 @@ public:
             // Run Phase I simplex
             simplex_loop(tab, basis, m + 1, cols);
 
-            double phase1_obj = tab[m][cols - 1]; // bottom RHS is the maximized value of (-sum(art))
+            float phase1_obj = tab[m][cols - 1]; // bottom RHS is the maximized value of (-sum(art))
             // recall: Phase I objective w* = -phase1_obj
             if (phase1_obj < -EPS) {
                 // phase1_obj negative means w* > 0 => infeasible
@@ -255,7 +255,7 @@ public:
             // Now physically remove artificial columns by creating a new tableau without them
             int newTotalCols = art_start; // drop everything from art_start .. art_start+art_count-1
             int newCols = newTotalCols + 1;
-            std::vector<std::vector<double>> newTab(m + 1, std::vector<double>(newCols, 0.0));
+            std::vector<std::vector<float>> newTab(m + 1, std::vector<float>(newCols, 0.0));
             std::vector<int> newBasis(m, -1);
             for (int i = 0; i < m + 1; ++i) {
                 for (int j = 0; j < newTotalCols; ++j) {
@@ -288,7 +288,7 @@ public:
         // add c_b * row_i to bottom row to make reduced costs correct. c_b for slack columns is 0.
         for (int i = 0; i < m; ++i) {
             int bcol = basis[i];
-            double c_b = 0.0;
+            float c_b = 0.0;
             if (bcol >= 0 && bcol < (int)c.size()) c_b = c[bcol];
             // else slack columns have c_b = 0
             if (std::abs(c_b) > 0.0) {
@@ -300,11 +300,11 @@ public:
         simplex_loop(tab, basis, m + 1, cols);
 
         // Extract solution for original variables (combine pos-neg pairs)
-        std::vector<double> x_orig(n, 0.0);
+        std::vector<float> x_orig(n, 0.0);
         for (int j = 0; j < n; ++j) {
             int col_pos = 2*j;
             int col_neg = 2*j + 1;
-            double val_pos = 0.0, val_neg = 0.0;
+            float val_pos = 0.0, val_neg = 0.0;
             int pivotRow = -1;
             // find if col_pos is basic
             for (int i = 0; i < m; ++i) {

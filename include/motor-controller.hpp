@@ -95,7 +95,7 @@ public:
 	 *
 	 * @return Bounded velocity (0 if in deadband, otherwise unchanged)
 	 */
-	double bound_velocity_to_deadband(double desired_velocity);
+	float bound_velocity_to_deadband(float desired_velocity);
 
 	/**
 	 * @brief Calculates maximum achievable acceleration in a given direction
@@ -110,7 +110,7 @@ public:
 	 *
 	 * @return Maximum achievable acceleration in rad/s^2
 	 */
-	double get_motor_max_accel(bool reverse, int direction);
+	float get_motor_max_accel(bool reverse, int direction);
 
 	/**
 	 * @brief Applies a voltage directly to the motor
@@ -122,7 +122,7 @@ public:
 	 *
 	 * @param[in] voltage Desired voltage in volts (will be clamped to max_voltage)
 	 */
-	void move_motor_voltage(const double& voltage);
+	void move_motor_voltage(const float& voltage);
 
 	/**
 	 * @brief Applies a voltage for a specified duration
@@ -134,7 +134,7 @@ public:
 	 * @param[in] voltage Desired voltage in volts
 	 * @param[in] time Duration to maintain voltage in milliseconds
 	 */
-	void move_motor_volts_time(const double& voltage, const int& time);
+	void move_motor_volts_time(const float& voltage, const int& time);
 
 	/**
 	 * @brief Calculates achievable velocity bounds for the next time step
@@ -148,7 +148,7 @@ public:
 	 *
 	 * @return Velocity bounds (min, max) in rad/s
 	 */
-	wheel_vel_bounds get_motor_vel_bounds(const double& dt);
+	wheel_vel_bounds get_motor_vel_bounds(const float& dt);
 
 	/**
 	 * @brief Calculates desired acceleration from desired velocity
@@ -162,7 +162,7 @@ public:
 	 *
 	 * @return Desired acceleration in rad/s^2
 	 */
-	double get_desired_motor_acceleration(const double& desired_motor_vels, const double& dt);
+	float get_desired_motor_acceleration(const float& desired_motor_vels, const float& dt);
 
 	/**
 	 * @brief Bounds desired velocity to achievable limits
@@ -178,7 +178,7 @@ public:
 	 *
 	 * @return Bounded velocity that is achievable within the time step
 	 */
-	double bound_desired_motor_velocity(const double& desired_velocity, const double& dt);
+	float bound_desired_motor_velocity(const float& desired_velocity, const float& dt);
 };
 
 #endif // MOTOR_CONTROLLER_HPP

@@ -2,22 +2,22 @@
 #define PID_HPP
 #include "controller.hpp"
 
-struct PIDConstants { double Kp, Ki, Kd; };
+struct PIDConstants { float Kp, Ki, Kd; };
 
-class PID : public Controller<PIDConstants, double, double, double, ControllerType::Feedback> {
+class PID : public Controller<PIDConstants, float, float, float, ControllerType::Feedback> {
 private:
-    double timestep;
-    double previous_error = 0.0;
-    double error_integral = 0.0;
+    float timestep;
+    float previous_error = 0.0;
+    float error_integral = 0.0;
 
 public:
-    using Base = Controller<PIDConstants, double, double, double, ControllerType::Feedback>;
+    using Base = Controller<PIDConstants, float, float, float, ControllerType::Feedback>;
 
-    explicit PID(PIDConstants constants_, double timestep_)
+    explicit PID(PIDConstants constants_, float timestep_)
         : Base(std::move(constants_)), timestep(timestep_) {}
 
     // Override the concrete virtual function
-    double compute(const double& setpoint, const double& output) override;
+    float compute(const float& setpoint, const float& output) override;
 };
 
 #endif // pid.hpp

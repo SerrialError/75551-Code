@@ -9,33 +9,33 @@
 #include "system-identification.hpp"
 #include <deque>
 
-std::vector<double> SysIdent::calculate_mean_velocities(double voltage, std::vector<MotorController>& motors) {
+std::vector<float> SysIdent::calculate_mean_velocities(float voltage, std::vector<MotorController>& motors) {
 	for (size_t i = 0; i < motors.size(); i++) {
 		motors[i].move_motor_voltage(voltage);
 	}
 	pros::delay(1000); // allow motors to reach steady state
-	std::vector<double> total_velocities(motors.size(), 0.0);
+	std::vector<float> total_velocities(motors.size(), 0.0);
 	for (size_t i = 0; i < 50; i++) {
 		for (size_t j = 0; j < motors.size(); j++) {
-			double measured_rpm = motors[j].motor.get().get_actual_velocity();
-			double measured_rad_s = measured_rpm * 2.0 * M_PI / 60.0;
+			float measured_rpm = motors[j].motor.get().get_actual_velocity();
+			float measured_rad_s = measured_rpm * 2.0 * M_PI / 60.0;
 			total_velocities[j] += measured_rad_s;
 		}
 		pros::delay(10);
 
 	}
-	std::vector<double> mean_velocities(motors.size(), 0.0);
+	std::vector<float> mean_velocities(motors.size(), 0.0);
 	for (size_t i = 0; i < motors.size(); i++) {
 		mean_velocities[i] = total_velocities[i] / 50.0;
 	}
 	return mean_velocities;
 }
 
-std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vector<MotorController>& motors) {
-	std::vector<std::vector<std::pair<double,double>>> velocity_data(motors.size());
+std::vector<std::pair<float,float>> SysIdent::calculate_Kv_and_Ks_s(std::vector<MotorController>& motors) {
+	std::vector<std::vector<std::pair<float,float>>> velocity_data(motors.size());
 	for (size_t i = 1; i <= 10; i++) {
 		// Alternate between positive and negative voltages to identify K_s sign.
-		double applied_voltage = (i % 2 == 0) ? -static_cast<double>(i) : static_cast<double>(i);
+		float applied_voltage = (i % 2 == 0) ? -static_cast<float>(i) : static_cast<float>(i);
 		auto mean_ws = calculate_mean_velocities(applied_voltage, motors);
 		for (size_t j = 0; j < motors.size(); j++) {
 			velocity_data[j].push_back({ mean_ws[j], applied_voltage });
@@ -49,7 +49,7 @@ std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vecto
 	for (size_t i = 0; i < motors.size(); i++) {
 		motors[i].move_motor_voltage(0.0);
 	}
-	std::vector<std::pair<double, double>> Kv_and_Ks_s;
+	std::vector<std::pair<float, float>> Kv_and_Ks_s;
 	Kv_and_Ks_s.reserve(motors.size());
 	for (size_t i = 0; i < motors.size(); i++) {
 		Kv_and_Ks_s.push_back(fit_Kv_and_Ks_with_sign(velocity_data[i]));
@@ -57,46 +57,46 @@ std::vector<std::pair<double,double>> SysIdent::calculate_Kv_and_Ks_s(std::vecto
 	return Kv_and_Ks_s;
 }
 
-std::pair<double,double> SysIdent::linear_reg(const std::vector<std::pair<double,double>>& points) {
-	double sum_x = 0.0, sum_y = 0.0, sum_xx = 0.0, sum_xy = 0.0;
-    const double n = static_cast<double>(points.size());
+std::pair<float,float> SysIdent::linear_reg(const std::vector<std::pair<float,float>>& points) {
+	float sum_x = 0.0, sum_y = 0.0, sum_xx = 0.0, sum_xy = 0.0;
+    const float n = static_cast<float>(points.size());
 
     for (const auto &point : points) {
-        double x = point.first;
-        double y = point.second;
+        float x = point.first;
+        float y = point.second;
         sum_x += x;
         sum_y += y;
         sum_xx += x * x;
         sum_xy += x * y;
     }
 
-    double denom = n * sum_xx - sum_x * sum_x;
+    float denom = n * sum_xx - sum_x * sum_x;
     if (std::abs(denom) < 1e-12) { // degenerate
-	double b = (n > 0.0) ? (sum_y / n) : 0.0;
+	float b = (n > 0.0) ? (sum_y / n) : 0.0;
 	return {0.0, b};
     }
-    double m = (n * sum_xy - sum_x * sum_y) / denom;
-	double b = (sum_y - m * sum_x) / n;
+    float m = (n * sum_xy - sum_x * sum_y) / denom;
+	float b = (sum_y - m * sum_x) / n;
 
 	return {m, b};
 }
 
 // Fit V = kV * w + kS * s  where s = sign(w)
-std::pair<double,double> SysIdent::fit_Kv_and_Ks_with_sign(const std::vector<std::pair<double,double>>& points) {
+std::pair<float,float> SysIdent::fit_Kv_and_Ks_with_sign(const std::vector<std::pair<float,float>>& points) {
     // points: (w, V)
-    double sum_w = 0.0;
-    double sum_s = 0.0;
-    double sum_ww = 0.0;
-    double sum_ws = 0.0;
-    double sum_ss = 0.0;
-    double sum_wy = 0.0;
-    double sum_sy = 0.0;
-    const double n = static_cast<double>(points.size());
+    float sum_w = 0.0;
+    float sum_s = 0.0;
+    float sum_ww = 0.0;
+    float sum_ws = 0.0;
+    float sum_ss = 0.0;
+    float sum_wy = 0.0;
+    float sum_sy = 0.0;
+    const float n = static_cast<float>(points.size());
 
     for (const auto &p : points) {
-        double w = p.first;
-        double y = p.second;
-        double s = (w > 0.0) ? 1.0 : ((w < 0.0) ? -1.0 : 0.0);
+        float w = p.first;
+        float y = p.second;
+        float s = (w > 0.0) ? 1.0 : ((w < 0.0) ? -1.0 : 0.0);
         sum_w += w;
         sum_s += s;
         sum_ww += w * w;
@@ -107,20 +107,20 @@ std::pair<double,double> SysIdent::fit_Kv_and_Ks_with_sign(const std::vector<std
     }
 
     // Normal equations: [sum_ww sum_ws; sum_ws sum_ss] * [kV; kS] = [sum_wy; sum_sy]
-    double det = sum_ww * sum_ss - sum_ws * sum_ws;
+    float det = sum_ww * sum_ss - sum_ws * sum_ws;
     if (std::abs(det) < 1e-12) {
         // degenerate: fall back to single-variable fit (your linear_reg) for kV, and approximate kS from medians
         auto kb = linear_reg(points); // {m,b} from V = m*w + b
         return { kb.first, kb.second }; // best-effort fallback
     }
 
-    double kV =  ( sum_wy * sum_ss - sum_sy * sum_ws) / det;
-    double kS =  (-sum_wy * sum_ws + sum_sy * sum_ww) / det;
+    float kV =  ( sum_wy * sum_ss - sum_sy * sum_ws) / det;
+    float kS =  (-sum_wy * sum_ws + sum_sy * sum_ww) / det;
 
     return {kV, kS};
 }
 
-std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, std::vector<std::vector<double>>> SysIdent::get_acceleration_data(double voltage, std::vector<MotorController>& motors) {
+std::tuple<std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> SysIdent::get_acceleration_data(float voltage, std::vector<MotorController>& motors) {
     // Command motors
     for (size_t i = 0; i < motors.size(); i++) {
         motors[i].move_motor_voltage(voltage);
@@ -128,10 +128,10 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, s
 
     const size_t iterations = 20;   // total outer loop iterations
     const int window = 4;            // N-sample window used for robust slope (3 is a good start)
-    const double ms_to_s = 1.0 / 1000.0;
+    const float ms_to_s = 1.0 / 1000.0;
 
     // output buffers
-    std::vector<std::vector<double>> V(motors.size()), w(motors.size()), alpha(motors.size());
+    std::vector<std::vector<float>> V(motors.size()), w(motors.size()), alpha(motors.size());
 
     // small reserves to avoid realloc churn on embedded target
     for (size_t j = 0; j < motors.size(); ++j) {
@@ -141,28 +141,28 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, s
     }
 
     // rolling buffers for slope estimation
-    std::vector<std::deque<double>> prev_ws(motors.size()), prev_ts(motors.size());
+    std::vector<std::deque<float>> prev_ws(motors.size()), prev_ts(motors.size());
 
     // exponential filter state for w
-    std::vector<double> w_filtered(motors.size(), 0.0);
-    const double w_lp_alpha = 0.20; // filter coefficient (0..1). smaller => smoother but slower. tune if needed.
+    std::vector<float> w_filtered(motors.size(), 0.0);
+    const float w_lp_alpha = 0.20; // filter coefficient (0..1). smaller => smoother but slower. tune if needed.
 
     // helper: current time in seconds
-    auto now_seconds = []() -> double {
-        return static_cast<double>(pros::millis()) * (1.0/1000.0);
+    auto now_seconds = []() -> float {
+        return static_cast<float>(pros::millis()) * (1.0/1000.0);
     };
 
     // main sample loop
     for (size_t iter = 0; iter < iterations; ++iter) {
-        double t = now_seconds();
+        float t = now_seconds();
 
         for (size_t j = 0; j < motors.size(); ++j) {
-            double raw_voltage = motors[j].motor.get().get_voltage(); // could be mV or V
+            float raw_voltage = motors[j].motor.get().get_voltage(); // could be mV or V
             // auto-detect units: if large (>100) assume mV, else assume volts
-            double measured_v = (std::abs(raw_voltage) > 100.0) ? (raw_voltage / 1000.0) : raw_voltage;
+            float measured_v = (std::abs(raw_voltage) > 100.0) ? (raw_voltage / 1000.0) : raw_voltage;
 
-            double measured_rpm = motors[j].motor.get().get_actual_velocity(); // RPM
-            double measured_rad_s = measured_rpm * 2.0 * M_PI / 60.0;          // rad/s
+            float measured_rpm = motors[j].motor.get().get_actual_velocity(); // RPM
+            float measured_rad_s = measured_rpm * 2.0 * M_PI / 60.0;          // rad/s
 
             // exponential low-pass on w to reduce HF jitter
             // initialize filtered value on first useful sample
@@ -180,22 +180,22 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, s
             // when we have a full window, compute slope by small linear regression (least squares)
             if (prev_ws[j].size() == static_cast<size_t>(window)) {
                 // compute means
-                double mean_t = 0.0, mean_w = 0.0;
+                float mean_t = 0.0, mean_w = 0.0;
                 for (int k = 0; k < window; ++k) {
                     mean_t += prev_ts[j][k];
                     mean_w += prev_ws[j][k];
                 }
-                mean_t /= static_cast<double>(window);
-                mean_w /= static_cast<double>(window);
+                mean_t /= static_cast<float>(window);
+                mean_w /= static_cast<float>(window);
 
-                double num = 0.0, den = 0.0;
+                float num = 0.0, den = 0.0;
                 for (int k = 0; k < window; ++k) {
-                    double dt = prev_ts[j][k] - mean_t;
-                    double dw = prev_ws[j][k] - mean_w;
+                    float dt = prev_ts[j][k] - mean_t;
+                    float dw = prev_ws[j][k] - mean_w;
                     num += dt * dw;
                     den += dt * dt;
                 }
-                double measured_rad_s_s = (den != 0.0) ? (num / den) : 0.0; // rad/s^2
+                float measured_rad_s_s = (den != 0.0) ? (num / den) : 0.0; // rad/s^2
 
                 // store the measurement triple
                 V[j].push_back(measured_v);
@@ -211,12 +211,12 @@ std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, s
     return {V, w, alpha};
 }
 
-std::vector<double> SysIdent::calculate_Ka_s(std::vector<std::pair<double, double>> Kv_and_Ks_s, std::vector<MotorController>& motors) {
+std::vector<float> SysIdent::calculate_Ka_s(std::vector<std::pair<float, float>> Kv_and_Ks_s, std::vector<MotorController>& motors) {
     auto [V, w, alpha] = get_acceleration_data(10.0, motors);
 
     printf("---- BEGIN Ka DATA ----\n");
 
-    std::vector<double> Ka;
+    std::vector<float> Ka;
     Ka.reserve(motors.size());
 
     // When calling through_origin_fit, use slightly stricter thresholds inside that function.
@@ -231,18 +231,18 @@ std::vector<double> SysIdent::calculate_Ka_s(std::vector<std::pair<double, doubl
     return Ka;
 }
 
-double SysIdent::through_origin_fit(const std::vector<double>& V, const std::vector<double>& w, const std::vector<double>& alpha, double Kv, double Ks) {
-	double alpha_thresh = 7.000;
-	double w_thresh = 0.001;
-	double num = 0.0, den = 0.0;
+float SysIdent::through_origin_fit(const std::vector<float>& V, const std::vector<float>& w, const std::vector<float>& alpha, float Kv, float Ks) {
+	float alpha_thresh = 7.000;
+	float w_thresh = 0.001;
+	float num = 0.0, den = 0.0;
 
 	for (size_t i = 0; i < V.size(); ++i) {
 		// optionally ignore low-speed samples where sgn(w) is noisy:
 		if (std::abs(w[i]) < w_thresh) continue;
 		if (std::abs(alpha[i]) < alpha_thresh) continue; // no info about Ka
 
-		double s = (w[i] > 0.0) ? 1.0 : -1.0; // choose sgn(0) handled by w_thresh
-		double Y = V[i] - Kv * w[i] - Ks * s;
+		float s = (w[i] > 0.0) ? 1.0 : -1.0; // choose sgn(0) handled by w_thresh
+		float Y = V[i] - Kv * w[i] - Ks * s;
 		num += alpha[i] * Y;
 		den += alpha[i] * alpha[i];
 		printf("ACCEL V=%.4f w=%.6f alpha=%.6f s=%d Y=%.6f\n",
@@ -251,16 +251,16 @@ double SysIdent::through_origin_fit(const std::vector<double>& V, const std::vec
 
 	if (den == 0.0) return 0.0;
 
-	double Ka = num / den;
+	float Ka = num / den;
 
 	return Ka;
 }
 
-std::vector<std::tuple<double, double, double>> SysIdent::calculate_Kv_Ka_and_Ks_s(std::vector<MotorController>& motors) {
-	std::vector<std::pair<double, double>> Kv_and_Ks_s = calculate_Kv_and_Ks_s(motors);
+std::vector<std::tuple<float, float, float>> SysIdent::calculate_Kv_Ka_and_Ks_s(std::vector<MotorController>& motors) {
+	std::vector<std::pair<float, float>> Kv_and_Ks_s = calculate_Kv_and_Ks_s(motors);
 	pros::delay(1000);
-	std::vector<double> Ka = calculate_Ka_s(Kv_and_Ks_s, motors);
-	std::vector<std::tuple<double, double, double>> Kv_Ka_and_Ks_s;
+	std::vector<float> Ka = calculate_Ka_s(Kv_and_Ks_s, motors);
+	std::vector<std::tuple<float, float, float>> Kv_Ka_and_Ks_s;
 	for (size_t i = 0; i < motors.size(); i++) {
 		Kv_Ka_and_Ks_s.emplace_back(Kv_and_Ks_s[i].first, Ka[i], Kv_and_Ks_s[i].second);
 	}

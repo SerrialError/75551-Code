@@ -15,7 +15,7 @@ void intake::move_motor_accelerations(const rollers<motorVelocityType>& motor_ac
     }
 }
 
-rollers<motorVelocityType> intake::get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels, const double& dt) {
+rollers<motorVelocityType> intake::get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels, const float& dt) {
     rollers<motorVelocityType> result{};
     for (size_t i = 0; i < 2; ++i) {
 	    result[i].velocity = motors[i].get_desired_motor_acceleration(desired_motor_vels[i].velocity, dt);
@@ -56,11 +56,11 @@ rollers<motorStateType> intake::get_roller_states(void) {
 }
 
 motorVelocityType intake::get_desired_motor_state(motorStateType wanted_roller_state, MotorController motor) {
-    double wanted_velocity = 0.0;
+    float wanted_velocity = 0.0;
     pros::motor_brake_mode_e wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
 
-    if (std::holds_alternative<double>(wanted_roller_state)) {
-        double scale = std::get<double>(wanted_roller_state);     // e.g. 0.8
+    if (std::holds_alternative<float>(wanted_roller_state)) {
+        float scale = std::get<float>(wanted_roller_state);     // e.g. 0.8
         wanted_velocity = motor.motor_constants.max_ang_vel * scale;
         wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
     } else {
@@ -103,7 +103,7 @@ void intake::get_intake_state() {
     }
 }
 
-void intake::update_intake_state(const double& dt) {
+void intake::update_intake_state(const float& dt) {
 	if (colorSorting) {
         get_intake_state();
     }
@@ -124,12 +124,12 @@ bool intake::is_correct_color(void) {
 }
 
 color intake::get_block_color(void) {
-	// double hue = optical.get_hue();
-    double hue = 0.01;
+	// float hue = optical.get_hue();
+    float hue = 0.01;
     master.print(0, 0, "%lf", hue);
     master.clear();
-	double redAngularDistance = angularDistance(hue, redHue);
-	double blueAngularDistance = angularDistance(hue, blueHue);
+	float redAngularDistance = angularDistance(hue, redHue);
+	float blueAngularDistance = angularDistance(hue, blueHue);
 	if (redAngularDistance < redHueUncertainty) {
 		return red;
 	}

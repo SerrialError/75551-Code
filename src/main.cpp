@@ -37,8 +37,8 @@ const wheels<FirstOrderFeedforwardConstants> dtConsts{
 	{0.00169461151421, 0.161775364104, 0.136640169512, 76.235982, 12.055}, 
 	{0.0043200416094, 0.16243797244, 0.259385827274, 75.314448, 12.012}, 
 	{0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012} };
-const double wheelbase = 0.292100005; // m
-const double trackwidth = 0.29508135; // m
+const float wheelbase = 0.292100005; // m
+const float trackwidth = 0.29508135; // m
 
 drivetrain dt(driveMotors, wheelbase, trackwidth, dtConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
 
@@ -57,7 +57,7 @@ const rollers<FirstOrderFeedforwardConstants> intakeConsts {
 
 intake Intake(intakeMotors, intakeConsts);
 
-const double dt_ = 0.01;
+const float dt_ = 0.01;
 autons current_auton = blueRight;
 /**
  * A callback function for LLEMU's center button.

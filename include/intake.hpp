@@ -29,10 +29,10 @@ private:
     pros::Controller master{pros::E_CONTROLLER_MASTER};
     rollers<MotorController> motors;
     motorStateType motorState;
-	const double redHue = 4.0;
-	const double blueHue = 200.0;
-	const double redHueUncertainty = 7.0;
-    const double blueHueUncertainty = 20.0;
+	const float redHue = 4.0;
+	const float blueHue = 200.0;
+	const float redHueUncertainty = 7.0;
+    const float blueHueUncertainty = 20.0;
 
 public:
     /**
@@ -76,7 +76,7 @@ public:
 	 *
 	 * @return Desired accelerations for each roller in rad/s^2 with brake mode
 	 */
-	rollers<motorVelocityType> get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels, const double& dt);
+	rollers<motorVelocityType> get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels, const float& dt);
 
 	/**
 	 * @brief Gets the motor states corresponding to the current intake state
@@ -137,7 +137,7 @@ public:
 	 *
 	 * @param[in] dt Time step in seconds for control loop calculations
 	 */
-	void update_intake_state(const double& dt);
+	void update_intake_state(const float& dt);
 
 	/**
 	 * @brief Checks if the detected block color matches the alliance color
@@ -174,8 +174,8 @@ public:
 	 *
 	 * @return Angular distance in degrees, in range [0, 180]
 	 */
-	double angularDistance(double a, double b) {
-    	double d = fabs(a - b);
+	float angularDistance(float a, float b) {
+    	float d = fabs(a - b);
     	if (d > 180.0) d = 360.0 - d;
     	return d;
 	}
