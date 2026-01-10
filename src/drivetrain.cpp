@@ -13,36 +13,38 @@
 drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
                        const float wheelbase_length_,
                        const float trackwidth_length_,
-                       const wheels<FirstOrderFeedforwardConstants>& motor_constants_,
+                       const float timestep_,
+                       const wheels<FirstOrderFeedforwardConstants>& ff_motor_constants_,
+                       const wheels<PIDConstants>& pid_motor_constants_,
                        pros::Rotation& linear_wheel_,
                        pros::Rotation& horizontal_wheel_,
                        pros::Imu& imu_,
                        pose Pose_)
     : motors{
-          MotorController(motors_.m1, motor_constants_.m1, "m1"),
-          MotorController(motors_.m2, motor_constants_.m2, "m2"),
-          MotorController(motors_.o1, motor_constants_.o1, "o1"),
-          MotorController(motors_.o2, motor_constants_.o2, "o2"),
-          MotorController(motors_.m3, motor_constants_.m3, "m3"),
-          MotorController(motors_.m4, motor_constants_.m4, "m4")},
+          MotorController(motors_.m1, ff_motor_constants_.m1, pid_motor_constants_.m1, timestep_, "m1"),
+          MotorController(motors_.m2, ff_motor_constants_.m2, pid_motor_constants_.m2, timestep_, "m2"),
+          MotorController(motors_.o1, ff_motor_constants_.o1, pid_motor_constants_.o1, timestep_, "o1"),
+          MotorController(motors_.o2, ff_motor_constants_.o2, pid_motor_constants_.o2, timestep_, "o2"),
+          MotorController(motors_.m3, ff_motor_constants_.m3, pid_motor_constants_.m3, timestep_, "m3"),
+          MotorController(motors_.m4, ff_motor_constants_.m4, pid_motor_constants_.m4, timestep_, "m4")},
       wheelbase_length(wheelbase_length_),
       trackwidth_length(trackwidth_length_),
       localization{linear_wheel_, horizontal_wheel_, imu_, Pose_},
       max_wheels_ang_vel(
-          std::min({ angular_velocity(0.f, motor_constants_.m1),
-                     angular_velocity(0.f, motor_constants_.m2),
-                     angular_velocity(0.f, motor_constants_.o1),
-                     angular_velocity(0.f, motor_constants_.o2),
-                     angular_velocity(0.f, motor_constants_.m3),
-                     angular_velocity(0.f, motor_constants_.m4) }) * gear_ratio),
+          std::min({ angular_velocity(0.f, ff_motor_constants_.m1),
+                     angular_velocity(0.f, ff_motor_constants_.m2),
+                     angular_velocity(0.f, ff_motor_constants_.o1),
+                     angular_velocity(0.f, ff_motor_constants_.o2),
+                     angular_velocity(0.f, ff_motor_constants_.m3),
+                     angular_velocity(0.f, ff_motor_constants_.m4) }) * gear_ratio),
       max_wheels_ang_vel_scaled(max_wheels_ang_vel * decimal_of_max_velocity),
       min_wheels_ang_accel(
-          std::min({ angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m1),
-                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m2),
-                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o1),
-                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.o2),
-                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m3),
-                     angular_acceleration(max_wheels_ang_vel_scaled, motor_constants_.m4) })),
+          std::min({ angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.m1),
+                     angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.m2),
+                     angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.o1),
+                     angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.o2),
+                     angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.m3),
+                     angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.m4) })),
       // Maximum linear and angular speeds/accelerations that respect motor limits.
       max_robot_lin_vel_scaled(max_wheels_ang_vel_scaled * wheel_radius),
       max_robot_ang_vel(((wheelbase_length_ + trackwidth_length_) / 24.f * (max_wheels_ang_vel * wheel_radius * 4.f)) +
@@ -52,7 +54,8 @@ drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors
       max_robot_ang_accel_scaled(((wheelbase_length_ + trackwidth_length_) / 24.f * (min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 4.f)) +
                                  (trackwidth_length_ / 12.f * (min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 2.f))),
       LinearMP((min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius), (max_robot_lin_vel_scaled)),
-      AngularMP((max_robot_ang_accel_scaled), (max_robot_ang_vel_scaled))
+      AngularMP((max_robot_ang_accel_scaled), (max_robot_ang_vel_scaled)),
+      timestep(timestep_)
 {}
 
 void drivetrain::motor_brakes() {
@@ -82,32 +85,32 @@ void drivetrain::move_motor_volts_time(const wheels<float>& wheel_voltages, cons
     }
 }
 
-wheels<wheel_vel_bounds> drivetrain::get_wheel_vel_bounds(const float dt) {
+wheels<wheel_vel_bounds> drivetrain::get_wheel_vel_bounds() {
     wheels<wheel_vel_bounds> result{};
     for (size_t i = 0; i < 6; ++i) {
-	    result[i].min = motors[i].get_motor_vel_bounds(dt).min * wheel_radius;
-	    result[i].max = motors[i].get_motor_vel_bounds(dt).max * wheel_radius;
+	    result[i].min = motors[i].get_motor_vel_bounds().min * wheel_radius;
+	    result[i].max = motors[i].get_motor_vel_bounds().max * wheel_radius;
     }
     return result;
 }
 
-wheels<motorVelocityType> drivetrain::get_wanted_motor_accels(const wheels<motorVelocityType>& desired_motor_vels, const float dt) {
+wheels<motorVelocityType> drivetrain::get_wanted_motor_accels(const wheels<motorVelocityType>& desired_motor_vels) {
     wheels<motorVelocityType> result{};
     for (size_t i = 0; i < 6; ++i) {
-	    result[i].velocity = motors[i].get_desired_motor_acceleration(desired_motor_vels[i].velocity, dt);
+	    result[i].velocity = motors[i].get_desired_motor_acceleration(desired_motor_vels[i].velocity);
 		result[i].brakeMode = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
     }
     return result;
 }
 
-void drivetrain::tank_drive_control(const float dt) {
+void drivetrain::tank_drive_control() {
     const float x_right = static_cast<float>(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
     const float y_left = static_cast<float>(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
     // for (int j = 0; j < 6; ++j) {
 	    // motors[j].update_motor_data();
     // }
     // Compute per-wheel velocity bounds given current state and time step.
-    const wheels<wheel_vel_bounds> bounds = get_wheel_vel_bounds(dt);
+    const wheels<wheel_vel_bounds> bounds = get_wheel_vel_bounds();
     const float W = trackwidth_length;
 	const float L = wheelbase_length;
     float linear_velocity;
@@ -135,14 +138,14 @@ void drivetrain::tank_drive_control(const float dt) {
 	const differentialVels robot_velocity = {linear_velocity, angular_velocity};
 	const wheels<motorVelocityType> wanted_motor_vels = differential_vels_to_motor_vels(robot_velocity);
     // wheels<float> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
-    const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
+    const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels);
     move_motor_accelerations(wanted_motor_accels);
 }
 
-wheels<float> drivetrain::bound_desired_motor_velocities(const wheels<float>& desired_motor_velocities, const float dt) {
+wheels<float> drivetrain::bound_desired_motor_velocities(const wheels<float>& desired_motor_velocities) {
     wheels<float> result;
     for (size_t i = 0; i < 6; ++i) {
-	    result[i] = motors[i].bound_desired_motor_velocity(desired_motor_velocities[i], dt);
+	    result[i] = motors[i].bound_desired_motor_velocity(desired_motor_velocities[i]);
     }
     return result;
 }
@@ -159,11 +162,11 @@ wheels<motorVelocityType> drivetrain::differential_vels_to_motor_vels(differenti
 	return {{m1_velocity, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {m2_velocity, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {o1_velocity, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {o2_velocity, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {m3_velocity, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {m4_velocity, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}};
 }
 
-void drivetrain::move_differential_robot_vels(const std::vector<differentialVels>& robot_vels, const float dt) {
+void drivetrain::move_differential_robot_vels(const std::vector<differentialVels>& robot_vels) {
 	for (size_t i = 0; i < robot_vels.size(); i++) {
 		wheels<motorVelocityType> wanted_motor_vels = differential_vels_to_motor_vels(robot_vels[i]);
     	// wheels<float> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
-    	const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
+    	const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels);
 		move_motor_accelerations(wanted_motor_accels);
 	}
 }
@@ -187,14 +190,14 @@ differentialVels drivetrain::ramsete(pose wanted_pose, differentialVels wanted_v
 	return {linear_out, angular_out};
 }
 
-void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose> wanted_pose, const float dt) {
+void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose> wanted_pose) {
 	for (size_t i = 0; i < robot_vels.size(); i++) {
 		differentialVels corrected_robot_vels = ramsete(wanted_pose[i], robot_vels[i]); 
 		wheels<motorVelocityType> wanted_motor_vels = differential_vels_to_motor_vels(corrected_robot_vels);
     	// wheels<float> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
-    	const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels, dt);
+    	const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels(wanted_motor_vels);
 		move_motor_accelerations(wanted_motor_accels);
-        pros::delay(static_cast<int>(dt*1000.f));
+        pros::delay(static_cast<int>(timestep*1000.f));
 	}
 }
 
@@ -204,7 +207,7 @@ void drivetrain::linear_mp(const float distance) {
     while(!LinearMP.profileFinished(time) || start) {
         float linear_velocity = LinearMP.velocity(time, distance);
 	    std::vector<differentialVels> desired_differential_vel = {{linear_velocity * 1.f, 0.f}};
-	    move_differential_robot_vels(desired_differential_vel, .01);
+	    move_differential_robot_vels(desired_differential_vel);
         pros::delay(10);
         time += 0.01;
         start = false;
@@ -218,7 +221,7 @@ void drivetrain::angular_mp(const float angle) {
     while(!AngularMP.profileFinished(time) || start) {
         float angular_velocity = AngularMP.velocity(time, angle);
 	    std::vector<differentialVels> desired_differential_vel = {{0.f, angular_velocity}};
-	    move_differential_robot_vels(desired_differential_vel, .01);
+	    move_differential_robot_vels(desired_differential_vel);
         pros::delay(10);
         time += 0.01;
         start = false;

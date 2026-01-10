@@ -42,6 +42,7 @@ private:
 	const float max_wheels_ang_vel;
 	const float max_wheels_ang_vel_scaled;
 	const float min_wheels_ang_accel;
+	const float timestep;
 
 public:
 	/**
@@ -61,14 +62,17 @@ public:
 	 * @param[in] imu_ Inertial measurement unit for orientation tracking
 	 * @param[in] Pose_ Initial pose (x, y, theta) of the robot
 	 */
-	drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
-			const float wheelbase_length_,
-			const float trackwidth_length_,
-			const wheels<FirstOrderFeedforwardConstants>& motor_constants_,
-			pros::Rotation& linear_wheel_,
-			pros::Rotation& horizontal_wheel_,
-			pros::Imu& imu_,
-			pose Pose_);
+	drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
+                       const float wheelbase_length_,
+                       const float trackwidth_length_,
+                       const float timestep_,
+                       const wheels<FirstOrderFeedforwardConstants>& ff_motor_constants_,
+                       const wheels<PIDConstants>& pid_motor_constants_,
+                       pros::Rotation& linear_wheel_,
+                       pros::Rotation& horizontal_wheel_,
+                       pros::Imu& imu_,
+                       pose Pose_);
+
 	const float max_robot_lin_vel_scaled;
 	const float max_robot_ang_vel;
 	const float max_robot_ang_vel_scaled;
@@ -182,7 +186,7 @@ public:
 	 *
 	 * @param[in] dt Time step in seconds for control loop calculations
 	 */
-	void field_oriented_holonomic_control(const float dt);
+	void field_oriented_holonomic_control();
 
 	/**
 	 * @brief Gets the standard angle representation of the robot's orientation
@@ -218,7 +222,7 @@ public:
 	 *
 	 * @return Velocity bounds (min, max) for each of the six wheels in m/s
 	 */
-	wheels<wheel_vel_bounds> get_wheel_vel_bounds(const float dt);
+	wheels<wheel_vel_bounds> get_wheel_vel_bounds();
 
 	/**
 	 * @brief Calculates desired motor accelerations from desired velocities
@@ -232,7 +236,7 @@ public:
 	 *
 	 * @return Desired accelerations for each motor in rad/s^2 with brake mode
 	 */
-	wheels<motorVelocityType> get_wanted_motor_accels(const wheels<motorVelocityType>& desired_motor_vels, const float dt);
+	wheels<motorVelocityType> get_wanted_motor_accels(const wheels<motorVelocityType>& desired_motor_vels);
 
 	/**
 	 * @brief Implements tank drive control using joystick inputs
@@ -245,7 +249,7 @@ public:
 	 *
 	 * @param[in] dt Time step in seconds for control loop calculations
 	 */
-	void tank_drive_control(const float dt);
+	void tank_drive_control();
 
 	/**
 	 * @brief Converts differential drive velocities to individual motor velocities
@@ -271,7 +275,7 @@ public:
 	 * @param[in] robot_vels Vector of desired robot velocities to execute sequentially
 	 * @param[in] dt Time step in seconds for each velocity command
 	 */
-	void move_differential_robot_vels(const std::vector<differentialVels>& robot_vels, const float dt);
+	void move_differential_robot_vels(const std::vector<differentialVels>& robot_vels);
 
 	/**
 	 * @brief Computes Ramsete controller output for path following
@@ -302,7 +306,7 @@ public:
 	 * @param[in] wanted_pose Vector of corresponding desired poses for Ramsete correction
 	 * @param[in] dt Time step in seconds for each velocity command
 	 */
-	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>, const float dt);
+	void move_differential_robot_vels_ramsete(std::vector<differentialVels> robot_vels, std::vector<pose>);
 
 	/**
 	 * @brief Applies desired accelerations to all motors using feedforward control
@@ -329,7 +333,7 @@ public:
 	 *
 	 * @return Bounded motor velocities that are achievable within the time step
 	 */
-	wheels<float> bound_desired_motor_velocities(const wheels<float>& desired_motor_velocities, const float dt);
+	wheels<float> bound_desired_motor_velocities(const wheels<float>& desired_motor_velocities);
 
 	/**
 	 * @brief Executes a linear motion profile to move a specified distance

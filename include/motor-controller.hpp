@@ -13,6 +13,7 @@
 #include "api.h"
 #include "structs.hpp"
 #include "controllers/first-order-feedforward.hpp"
+#include "controllers/pid.hpp"
 #include "helper-functions.hpp"
 
 /**
@@ -25,9 +26,10 @@
  */
 class MotorController {
 private:
-    FirstOrderFeedforward motor_ff;
-    std::vector<input_output> motor_data;
-
+    FirstOrderFeedforward ff_controller;
+	PID pid_controller;
+    std::vector<input_output> data;
+	const float timestep;
 public:
     /**
      * @brief Constructs a motor controller with a motor and constants
@@ -41,14 +43,20 @@ public:
      * @param[in] motor_name_ Name identifier for this motor (for debugging/logging)
      */
     MotorController(const std::reference_wrapper<pros::Motor>& motor_,
-              const FirstOrderFeedforwardConstants& motor_constants_,
-              std::string_view motor_name_)
+              const FirstOrderFeedforwardConstants& ff_constants_,
+			  const PIDConstants& pid_constants_,
+			  const float timestep_,
+              std::string_view name_)
         : motor(motor_),
-          motor_constants(motor_constants_),
-          motor_ff(motor_constants_),
-          motor_name(motor_name_)
+          ff_constants(ff_constants_),
+		  pid_constants(pid_constants_),
+          ff_controller(ff_constants_),
+		  pid_controller(pid_constants_, timestep),
+		  timestep(timestep_),
+          name(name_)
     {}
-    FirstOrderFeedforwardConstants motor_constants;
+    FirstOrderFeedforwardConstants ff_constants;
+	PIDConstants pid_constants;
 
 	/**
 	 * @brief Prints the stored motor data vector
@@ -69,7 +77,7 @@ public:
     
     std::reference_wrapper<pros::Motor> motor;
     
-	std::string_view motor_name;
+	std::string_view name;
 
 	/**
 	 * @brief Applies a desired acceleration using feedforward control
@@ -144,11 +152,9 @@ public:
 	 * limits. The bounds account for both forward and reverse acceleration
 	 * capabilities.
 	 *
-	 * @param[in] dt Time step in seconds for calculating velocity change limits
-	 *
 	 * @return Velocity bounds (min, max) in rad/s
 	 */
-	wheel_vel_bounds get_motor_vel_bounds(const float& dt);
+	wheel_vel_bounds get_motor_vel_bounds();
 
 	/**
 	 * @brief Calculates desired acceleration from desired velocity
@@ -162,7 +168,7 @@ public:
 	 *
 	 * @return Desired acceleration in rad/s^2
 	 */
-	float get_desired_motor_acceleration(const float& desired_motor_vels, const float& dt);
+	float get_desired_motor_acceleration(const float& desired_motor_vels);
 
 	/**
 	 * @brief Bounds desired velocity to achievable limits
@@ -178,7 +184,7 @@ public:
 	 *
 	 * @return Bounded velocity that is achievable within the time step
 	 */
-	float bound_desired_motor_velocity(const float& desired_velocity, const float& dt);
+	float bound_desired_motor_velocity(const float& desired_velocity);
 };
 
 #endif // MOTOR_CONTROLLER_HPP

@@ -30,17 +30,28 @@ const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
 };
 
 // kA, kV, kS, max rad/s (calculated at 12 V), max voltage
-const wheels<FirstOrderFeedforwardConstants> dtConsts{ 
+const wheels<FirstOrderFeedforwardConstants> dtFFConsts{ 
 	{0.0045870351481, 0.166157827462, 0.120535260966, 75.858991, 12.24}, 
 	{0.00346235990182, 0.16618573907, 0.103286863565, 74.351026, 12.055}, 
 	{0.0011750526572, 0.156487380984, 0.133576249675, 80.215332, 12.055}, 
 	{0.00169461151421, 0.161775364104, 0.136640169512, 76.235982, 12.055}, 
 	{0.0043200416094, 0.16243797244, 0.259385827274, 75.314448, 12.012}, 
 	{0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012} };
+
+const wheels<PIDConstants> dtPIDConsts{ 
+	{0.f, 0.f, 0.f},
+	{0.f, 0.f, 0.f}, 
+	{0.f, 0.f, 0.f}, 
+	{0.f, 0.f, 0.f}, 
+	{0.f, 0.f, 0.f}, 
+	{0.f, 0.f, 0.f} };
+
 const float wheelbase = 0.292100005; // m
 const float trackwidth = 0.29508135; // m
 
-drivetrain dt(driveMotors, wheelbase, trackwidth, dtConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
+const float dt_ = 0.01f;
+
+drivetrain dt(driveMotors, wheelbase, trackwidth, dt_, dtFFConsts, dtPIDConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
 
 pros::Motor front(-5, pros::v5::MotorGears::blue);
 pros::Motor back(-6, pros::v5::MotorGears::blue);
@@ -57,7 +68,6 @@ const rollers<FirstOrderFeedforwardConstants> intakeConsts {
 
 intake Intake(intakeMotors, intakeConsts);
 
-const float dt_ = 0.01;
 autons current_auton = blueRight;
 /**
  * A callback function for LLEMU's center button.
@@ -243,7 +253,7 @@ void opcontrol() {
 		}
 	 	Intake.update_intake_state(dt_);
 	    // dt.field_oriented_holonomic_control(dt_);
-	    dt.tank_drive_control(dt_);
+	    dt.tank_drive_control();
         // dt.test_control(dt_);
         pros::delay(static_cast<int>(dt_*1000.0));
     }
