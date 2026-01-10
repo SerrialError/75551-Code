@@ -48,7 +48,10 @@ float MotorController::get_motor_max_accel(bool reverse, int direction) {
 
 void MotorController::move_motor_voltage(const float& voltage) {
     float clamped_voltage = std::clamp(voltage, -ff_constants.max_voltage, ff_constants.max_voltage);
-    motor.get().move_voltage(static_cast<int>(std::lround(voltage * 1000.0))); // volts to millivolts
+
+    if (motor.get().is_installed()) {
+        motor.get().move_voltage(static_cast<int>(std::lround(voltage * 1000.0))); // volts to millivolts
+    }
 }
 
 void MotorController::move_motor_volts_time(const float& voltage, const int& time) {
