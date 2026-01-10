@@ -40,7 +40,7 @@ std::vector<std::pair<float,float>> SysIdent::calculate_Kv_and_Ks_s(std::vector<
 		for (size_t j = 0; j < motors.size(); j++) {
 			velocity_data[j].push_back({ mean_ws[j], applied_voltage });
 			printf("STEADY motor=%s V=%.3f w=%.6f s=%d\n",
-		  		std::string(motors[j].motor_name).c_str(),
+		  		std::string(motors[j].name).c_str(),
 		  		applied_voltage,
 		  		mean_ws[j],
 		  		(mean_ws[j] > 0) - (mean_ws[j] < 0));
@@ -223,7 +223,7 @@ std::vector<float> SysIdent::calculate_Ka_s(std::vector<std::pair<float, float>>
     // (If you haven't changed through_origin_fit, consider increasing alpha_thresh and w_thresh there.)
     for (size_t i = 0; i < motors.size(); i++) {
         // optional per-motor debug: print how many samples were captured for this motor
-        printf("DBG Ka: motor=%s samples=%zu\n", std::string(motors[i].motor_name).c_str(), alpha[i].size());
+        printf("DBG Ka: motor=%s samples=%zu\n", std::string(motors[i].name).c_str(), alpha[i].size());
         Ka.push_back(through_origin_fit(V[i], w[i], alpha[i], Kv_and_Ks_s[i].first, Kv_and_Ks_s[i].second));
     }
 
@@ -272,7 +272,7 @@ void SysIdent::calculate_and_print_constants(std::vector<MotorController>& motor
 
 	for (size_t i = 0; i < motors.size(); i++) {
 		auto [Kv, Ka, Ks] = results[i];
-		printf("%s\n", std::string(motors[i].motor_name).c_str());
+		printf("%s\n", std::string(motors[i].name).c_str());
 		pros::delay(10);
 		printf("K_v = ");
 		pros::delay(10);

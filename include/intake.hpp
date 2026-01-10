@@ -46,9 +46,11 @@ public:
      * @param[in] motor_constants_ Feedforward constants for each motor
      */
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_,
-              const rollers<FirstOrderFeedforwardConstants>& motor_constants_)
-        : motors{ MotorController(motors_.front, motor_constants_.front, "front"),
-                  MotorController(motors_.back, motor_constants_.back, "back") }
+           const rollers<FirstOrderFeedforwardConstants>& motor_ff_constants_,
+		   const rollers<PIDConstants>& motor_pid_constants_,
+		   const float timestep)
+        : motors{ MotorController(motors_.front, motor_ff_constants_.front, motor_pid_constants_.front, timestep, "front"),
+                  MotorController(motors_.back, motor_ff_constants_.back, motor_pid_constants_.front, timestep, "back") }
     {}
     color allianceColor = red;
     rollerStateType intakeState = intakeOff;
@@ -76,7 +78,7 @@ public:
 	 *
 	 * @return Desired accelerations for each roller in rad/s^2 with brake mode
 	 */
-	rollers<motorVelocityType> get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels, const float& dt);
+	rollers<motorVelocityType> get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels);
 
 	/**
 	 * @brief Gets the motor states corresponding to the current intake state

@@ -61,12 +61,18 @@ const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 	std::ref(back)
 };
 
-const rollers<FirstOrderFeedforwardConstants> intakeConsts {
+const rollers<FirstOrderFeedforwardConstants> intakeFFConsts {
 	{0.00681526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618},
 	{0.00981526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618}
 };
 
-intake Intake(intakeMotors, intakeConsts);
+const rollers<PIDConstants> intakePIDConsts {
+	{0.f, 0.f, 0.f}, 
+	{0.f, 0.f, 0.f}
+};
+
+
+intake Intake(intakeMotors, intakeFFConsts, intakePIDConsts, dt_);
 
 autons current_auton = blueRight;
 /**

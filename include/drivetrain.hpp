@@ -62,7 +62,7 @@ public:
 	 * @param[in] imu_ Inertial measurement unit for orientation tracking
 	 * @param[in] Pose_ Initial pose (x, y, theta) of the robot
 	 */
-	drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
+	drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors_,
                        const float wheelbase_length_,
                        const float trackwidth_length_,
                        const float timestep_,

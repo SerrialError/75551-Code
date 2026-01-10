@@ -152,7 +152,7 @@ std::optional<wheels<float>> drivetrain::calculate_wheel_vels(const pose& desire
 	return result;
 }
 
-void drivetrain::field_oriented_holonomic_control(const float dt) {
+void drivetrain::field_oriented_holonomic_control() {
     const float L = wheelbase_length;
     const float W = trackwidth_length;
     const float ZERO_DEADBAND = 1.f;
@@ -177,7 +177,7 @@ void drivetrain::field_oriented_holonomic_control(const float dt) {
     // float angle_error = wrapToPi(wanted_angle - cur_angle);
     // float angle_error = wanted_angle;
     float angle_error = 0.f;
-    wheels<wheel_vel_bounds> bounds = get_wheel_vel_bounds(dt);
+    wheels<wheel_vel_bounds> bounds = get_wheel_vel_bounds();
 	float x_max_velocity = bounds.m1.max - bounds.m2.min - bounds.m3.min + bounds.m4.max;
 	float y_max_velocity = bounds.m1.max + bounds.m2.max + bounds.m3.max + bounds.m4.max + bounds.o1.max + bounds.o2.max;
     float theta_max_velocity = (L+W)/4.f*(bounds.m2.max + bounds.m4.max - bounds.m1.min - bounds.m3.min) + W/2.f*(bounds.o2.max - bounds.o1.min); // THESE SHOULD BE FORCES AND TORQUES
@@ -200,6 +200,6 @@ void drivetrain::field_oriented_holonomic_control(const float dt) {
     }
     wheels<float> wanted_motor_vels = *wanted_motor_vels_;
     // wheels<float> wanted_bounded_motor_vels = bound_desired_motor_velocities(wanted_motor_vels, dt);
-    const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels({{wanted_motor_vels.m1, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.m2, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.o1, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.o2, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.m3, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.m4, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}}, dt);
+    const wheels<motorVelocityType> wanted_motor_accels = get_wanted_motor_accels({{wanted_motor_vels.m1, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.m2, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.o1, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.o2, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.m3, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}, {wanted_motor_vels.m4, pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST}});
     move_motor_accelerations(wanted_motor_accels);
 }

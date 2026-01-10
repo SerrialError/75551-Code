@@ -15,10 +15,10 @@ void intake::move_motor_accelerations(const rollers<motorVelocityType>& motor_ac
     }
 }
 
-rollers<motorVelocityType> intake::get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels, const float& dt) {
+rollers<motorVelocityType> intake::get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels) {
     rollers<motorVelocityType> result{};
     for (size_t i = 0; i < 2; ++i) {
-	    result[i].velocity = motors[i].get_desired_motor_acceleration(desired_motor_vels[i].velocity, dt);
+	    result[i].velocity = motors[i].get_desired_motor_acceleration(desired_motor_vels[i].velocity);
 		result[i].brakeMode = desired_motor_vels[i].brakeMode;
     }
     return result;
@@ -61,7 +61,7 @@ motorVelocityType intake::get_desired_motor_state(motorStateType wanted_roller_s
 
     if (std::holds_alternative<float>(wanted_roller_state)) {
         float scale = std::get<float>(wanted_roller_state);     // e.g. 0.8
-        wanted_velocity = motor.motor_constants.max_ang_vel * scale;
+        wanted_velocity = motor.ff_constants.max_ang_vel * scale;
         wanted_brake = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
     } else {
         // it's a SpecialState
@@ -109,7 +109,7 @@ void intake::update_intake_state(const float& dt) {
     }
     rollers<motorStateType> roller_states = get_roller_states();
 	rollers<motorVelocityType> desired_motor_states = get_desired_motor_states(roller_states);
-    rollers<motorVelocityType> motor_accelerations = get_wanted_motor_accels(desired_motor_states, dt);
+    rollers<motorVelocityType> motor_accelerations = get_wanted_motor_accels(desired_motor_states);
     move_motor_accelerations(motor_accelerations);
 }
 
