@@ -345,7 +345,8 @@ public:
 	 *
 	 * @param[in] distance Distance to travel in meters (positive = forward, negative = backward)
 	 */
-	void linear_mp(const float distance, const float percent_of_max_velocity = 100.f, const float percent_of_max_acceleration = 100.f);
+	void linear_mp(const float distance, bool log = false, const float percent_of_max_velocity = 100.f, const float percent_of_max_acceleration = 100.f);
+
 	
 	/**
 	 * @brief Executes an angular motion profile to rotate a specified angle
@@ -357,7 +358,7 @@ public:
 	 *
 	 * @param[in] angle Angle to rotate in radians (positive = counterclockwise, negative = clockwise)
 	 */
-	void angular_mp(const float angle, const float percent_of_max_velocity = 100.f, const float percent_of_max_acceleration = 100.f);
+	void angular_mp(const float angle, bool log = false, const float percent_of_max_velocity = 100.f, const float percent_of_max_acceleration = 100.f);
 
 	
 	/**
