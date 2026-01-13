@@ -8,44 +8,29 @@
  */
 #include "motion-profiler.hpp"
 
-bool mp::profileFinished(double time) {
+bool mp::profileFinished(float time) {
     return (time >= end_time);
 }
 
-double mp::velocity(double time, double distance) {
-    const double t_1 = max_velocity / max_acceleration;
-    const double c = max_velocity * t_1 / 2;
-    const double b = distance - 2 * c;
-    double velocity = 0.0;
-    if (b < 0) {
-        velocity = triangular_motion_profile(time, distance);
+float mp::velocity(float time) {
+    if (b < 0.f) {
+        return triangular_motion_profile(time);
     }
     else {
-        velocity = trapezoidal_motion_profile(time, distance);
+        return trapezoidal_motion_profile(time);
     }
-    return velocity;
 }
 
-double mp::triangular_motion_profile(double time, double distance) {
-    const double h = sqrt(distance * max_acceleration);
-    const double z = 2 * distance / h;
-    end_time = z;
-    if (time < z / 2) {
+float mp::triangular_motion_profile(float time) {
+    if (time < end_time / 2.f) {
         return (max_acceleration * time);
     }
     else {
-        return (-max_acceleration * (time - z/2) + max_acceleration * z/2);
+        return (-max_acceleration * (time - end_time/2.f) + max_acceleration * end_time/2.f);
     }
 }
 
-double mp::trapezoidal_motion_profile(double time, double distance) {
-    const double h = sqrt(distance * max_acceleration);
-    const double z = 2 * distance / h;
-    const double u = 2 * max_velocity / max_acceleration;
-    const double w = (distance - (1.0 / 2.0 * u * max_velocity)) / max_velocity;
-    const double t_4 = u / 2;
-    const double t_5 = t_4 + w;
-    end_time = t_5 + t_4;
+float mp::trapezoidal_motion_profile(float time) {
     if (time < t_4) {
         return (max_acceleration * time);    
     }
