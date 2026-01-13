@@ -269,17 +269,4 @@ struct differentialVels {
     float angular; /**< Angular velocity in rad/s (rotation) */
 };
 
-/**
- * @brief Autonomous routine identifiers
- *
- * Enumeration of the different autonomous routines available,
- * identified by alliance color and starting position.
- */
-enum autons {
-    blueRight, /**< Blue alliance, right starting position */
-    blueLeft,  /**< Blue alliance, left starting position */
-    redRight,  /**< Red alliance, right starting position */
-    redLeft    /**< Red alliance, left starting position */
-};
-
 #endif // STRUCTS_HPP
