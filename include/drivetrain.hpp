@@ -345,7 +345,7 @@ public:
 	 *
 	 * @param[in] distance Distance to travel in meters (positive = forward, negative = backward)
 	 */
-	void linear_mp(const float distance);
+	void linear_mp(const float distance, bool log = false);
 	
 	/**
 	 * @brief Executes an angular motion profile to rotate a specified angle
