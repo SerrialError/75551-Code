@@ -49,9 +49,9 @@ const wheels<PIDConstants> dtPIDConsts{
 const float wheelbase = 0.292100005; // m
 const float trackwidth = 0.29508135; // m
 
-const float dt_ = 0.01f;
+const float timestep = 0.01f;
 
-drivetrain dt(driveMotors, wheelbase, trackwidth, dt_, dtFFConsts, dtPIDConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
+drivetrain dt(driveMotors, wheelbase, trackwidth, timestep, dtFFConsts, dtPIDConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
 
 pros::Motor front(-5, pros::v5::MotorGears::blue);
 pros::Motor back(-6, pros::v5::MotorGears::blue);
@@ -72,9 +72,17 @@ const rollers<PIDConstants> intakePIDConsts {
 };
 
 
-intake Intake(intakeMotors, intakeFFConsts, intakePIDConsts, dt_);
+intake Intake(intakeMotors, intakeFFConsts, intakePIDConsts, timestep);
 
-autons current_auton = blueRight;
+enum autons {
+	testing,
+    blueRight,
+    blueLeft,
+    redRight,
+    redLeft
+};
+
+autons current_auton = testing;
 /**
  * A callback function for LLEMU's center button.
  *
@@ -184,24 +192,34 @@ void competition_initialize() {
  */
 void autonomous() {
 	switch (current_auton) {
+		case testing:
+			dt.localization.set_pose({0.0, 0.0, 0.0});
+			dt.linear_mp(10.f * 0.0254f, true, 100.f, 100.f);
+			break;
+			
 		case blueRight:
 			dt.localization.set_pose({0.0, 0.0, 0.0});
 			Intake.intakeState = intakeOnly;
 			for (int i = 0; i < 20; i++) {
-	 			Intake.update_intake_state(dt_);
-        			pros::delay(static_cast<int>(dt_*1000.0));
+	 			Intake.update_intake_state(timestep);
+        		pros::delay(static_cast<int>(timestep*1000.f));
 			}
-			dt.linear_mp(40 * 0.0254);
+			dt.linear_mp(0.738f);
+			pros::delay(50);
+			dt.angular_mp(-90.f * 180.f / static_cast<float>(M_PI));
+			pros::delay(50);
+			dt.linear_mp(0.179f);
+			match_loader.extend();
 			pros::delay(500);
-			dt.angular_mp(162.0 * M_PI / 180.0 * 0.0254);
-			pros::delay(500);
-			dt.linear_mp(21.0 * 0.0254);
-			Intake.intakeState = bottomScore;
+			dt.linear_mp(-0.616f);
+			match_loader.retract();
+			Intake.intakeState = topScore;
 			for (int i = 0; i < 20; i++) {
-	 			Intake.update_intake_state(dt_);
-        			pros::delay(static_cast<int>(dt_*1000.0));
+				Intake.update_intake_state(timestep);
+				pros::delay(static_cast<int>(timestep*1000.f));
 			}
 			break;
+
 		case blueLeft:
 			break;
 		case redLeft:
@@ -215,7 +233,6 @@ void autonomous() {
 			break;
 	}
 }
-
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -257,10 +274,10 @@ void opcontrol() {
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
 			dt.calculate_and_print_motor_constants();
 		}
-	 	Intake.update_intake_state(dt_);
-	    // dt.field_oriented_holonomic_control(dt_);
+	 	Intake.update_intake_state(timestep);
+	    // dt.field_oriented_holonomic_control(timestep);
 	    dt.tank_drive_control();
-        // dt.test_control(dt_);
-        pros::delay(static_cast<int>(dt_*1000.0));
+        // dt.test_control(timestep);
+        pros::delay(static_cast<int>(timestep*1000.0));
     }
 }

@@ -204,7 +204,7 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
 void drivetrain::linear_mp(const float distance, bool log, const float percent_of_max_velocity, const float percent_of_max_acceleration) {
     float time = 0.f;
     bool start = true;
-    mp linearMP(max_robot_lin_accel_scaled, max_robot_lin_vel_scaled, distance);
+    mp linearMP(max_robot_lin_accel_scaled * percent_of_max_acceleration / 100.f, max_robot_lin_vel_scaled * percent_of_max_velocity / 100.f, distance);
 	std::optional<std::vector<float>> linear_velocities;
     if (log) {
         linear_velocities.emplace();
@@ -234,7 +234,7 @@ void drivetrain::linear_mp(const float distance, bool log, const float percent_o
 void drivetrain::angular_mp(const float angle, bool log, const float percent_of_max_velocity, const float percent_of_max_acceleration) {
     float time = 0.f;
     bool start = true;
-    mp angularMP(max_robot_ang_accel_scaled, max_robot_ang_vel_scaled, angle);
+    mp angularMP(max_robot_ang_accel_scaled * percent_of_max_acceleration / 100.f, max_robot_ang_vel_scaled * percent_of_max_velocity / 100.f, angle);
   	std::optional<std::vector<float>> angular_velocities;
     if (log) {
         angular_velocities.emplace();
