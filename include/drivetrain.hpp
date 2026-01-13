@@ -43,6 +43,11 @@ private:
 	const float max_wheels_ang_vel_scaled;
 	const float min_wheels_ang_accel;
 	const float timestep;
+	const float max_robot_lin_vel_scaled;
+	const float max_robot_ang_vel;
+	const float max_robot_ang_vel_scaled;
+	const float max_robot_ang_accel_scaled;
+	const float max_robot_lin_accel_scaled;
 
 public:
 	/**
@@ -72,14 +77,9 @@ public:
                        pros::Rotation& horizontal_wheel_,
                        pros::Imu& imu_,
                        pose Pose_);
-
-	const float max_robot_lin_vel_scaled;
-	const float max_robot_ang_vel;
-	const float max_robot_ang_vel_scaled;
-	const float max_robot_ang_accel_scaled;
+	
 	Localization localization;
-	mp LinearMP;
-	mp AngularMP;
+
 	/**
 	 * @brief Calculates maximum angular velocity for a given acceleration
 	 *
@@ -345,7 +345,7 @@ public:
 	 *
 	 * @param[in] distance Distance to travel in meters (positive = forward, negative = backward)
 	 */
-	void linear_mp(const float distance);
+	void linear_mp(const float distance, const float percent_of_max_velocity = 100.f, const float percent_of_max_acceleration = 100.f);
 	
 	/**
 	 * @brief Executes an angular motion profile to rotate a specified angle
@@ -357,7 +357,8 @@ public:
 	 *
 	 * @param[in] angle Angle to rotate in radians (positive = counterclockwise, negative = clockwise)
 	 */
-	void angular_mp(const float angle);
+	void angular_mp(const float angle, const float percent_of_max_velocity = 100.f, const float percent_of_max_acceleration = 100.f);
+
 	
 	/**
 	 * @brief Moves to a target pose using motion profiles

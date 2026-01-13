@@ -53,8 +53,7 @@ drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors
                                (trackwidth_length_ / 12.f * (max_wheels_ang_vel_scaled * wheel_radius * 2.f))),
       max_robot_ang_accel_scaled(((wheelbase_length_ + trackwidth_length_) / 24.f * (min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 4.f)) +
                                  (trackwidth_length_ / 12.f * (min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 2.f))),
-      LinearMP((min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius), (max_robot_lin_vel_scaled)),
-      AngularMP((max_robot_ang_accel_scaled), (max_robot_ang_vel_scaled)),
+	  max_robot_lin_accel_scaled(min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius),
       timestep(timestep_)
 {}
 
@@ -201,11 +200,12 @@ void drivetrain::move_differential_robot_vels_ramsete(std::vector<differentialVe
 	}
 }
 
-void drivetrain::linear_mp(const float distance) {
+void drivetrain::linear_mp(const float distance, const float percent_of_max_velocity, const float percent_of_max_acceleration) {
     float time = 0.f;
     bool start = true;
-    while(!LinearMP.profileFinished(time) || start) {
-        float linear_velocity = LinearMP.velocity(time, distance);
+    mp linearMP(max_robot_lin_accel_scaled, max_robot_lin_vel_scaled, distance);
+    while(!linearMP.profileFinished(time) || start) {
+        float linear_velocity = linearMP.velocity(time);
 	    std::vector<differentialVels> desired_differential_vel = {{linear_velocity, 0.f}};
 	    move_differential_robot_vels(desired_differential_vel);
         pros::delay(static_cast<int>(timestep * 1000.f));
@@ -215,20 +215,12 @@ void drivetrain::linear_mp(const float distance) {
     motor_brakes();
 }
 
-void print_vector(const std::vector<float>& vector, const char* name) {
-	printf("%s = [", name);
-    for (size_t i = 0; i < vector.size(); ++i) {
-        printf("%.4f", vector[i]);
-        if (i + 1 < vector.size()) printf(",");
-    }
-    printf("]\n");	
-}
-
-void drivetrain::angular_mp(const float angle) {
+void drivetrain::angular_mp(const float angle, const float percent_of_max_velocity, const float percent_of_max_acceleration) {
     float time = 0.f;
     bool start = true;
-    while(!AngularMP.profileFinished(time) || start) {
-        float angular_velocity = AngularMP.velocity(time, angle);
+    mp angularMP(max_robot_ang_accel_scaled, max_robot_ang_vel_scaled, angle);
+    while(!angularMP.profileFinished(time) || start) {
+        float angular_velocity = angularMP.velocity(time);
 	    std::vector<differentialVels> desired_differential_vel = {{0.f, angular_velocity}};
 	    move_differential_robot_vels(desired_differential_vel);
         pros::delay(timestep * 1000.f);
@@ -258,5 +250,3 @@ void drivetrain::mtp_mp(const pose desired_pose) {
 void drivetrain::mtp_mp_ramsete(const pose desired_pose) {
 
 }
-
-
