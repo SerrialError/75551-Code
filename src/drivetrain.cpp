@@ -242,7 +242,7 @@ void drivetrain::angular_mp(const float angle, bool log, const float percent_of_
     }
     while(!angularMP.profileFinished(time) || start) {
 
-        float angular_velocity = AngularMP.velocity(time, angle);
+        float angular_velocity = angularMP.velocity(time);
 		if (angular_velocities) {
 			angular_velocities->push_back(angular_velocity);
 		}
