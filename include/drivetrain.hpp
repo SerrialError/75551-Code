@@ -357,7 +357,7 @@ public:
 	 *
 	 * @param[in] angle Angle to rotate in radians (positive = counterclockwise, negative = clockwise)
 	 */
-	void angular_mp(const float angle);
+	void angular_mp(const float angle, bool log = false);
 	
 	/**
 	 * @brief Moves to a target pose using motion profiles

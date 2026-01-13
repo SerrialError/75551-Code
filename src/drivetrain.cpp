@@ -230,7 +230,7 @@ void drivetrain::linear_mp(const float distance, bool log) {
     motor_brakes();
 }
 
-void drivetrain::angular_mp(const float angle) {
+void drivetrain::angular_mp(const float angle, bool log) {
     float time = 0.f;
     bool start = true;
 	std::optional<std::vector<float>> angular_velocities;
@@ -242,7 +242,7 @@ void drivetrain::angular_mp(const float angle) {
     while(!AngularMP.profileFinished(time) || start) {
         float angular_velocity = AngularMP.velocity(time, angle);
 		if (angular_velocities) {
-			angular_velocities->push_back(linear_velocity);
+			angular_velocities->push_back(angular_velocity);
 		}
 	    std::vector<differentialVels> desired_differential_vel = {{0.f, angular_velocity}};
 	    move_differential_robot_vels(desired_differential_vel);
