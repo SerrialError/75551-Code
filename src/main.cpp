@@ -249,6 +249,10 @@ void autonomous() {
  */
 
 void opcontrol() {
+    printf("%.4f\n", dt.max_robot_lin_vel_scaled);
+    printf("%.4f\n", dt.max_robot_lin_accel_scaled);
+    printf("%.4f\n", dt.max_robot_ang_vel_scaled);
+    printf("%.4f\n", dt.max_robot_ang_accel_scaled);
     while(true) {
 	    if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
 	        Intake.intakeState = topScore;
@@ -275,9 +279,7 @@ void opcontrol() {
 			dt.calculate_and_print_motor_constants();
 		}
 	 	Intake.update_intake_state(timestep);
-	    // dt.field_oriented_holonomic_control(timestep);
 	    dt.tank_drive_control();
-        // dt.test_control(timestep);
         pros::delay(static_cast<int>(timestep*1000.0));
     }
 }

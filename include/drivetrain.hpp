@@ -43,11 +43,7 @@ private:
 	const float max_wheels_ang_vel_scaled;
 	const float min_wheels_ang_accel;
 	const float timestep;
-	const float max_robot_lin_vel_scaled;
 	const float max_robot_ang_vel;
-	const float max_robot_ang_vel_scaled;
-	const float max_robot_ang_accel_scaled;
-	const float max_robot_lin_accel_scaled;
 
 public:
 	/**
@@ -79,6 +75,10 @@ public:
                        pose Pose_);
 	
 	Localization localization;
+	const float max_robot_lin_vel_scaled;
+	const float max_robot_ang_vel_scaled;
+	const float max_robot_ang_accel_scaled;
+	const float max_robot_lin_accel_scaled;
 
 	/**
 	 * @brief Calculates maximum angular velocity for a given acceleration
