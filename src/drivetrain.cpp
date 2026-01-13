@@ -79,9 +79,9 @@ void drivetrain::move_motor_accelerations(const wheels<motorVelocityType>& motor
 }
 
 void drivetrain::move_motor_volts_time(const wheels<float>& wheel_voltages, const int time) {
-    for (size_t i = 0; i < time / 10; i++) {
+    for (size_t i = 0; i < time / timestep; i++) {
         move_motor_volts(wheel_voltages);
-	    pros::delay(10);
+	    pros::delay(timestep * 1000.f);
     }
 }
 
@@ -206,13 +206,22 @@ void drivetrain::linear_mp(const float distance) {
     bool start = true;
     while(!LinearMP.profileFinished(time) || start) {
         float linear_velocity = LinearMP.velocity(time, distance);
-	    std::vector<differentialVels> desired_differential_vel = {{linear_velocity * 1.f, 0.f}};
+	    std::vector<differentialVels> desired_differential_vel = {{linear_velocity, 0.f}};
 	    move_differential_robot_vels(desired_differential_vel);
-        pros::delay(10);
-        time += 0.01;
+        pros::delay(static_cast<int>(timestep * 1000.f));
+        time += timestep;
         start = false;
     }
     motor_brakes();
+}
+
+void print_vector(const std::vector<float>& vector, const char* name) {
+	printf("%s = [", name);
+    for (size_t i = 0; i < vector.size(); ++i) {
+        printf("%.4f", vector[i]);
+        if (i + 1 < vector.size()) printf(",");
+    }
+    printf("]\n");	
 }
 
 void drivetrain::angular_mp(const float angle) {
@@ -222,8 +231,8 @@ void drivetrain::angular_mp(const float angle) {
         float angular_velocity = AngularMP.velocity(time, angle);
 	    std::vector<differentialVels> desired_differential_vel = {{0.f, angular_velocity}};
 	    move_differential_robot_vels(desired_differential_vel);
-        pros::delay(10);
-        time += 0.01;
+        pros::delay(timestep * 1000.f);
+        time += timestep;
         start = false;
     }
     motor_brakes();
@@ -249,3 +258,5 @@ void drivetrain::mtp_mp(const pose desired_pose) {
 void drivetrain::mtp_mp_ramsete(const pose desired_pose) {
 
 }
+
+
