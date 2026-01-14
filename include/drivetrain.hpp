@@ -45,6 +45,10 @@ private:
 	const float timestep;
 	const float max_robot_ang_vel;
 
+	float get_linear_velocity();
+
+	float get_angular_velocity();
+
 public:
 	/**
 	 * @brief Constructs a drivetrain object with specified motors and parameters
@@ -163,7 +167,7 @@ public:
 	 *
 	 * @param[in] wheel_voltages Voltage values for each of the six wheels in volts
 	 */
-	void move_motor_volts(const wheels<float>& wheel_voltages);
+	void move_voltage(const wheels<float>& wheel_voltages);
 
 	/**
 	 * @brief Sets voltage for all motors for a specified duration
@@ -175,7 +179,7 @@ public:
 	 * @param[in] wheel_voltages Voltage values for each of the six wheels in volts
 	 * @param[in] time Duration to maintain voltages in milliseconds
 	 */
-	void move_motor_volts_time(const wheels<float>& wheel_voltages, const int time);
+	void move_voltage_time(const wheels<float>& wheel_voltages, const int time);
 
 	/**
 	 * @brief Controls the robot using field-oriented holonomic drive

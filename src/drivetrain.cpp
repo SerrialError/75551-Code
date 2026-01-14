@@ -62,25 +62,25 @@ void drivetrain::motor_brakes() {
 	for (size_t i = 0; i < 6; ++i) {
 		motors[i].motor.get().set_brake_mode(pros::motor_brake_mode_e::E_MOTOR_BRAKE_BRAKE);
 		motors[i].motor.get().brake();
-		move_motor_volts({0.f, 0.f, 0.f, 0.f, 0.f, 0.f});
+		move_voltage({0.f, 0.f, 0.f, 0.f, 0.f, 0.f});
 	}
 }
 
-void drivetrain::move_motor_volts(const wheels<float>& wheel_voltages) {
+void drivetrain::move_voltage(const wheels<float>& wheel_voltages) {
     for (size_t i = 0; i < 6; ++i) {
-        motors[i].move_motor_voltage(wheel_voltages[i]);
+        motors[i].move_voltage(wheel_voltages[i]);
     }
 }
 
 void drivetrain::move_motor_accelerations(const wheels<motorVelocityType>& motor_accelerations) {
     for (int i = 0; i < 6; i++) {
-	    motors[i].move_motor_acceleration(motor_accelerations[i]);
+	    motors[i].move_acceleration(motor_accelerations[i]);
     }
 }
 
-void drivetrain::move_motor_volts_time(const wheels<float>& wheel_voltages, const int time) {
+void drivetrain::move_voltage_time(const wheels<float>& wheel_voltages, const int time) {
     for (size_t i = 0; i < time / timestep; i++) {
-        move_motor_volts(wheel_voltages);
+        move_voltage(wheel_voltages);
 	    pros::delay(timestep * 1000.f);
     }
 }
@@ -88,8 +88,8 @@ void drivetrain::move_motor_volts_time(const wheels<float>& wheel_voltages, cons
 wheels<wheel_vel_bounds> drivetrain::get_wheel_vel_bounds() {
     wheels<wheel_vel_bounds> result{};
     for (size_t i = 0; i < 6; ++i) {
-	    result[i].min = motors[i].get_motor_vel_bounds().min * wheel_radius;
-	    result[i].max = motors[i].get_motor_vel_bounds().max * wheel_radius;
+	    result[i].min = motors[i].get_vel_bounds().min * wheel_radius;
+	    result[i].max = motors[i].get_vel_bounds().max * wheel_radius;
     }
     return result;
 }
@@ -97,7 +97,7 @@ wheels<wheel_vel_bounds> drivetrain::get_wheel_vel_bounds() {
 wheels<motorVelocityType> drivetrain::get_wanted_motor_accels(const wheels<motorVelocityType>& desired_motor_vels) {
     wheels<motorVelocityType> result{};
     for (size_t i = 0; i < 6; ++i) {
-	    result[i].velocity = motors[i].get_desired_motor_acceleration(desired_motor_vels[i].velocity);
+	    result[i].velocity = motors[i].get_desired_acceleration(desired_motor_vels[i].velocity);
 		result[i].brakeMode = pros::motor_brake_mode_e::E_MOTOR_BRAKE_COAST;
     }
     return result;
@@ -145,7 +145,7 @@ void drivetrain::tank_drive_control() {
 wheels<float> drivetrain::bound_desired_motor_velocities(const wheels<float>& desired_motor_velocities) {
     wheels<float> result;
     for (size_t i = 0; i < 6; ++i) {
-	    result[i] = motors[i].bound_desired_motor_velocity(desired_motor_velocities[i]);
+	    result[i] = motors[i].bound_desired_velocity(desired_motor_velocities[i]);
     }
     return result;
 }
@@ -215,6 +215,7 @@ void drivetrain::linear_mp(const float distance, bool log, const float percent_o
         float linear_velocity = linearMP.velocity(time);
 		if (linear_velocities) {
 			linear_velocities->push_back(linear_velocity);
+            // linear_velocities->push_back(get_linear_velocity());
 		}
 	    std::vector<differentialVels> desired_differential_vel = {{linear_velocity, 0.f}};
 	    move_differential_robot_vels(desired_differential_vel);
@@ -245,6 +246,7 @@ void drivetrain::angular_mp(const float angle, bool log, const float percent_of_
         float angular_velocity = angularMP.velocity(time);
 		if (angular_velocities) {
 			angular_velocities->push_back(angular_velocity);
+            // angular_velocities->push_back(get_angular_velocity());
 		}
 	    std::vector<differentialVels> desired_differential_vel = {{0.f, angular_velocity}};
 	    move_differential_robot_vels(desired_differential_vel);
@@ -267,6 +269,27 @@ void drivetrain::calculate_and_print_motor_constants() {
 		motors_.push_back(motors[i]);
 	}
 	SysIdent::calculate_and_print_constants(motors_);
+}
+
+float drivetrain::get_linear_velocity() {
+    float total_linear_velocity = 0.f;
+    for (size_t i = 0; i < 6; ++i) {
+        float linear_velocity = motors[i].get_angular_velocity() * wheel_radius;
+        total_linear_velocity += linear_velocity;
+    }
+    return total_linear_velocity / 6.f;
+}
+
+float drivetrain::get_angular_velocity() {
+	const float m1_linear_velocity = motors.m1.get_angular_velocity() * wheel_radius;
+	const float m2_linear_velocity = motors.m2.get_angular_velocity() * wheel_radius;
+    const float o1_linear_velocity = motors.o1.get_angular_velocity() * wheel_radius;
+	const float o2_linear_velocity = motors.o2.get_angular_velocity() * wheel_radius;
+	const float m3_linear_velocity = motors.m3.get_angular_velocity() * wheel_radius;
+	const float m4_linear_velocity = motors.m4.get_angular_velocity() * wheel_radius;
+    float left_linear_velocity = (m1_linear_velocity + o1_linear_velocity + m3_linear_velocity) / 3.f;
+    float right_linear_velocity = (m2_linear_velocity + o2_linear_velocity + m4_linear_velocity) / 3.f;
+    return (right_linear_velocity - left_linear_velocity) / trackwidth_length;
 }
 
 void drivetrain::mtp_mp(const pose desired_pose) {

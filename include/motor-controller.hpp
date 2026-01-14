@@ -73,7 +73,7 @@ public:
      * into the motor_data vector. This data can be used for system identification
      * or analysis of motor performance.
      */
-    void update_motor_data();
+    void update_data();
     
     std::reference_wrapper<pros::Motor> motor;
     
@@ -89,7 +89,7 @@ public:
 	 *
 	 * @param[in] desired_acceleration Desired acceleration in rad/s^2 with brake mode
 	 */
-	void move_motor_acceleration(const motorVelocityType& desired_acceleration);
+	void move_acceleration(const motorVelocityType& desired_acceleration);
 
 	/**
 	 * @brief Bounds velocity to zero if within deadband range
@@ -118,7 +118,7 @@ public:
 	 *
 	 * @return Maximum achievable acceleration in rad/s^2
 	 */
-	float get_motor_max_accel(bool reverse, int direction);
+	float get_max_accel(bool reverse, int direction);
 
 	/**
 	 * @brief Applies a voltage directly to the motor
@@ -130,7 +130,7 @@ public:
 	 *
 	 * @param[in] voltage Desired voltage in volts (will be clamped to max_voltage)
 	 */
-	void move_motor_voltage(const float& voltage);
+	void move_voltage(const float& voltage);
 
 	/**
 	 * @brief Applies a voltage for a specified duration
@@ -142,7 +142,7 @@ public:
 	 * @param[in] voltage Desired voltage in volts
 	 * @param[in] time Duration to maintain voltage in milliseconds
 	 */
-	void move_motor_volts_time(const float& voltage, const int& time);
+	void move_volts_time(const float& voltage, const int& time);
 
 	/**
 	 * @brief Calculates achievable velocity bounds for the next time step
@@ -154,7 +154,7 @@ public:
 	 *
 	 * @return Velocity bounds (min, max) in rad/s
 	 */
-	wheel_vel_bounds get_motor_vel_bounds();
+	wheel_vel_bounds get_vel_bounds();
 
 	/**
 	 * @brief Calculates desired acceleration from desired velocity
@@ -168,7 +168,7 @@ public:
 	 *
 	 * @return Desired acceleration in rad/s^2
 	 */
-	float get_desired_motor_acceleration(const float& desired_motor_vels);
+	float get_desired_acceleration(const float& desired_motor_vels);
 
 	/**
 	 * @brief Bounds desired velocity to achievable limits
@@ -184,7 +184,9 @@ public:
 	 *
 	 * @return Bounded velocity that is achievable within the time step
 	 */
-	float bound_desired_motor_velocity(const float& desired_velocity);
+	float bound_desired_velocity(const float& desired_velocity);
+
+	float get_angular_velocity();
 };
 
 #endif // MOTOR_CONTROLLER_HPP

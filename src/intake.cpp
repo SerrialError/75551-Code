@@ -11,14 +11,14 @@
 
 void intake::move_motor_accelerations(const rollers<motorVelocityType>& motor_accelerations) {
     for (int i = 0; i < 2; i++) {
-	    motors[i].move_motor_acceleration(motor_accelerations[i]);
+	    motors[i].move_acceleration(motor_accelerations[i]);
     }
 }
 
 rollers<motorVelocityType> intake::get_wanted_motor_accels(const rollers<motorVelocityType>& desired_motor_vels) {
     rollers<motorVelocityType> result{};
     for (size_t i = 0; i < 2; ++i) {
-	    result[i].velocity = motors[i].get_desired_motor_acceleration(desired_motor_vels[i].velocity);
+	    result[i].velocity = motors[i].get_desired_acceleration(desired_motor_vels[i].velocity);
 		result[i].brakeMode = desired_motor_vels[i].brakeMode;
     }
     return result;
