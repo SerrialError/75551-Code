@@ -17,7 +17,7 @@ pros::Motor m2(14, pros::v5::MotorGears::blue);
 pros::Motor o1(-13, pros::v5::MotorGears::blue);
 pros::Motor o2(18, pros::v5::MotorGears::blue);
 pros::Motor m3(-11, pros::v5::MotorGears::blue);
-pros::Motor m4(17, pros::v5::MotorGears::blue);
+pros::Motor m4(10, pros::v5::MotorGears::blue);
 
 // Drivetrain motor grouping: mecanum (m1–m4) plus omni wheels (o1, o2).
 const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
@@ -82,7 +82,7 @@ enum autons {
     redLeft
 };
 
-autons current_auton = testing;
+autons current_auton = blueRight;
 /**
  * A callback function for LLEMU's center button.
  *
@@ -281,5 +281,7 @@ void opcontrol() {
 	 	Intake.update_intake_state(timestep);
 	    dt.tank_drive_control();
         pros::delay(static_cast<int>(timestep*1000.0));
+		dt.master.print(0, 0, "%lf", dt.master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
+		dt.master.clear();
     }
 }
