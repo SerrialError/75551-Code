@@ -11,7 +11,7 @@
 
 std::vector<float> SysIdent::calculate_mean_velocities(float voltage, std::vector<MotorController>& motors) {
 	for (size_t i = 0; i < motors.size(); i++) {
-		motors[i].move_motor_voltage(voltage);
+		motors[i].move_voltage(voltage);
 	}
 	pros::delay(1000); // allow motors to reach steady state
 	std::vector<float> total_velocities(motors.size(), 0.0);
@@ -47,7 +47,7 @@ std::vector<std::pair<float,float>> SysIdent::calculate_Kv_and_Ks_s(std::vector<
 		}
 	}
 	for (size_t i = 0; i < motors.size(); i++) {
-		motors[i].move_motor_voltage(0.0);
+		motors[i].move_voltage(0.0);
 	}
 	std::vector<std::pair<float, float>> Kv_and_Ks_s;
 	Kv_and_Ks_s.reserve(motors.size());
@@ -123,7 +123,7 @@ std::pair<float,float> SysIdent::fit_Kv_and_Ks_with_sign(const std::vector<std::
 std::tuple<std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> SysIdent::get_acceleration_data(float voltage, std::vector<MotorController>& motors) {
     // Command motors
     for (size_t i = 0; i < motors.size(); i++) {
-        motors[i].move_motor_voltage(voltage);
+        motors[i].move_voltage(voltage);
     }
 
     const size_t iterations = 20;   // total outer loop iterations
