@@ -48,7 +48,6 @@ float MotorController::get_max_accel(bool reverse, int direction) {
 
 void MotorController::move_voltage(const float& voltage) {
     float clamped_voltage = std::clamp(voltage, -ff_constants.max_voltage, ff_constants.max_voltage);
-
     if (motor.get().is_installed()) {
         motor.get().move_voltage(static_cast<int>(std::lround(voltage * 1000.f)));
     }
@@ -70,7 +69,13 @@ wheel_vel_bounds MotorController::get_vel_bounds() {
 }
 
 float MotorController::get_angular_velocity() {
-    return motor.get().get_actual_velocity() * 2.f * static_cast<float>(M_PI) / 60.f;
+    if (motor.get().is_installed()) {
+        return motor.get().get_actual_velocity() * 2.f * static_cast<float>(M_PI) / 60.f;
+    }
+    else {
+        return 0.f;
+    }
+    
 }
 
 float MotorController::get_desired_acceleration(const float& desired_motor_vel) {

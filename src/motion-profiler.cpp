@@ -13,11 +13,18 @@ bool mp::profileFinished(float time) {
 }
 
 float mp::velocity(float time) {
+    float velocity;
     if (b < 0.f) {
-        return triangular_motion_profile(time);
+        velocity = triangular_motion_profile(time);
     }
     else {
-        return trapezoidal_motion_profile(time);
+        velocity = trapezoidal_motion_profile(time);
+    }
+    if (distance > 0) {
+        return velocity;
+    }
+    else {
+        return -velocity;
     }
 }
 

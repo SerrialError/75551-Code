@@ -72,10 +72,10 @@ public:
 		: max_acceleration(max_acceleration_),
 		max_velocity(max_velocity_),
 		distance(distance_),
-		end_time(2* distance_ / sqrt(distance_ * max_acceleration_)),
+		end_time(2* fabs(distance_) / sqrt(fabs(distance_) * max_acceleration_)),
 		t_4(max_velocity_ / max_acceleration_),
-		t_5(max_velocity_ / max_acceleration_ + (distance_ - (1.f / 4.f * max_velocity_ / max_acceleration_ * max_velocity_)) / max_velocity_),
-		b(distance - pow(max_velocity_, 2) / max_acceleration_)
+		t_5(max_velocity_ / max_acceleration_ + (fabs(distance_) - (1.f / 4.f * max_velocity_ / max_acceleration_ * max_velocity_)) / max_velocity_),
+		b(fabs(distance_) - pow(max_velocity_, 2) / max_acceleration_)
 	{}
 	const float max_acceleration;
 	const float max_velocity;

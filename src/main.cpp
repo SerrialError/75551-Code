@@ -12,7 +12,7 @@ pros::Rotation linear_wheel(16);
 pros::Rotation horizontal_wheel(15);
 pros::Imu imu_sensor_1(3);
 
-pros::Motor m1(-2, pros::v5::MotorGears::blue);
+pros::Motor m1(-4, pros::v5::MotorGears::blue);
 pros::Motor m2(14, pros::v5::MotorGears::blue);
 pros::Motor o1(-13, pros::v5::MotorGears::blue);
 pros::Motor o2(18, pros::v5::MotorGears::blue);
@@ -63,7 +63,7 @@ const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 
 const rollers<FirstOrderFeedforwardConstants> intakeFFConsts {
 	{0.00681526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618},
-	{0.00981526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618}
+	{0.00981526983289, 0.276443936704, 0.13522177916, 70.590165, 12.618}
 };
 
 const rollers<PIDConstants> intakeVelocityPIDConsts {
@@ -205,8 +205,9 @@ void autonomous() {
         		pros::delay(static_cast<int>(timestep*1000.f));
 			}
 			dt.linear_mp(0.738f);
+			dt.master.clear();
 			pros::delay(50);
-			dt.angular_mp(-90.f * 180.f / static_cast<float>(M_PI));
+			dt.angular_mp(-90.f * -static_cast<float>(M_PI) / 180.f);
 			pros::delay(50);
 			dt.linear_mp(0.179f);
 			match_loader.extend();
@@ -278,12 +279,8 @@ void opcontrol() {
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
 			dt.calculate_and_print_motor_constants();
 		}
-    	dt.master.print(0, 0, "%lf", dt.master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
-    	dt.master.clear();
 	 	Intake.update_intake_state(timestep);
 	    dt.tank_drive_control();
         pros::delay(static_cast<int>(timestep*1000.0));
-		dt.master.print(0, 0, "%lf", dt.master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
-		dt.master.clear();
     }
 }

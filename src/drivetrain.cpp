@@ -48,6 +48,9 @@ drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors
                      angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.m4) })),
       // Maximum linear and angular speeds/accelerations that respect motor limits.
       max_robot_lin_vel_scaled(max_wheels_ang_vel_scaled * wheel_radius),
+      // Assumes symmetric max-yaw command:
+      // (vm2 + vm4 - vm1 - vm3) = 4 * v_wheel
+      // (vo2 - vo1) = 2 * v_wheel
       max_robot_ang_vel(((wheelbase_length_ + trackwidth_length_) / 24.f * (max_wheels_ang_vel * wheel_radius * 4.f)) +
                         (trackwidth_length_ / 12.f * (max_wheels_ang_vel * wheel_radius * 2.f))),
       max_robot_ang_vel_scaled(((wheelbase_length_ + trackwidth_length_) / 24.f * (max_wheels_ang_vel_scaled * wheel_radius * 4.f)) +
@@ -210,7 +213,6 @@ void drivetrain::linear_mp(const float distance, bool log, const float percent_o
         linear_velocities.emplace();
         linear_velocities->reserve(static_cast<int>(std::round(linearMP.end_time / timestep)));
     }
-
     while(!linearMP.profileFinished(time) || start) {
         float linear_velocity = linearMP.velocity(time);
 		if (linear_velocities) {
@@ -241,8 +243,8 @@ void drivetrain::angular_mp(const float angle, bool log, const float percent_of_
         angular_velocities.emplace();
         angular_velocities->reserve(static_cast<int>(std::round(angularMP.end_time / timestep)));
     }
+    
     while(!angularMP.profileFinished(time) || start) {
-
         float angular_velocity = angularMP.velocity(time);
 		if (angular_velocities) {
 			angular_velocities->push_back(angular_velocity);
