@@ -1,4 +1,5 @@
 #include "logger.hpp"
+#include <cstdio>
 
 void print_vector(const std::vector<float>& vector, const char* name) {
 	printf("%s = [", name);

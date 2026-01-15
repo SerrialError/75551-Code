@@ -39,12 +39,12 @@ const wheels<FirstOrderFeedforwardConstants> dtFFConsts{
 	{0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012} };
 
 const wheels<PIDConstants> dtPIDConsts{ 
-	{0.f, 0.f, 0.f},
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f} };
+	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity},
+	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}, 
+	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}, 
+	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}, 
+	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}, 
+	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity} };
 
 const float wheelbase = 0.292100005; // m
 const float trackwidth = 0.29508135; // m
@@ -67,8 +67,8 @@ const rollers<FirstOrderFeedforwardConstants> intakeFFConsts {
 };
 
 const rollers<PIDConstants> intakePIDConsts {
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f}
+	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}, 
+	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}
 };
 
 
@@ -278,6 +278,8 @@ void opcontrol() {
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
 			dt.calculate_and_print_motor_constants();
 		}
+    	dt.master.print(0, 0, "%lf", dt.master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
+    	dt.master.clear();
 	 	Intake.update_intake_state(timestep);
 	    dt.tank_drive_control();
         pros::delay(static_cast<int>(timestep*1000.0));

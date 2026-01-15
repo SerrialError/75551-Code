@@ -11,7 +11,7 @@
  * operations on angles and scalar values.
  */
 
-#include "api.h"
+#include <cmath>
 
 /**
  * @brief Returns the sign of a number
@@ -40,8 +40,8 @@ constexpr static float sign(float x) {
  * @return Angle normalized to [-PI, PI) range
  */
 constexpr static float wrapToPi(float a) {
-    float r = std::fmod(a + static_cast<float>(M_PI), 2.0*static_cast<float>(M_PI));
-    if (r < 0) r += 2.0*static_cast<float>(M_PI);
+    float r = std::fmod(a + static_cast<float>(M_PI), 2.f*static_cast<float>(M_PI));
+    if (r < 0) r += 2.f*static_cast<float>(M_PI);
     return r - static_cast<float>(M_PI);
 }
 
@@ -59,7 +59,7 @@ constexpr static float wrapToPi(float a) {
  */
 constexpr static float DEG_TO_RAD_NORM(float deg_cw) {
     // Convert degrees to radians and flip sign (CW -> CCW is a sign change)
-    float rad = -deg_cw * (static_cast<float>(M_PI) / 180.0);
+    float rad = -deg_cw * (static_cast<float>(M_PI) / 180.f);
 
     // Normalize into [-PI, PI)
     rad = wrapToPi(rad);
@@ -79,7 +79,7 @@ constexpr static float DEG_TO_RAD_NORM(float deg_cw) {
  * @return sin(x)/x if |x| >= 1e-5, 1.0 otherwise
  */
 constexpr static float sinc(float x) {
-    return (std::abs(x) < 1e-5f) ? 1.0f : std::sin(x) / x;
+    return (std::abs(x) < 1e-5f) ? 1.f : std::sin(x) / x;
 }
 
 #endif // HELPER_FUNCTIONS_HPP
