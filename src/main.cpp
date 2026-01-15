@@ -38,7 +38,7 @@ const wheels<FirstOrderFeedforwardConstants> dtFFConsts{
 	{0.0043200416094, 0.16243797244, 0.259385827274, 75.314448, 12.012}, 
 	{0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012} };
 
-const wheels<PIDConstants> dtPIDConsts{ 
+const wheels<PIDConstants> dtVelocityPIDConsts{ 
 	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity},
 	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}, 
 	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}, 
@@ -51,7 +51,7 @@ const float trackwidth = 0.29508135; // m
 
 const float timestep = 0.01f;
 
-drivetrain dt(driveMotors, wheelbase, trackwidth, timestep, dtFFConsts, dtPIDConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
+drivetrain dt(driveMotors, wheelbase, trackwidth, timestep, dtFFConsts, dtVelocityPIDConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
 
 pros::Motor front(-5, pros::v5::MotorGears::blue);
 pros::Motor back(-6, pros::v5::MotorGears::blue);
@@ -66,13 +66,13 @@ const rollers<FirstOrderFeedforwardConstants> intakeFFConsts {
 	{0.00981526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618}
 };
 
-const rollers<PIDConstants> intakePIDConsts {
+const rollers<PIDConstants> intakeVelocityPIDConsts {
 	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}, 
 	{0.f, 0.f, 0.f, 0.f, 0.f, PIDState::velocity}
 };
 
 
-intake Intake(intakeMotors, intakeFFConsts, intakePIDConsts, timestep);
+intake Intake(intakeMotors, intakeFFConsts, intakeVelocityPIDConsts, timestep);
 
 enum autons {
 	testing,
