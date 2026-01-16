@@ -34,11 +34,11 @@ private:
 	wheels<MotorController> motors;
 	const float wheelbase_length;
 	const float trackwidth_length;
-	static constexpr float wheel_radius = 2.0 / 2.0 * 0.0254;
-	static constexpr float b_gain = 2.0;
-	static constexpr float decimal_of_max_velocity = 0.195;
-	static constexpr float decimal_of_max_acceleration = 0.3;
-	static constexpr float gear_ratio = 48.0/36.0;
+	static constexpr float wheel_radius = 2.f / 2.f * 0.0254f;
+	static constexpr float b_gain = 2.f;
+	static constexpr float decimal_of_max_velocity = 0.195f;
+	static constexpr float decimal_of_max_acceleration = 0.3f;
+	static constexpr float gear_ratio = 48.f/36.f;
 	const float max_wheels_ang_vel;
 	const float max_wheels_ang_vel_scaled;
 	const float min_wheels_ang_accel;

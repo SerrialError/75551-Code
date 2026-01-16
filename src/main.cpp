@@ -62,8 +62,8 @@ const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
 };
 
 const rollers<FirstOrderFeedforwardConstants> intakeFFConsts {
-	{0.00681526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618},
-	{0.00981526983289, 0.276443936704, 0.13522177916, 70.590165, 12.618}
+	{0.00381526983289, 0.276443936704, 0.123522177916, 70.590165, 12.618},
+	{0.00981526983289, 0.276443936704, 0.53522177916, 70.590165, 12.618}
 };
 
 const rollers<PIDConstants> intakeVelocityPIDConsts {
@@ -207,7 +207,7 @@ void autonomous() {
 			dt.linear_mp(0.738f);
 			dt.master.clear();
 			pros::delay(50);
-			dt.angular_mp(-90.f * -static_cast<float>(M_PI) / 180.f);
+			dt.angular_mp(-90.f * static_cast<float>(M_PI) / 180.f);
 			pros::delay(50);
 			dt.linear_mp(0.179f);
 			match_loader.extend();

@@ -208,6 +208,7 @@ void drivetrain::linear_mp(const float distance, bool log, const float percent_o
     float time = 0.f;
     bool start = true;
     mp linearMP(max_robot_lin_accel_scaled * percent_of_max_acceleration / 100.f, max_robot_lin_vel_scaled * percent_of_max_velocity / 100.f, distance);
+
 	std::optional<std::vector<float>> linear_velocities;
     if (log) {
         linear_velocities.emplace();
@@ -216,8 +217,8 @@ void drivetrain::linear_mp(const float distance, bool log, const float percent_o
     while(!linearMP.profileFinished(time) || start) {
         float linear_velocity = linearMP.velocity(time);
 		if (linear_velocities) {
-			linear_velocities->push_back(linear_velocity);
-            // linear_velocities->push_back(get_linear_velocity());
+			// linear_velocities->push_back(linear_velocity);
+            linear_velocities->push_back(get_linear_velocity());
 		}
 	    std::vector<differentialVels> desired_differential_vel = {{linear_velocity, 0.f}};
 	    move_differential_robot_vels(desired_differential_vel);
@@ -243,7 +244,7 @@ void drivetrain::angular_mp(const float angle, bool log, const float percent_of_
         angular_velocities.emplace();
         angular_velocities->reserve(static_cast<int>(std::round(angularMP.end_time / timestep)));
     }
-    
+    master.print(0, 0, "%lf", angularMP.end_time);
     while(!angularMP.profileFinished(time) || start) {
         float angular_velocity = angularMP.velocity(time);
 		if (angular_velocities) {
