@@ -38,7 +38,7 @@ drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors
                      angular_velocity(0.f, ff_motor_constants_.o2),
                      angular_velocity(0.f, ff_motor_constants_.m3),
                      angular_velocity(0.f, ff_motor_constants_.m4) }) * gear_ratio),
-      max_wheels_ang_vel_scaled(max_wheels_ang_vel * decimal_of_max_velocity),
+      max_wheels_ang_vel_scaled(max_wheels_ang_vel * decimal_of_max_velocity_motor),
       min_wheels_ang_accel(
           std::min({ angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.m1),
                      angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.m2),
@@ -47,7 +47,7 @@ drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors
                      angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.m3),
                      angular_acceleration(max_wheels_ang_vel_scaled, ff_motor_constants_.m4) })),
       // Maximum linear and angular speeds/accelerations that respect motor limits.
-      max_robot_lin_vel_scaled(max_wheels_ang_vel_scaled * wheel_radius),
+      max_robot_lin_vel_scaled(max_wheels_ang_vel_scaled * decimal_of_max_velocity_linear * wheel_radius),
       // Assumes symmetric max-yaw command:
       // (vm2 + vm4 - vm1 - vm3) = 4 * v_wheel
       // (vo2 - vo1) = 2 * v_wheel
@@ -55,9 +55,9 @@ drivetrain::drivetrain(const wheels<std::reference_wrapper<pros::Motor>>& motors
                         (trackwidth_length_ / 12.f * (max_wheels_ang_vel * wheel_radius * 2.f))),
       max_robot_ang_vel_scaled(((wheelbase_length_ + trackwidth_length_) / 24.f * (max_wheels_ang_vel_scaled * wheel_radius * 4.f)) +
                                (trackwidth_length_ / 12.f * (max_wheels_ang_vel_scaled * wheel_radius * 2.f))),
-      max_robot_ang_accel_scaled(((wheelbase_length_ + trackwidth_length_) / 24.f * (min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 4.f)) +
-                                 (trackwidth_length_ / 12.f * (min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius * 2.f))),
-	  max_robot_lin_accel_scaled(min_wheels_ang_accel * decimal_of_max_acceleration * wheel_radius),
+      max_robot_ang_accel_scaled(((wheelbase_length_ + trackwidth_length_) / 24.f * (min_wheels_ang_accel * decimal_of_max_acceleration_angular * wheel_radius * 4.f)) +
+                                 (trackwidth_length_ / 12.f * (min_wheels_ang_accel * decimal_of_max_acceleration_angular * wheel_radius * 2.f))),
+	  max_robot_lin_accel_scaled(min_wheels_ang_accel * decimal_of_max_acceleration_linear * wheel_radius),
       timestep(timestep_)
 {}
 

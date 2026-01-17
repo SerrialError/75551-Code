@@ -271,10 +271,10 @@ void opcontrol() {
 	        Intake.intakeState = intakeOff; 			
 	    }
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-			match_loader.retract();
+			match_loader.extend();
 	    }
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			match_loader.extend();
+			match_loader.retract();
 	    }
 		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
 			dt.calculate_and_print_motor_constants();
