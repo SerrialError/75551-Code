@@ -1,5 +1,5 @@
 #include "main.h"
-
+#include "intake.hpp"
 /////
 // For installation, upgrading, documentations, and tutorials, check out our website!
 // https://ez-robotics.github.io/EZ-Template/
@@ -11,7 +11,7 @@ ez::Drive chassis(
     {-11, -12, -13},     // Left Chassis Ports (negative port will reverse it!)
     {18, 19, 20},  // Right Chassis Ports (negative port will reverse it!)
 
-    7,      // IMU Port
+    8,      // IMU Port
     3.25,  // Wheel Diameter
     450);   // Wheel RPM = cartridge * (motor gear / wheel gear)
 
@@ -58,8 +58,10 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
+      {"Park only", skills_park_only},
       {"Drive\n\nDrive forward and come back", drive_example},
       {"Turn\n\nTurn 3 times.", turn_example},
+      /*
       {"Drive and Turn\n\nDrive forward, turn, come back", drive_and_turn},
       {"Drive and Turn\n\nSlow down during drive", wait_until_change_speed},
       {"Swing Turn\n\nSwing in an 'S' curve", swing_example},
@@ -71,7 +73,7 @@ void initialize() {
       {"Pure Pursuit Wait Until\n\nGo to (24, 24) but start running an intake once the robot passes (12, 24)", odom_pure_pursuit_wait_until_example},
       {"Boomerang\n\nGo to (0, 24, 45) then come back to (0, 0, 0)", odom_boomerang_example},
       {"Boomerang Pure Pursuit\n\nGo to (0, 24, 45) on the way to (24, 24) then come back to (0, 0, 0)", odom_boomerang_injected_pure_pursuit_example},
-      {"Measure Offsets\n\nThis will turn the robot a bunch of times and calculate your offsets for your tracking wheels.", measure_offsets},
+      {"Measure Offsets\n\nThis will turn the robot a bunch of times and calculate your offsets for your tracking wheels.", measure_offsets},*/
   });
 
   // Initialize chassis and auton selector
@@ -79,6 +81,17 @@ void initialize() {
   ez::as::initialize();
   master.rumble(chassis.drive_imu_calibrated() ? "." : "---");
 }
+
+pros::adi::Pneumatics match_loader ('a', false, false);
+pros::Motor front(-2, pros::v5::MotorGears::blue);
+pros::Motor back(-9, pros::v5::MotorGears::blue);
+
+const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
+	std::ref(front),
+	std::ref(back)
+};
+
+intake Intake(intakeMotors);
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -244,19 +257,35 @@ void opcontrol() {
   chassis.drive_brake_set(MOTOR_BRAKE_COAST);
 
   while (true) {
-    // Gives you some extras to make EZ-Template ezier
     ez_template_extras();
 
-    chassis.opcontrol_tank();  // Tank control
-    // chassis.opcontrol_arcade_standard(ez::SPLIT);   // Standard split arcade
+    // chassis.opcontrol_tank();  // Tank control
+    chassis.opcontrol_arcade_standard(ez::SPLIT);   // Standard split arcade
     // chassis.opcontrol_arcade_standard(ez::SINGLE);  // Standard single arcade
     // chassis.opcontrol_arcade_flipped(ez::SPLIT);    // Flipped split arcade
     // chassis.opcontrol_arcade_flipped(ez::SINGLE);   // Flipped single arcade
-
-    // . . .
-    // Put more user control code here!
-    // . . .
-
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+	    Intake.intakeState = topScore;
+	  }
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+	    Intake.intakeState = midScore; 			
+	  }
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+	    Intake.intakeState = bottomScore; 			
+	  }
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+	    Intake.intakeState = intakeOnly;
+	  }
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+	    Intake.intakeState = intakeOff; 			
+	  }
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+			match_loader.extend();
+	  }
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+      match_loader.retract();
+	  }
+	 	Intake.update_intake_state();
     pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
   }
 }
