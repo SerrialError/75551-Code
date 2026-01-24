@@ -1,5 +1,4 @@
 #include "main.h"
-#include "intake.hpp"
 /////
 // For installation, upgrading, documentations, and tutorials, check out our website!
 // https://ez-robotics.github.io/EZ-Template/
@@ -81,17 +80,6 @@ void initialize() {
   ez::as::initialize();
   master.rumble(chassis.drive_imu_calibrated() ? "." : "---");
 }
-
-pros::adi::Pneumatics match_loader ('a', false, false);
-pros::Motor front(-2, pros::v5::MotorGears::blue);
-pros::Motor back(-9, pros::v5::MotorGears::blue);
-
-const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
-	std::ref(front),
-	std::ref(back)
-};
-
-intake Intake(intakeMotors);
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or

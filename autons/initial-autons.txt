@@ -1,0 +1,97 @@
+// blueRight
+
+
+chassis.pid_drive_set(29.064_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(90_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(7.054_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(90_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(-24.267_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(90_deg, 90);
+chassis.pid_wait();
+
+// blueLeft
+
+chassis.pid_drive_set(29.064_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(90_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(7.054_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(90_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(-24.267_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(90_deg, 90);
+chassis.pid_wait();
+
+// redRight
+
+chassis.pid_drive_set(29.055_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(270_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(7.087_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(270_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(-24.291_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(270_deg, 90);
+chassis.pid_wait();
+
+// redRight
+
+chassis.pid_drive_set(-29.064_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(270_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(6.958_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(270.019_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(-24.272_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(270_deg, 90);
+chassis.pid_wait();
+
+// skills-park-only
+
+chassis.pid_drive_set(21.614_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(180_deg, 90);
+chassis.pid_wait();
+
+// skills-deload
+
+chassis.pid_drive_set(-29.064_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(270_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(6.958_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(90.019_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(-24.272_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(241.054_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(28.393_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(199.093_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(11.223_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(180.686_deg, 90);
+chassis.pid_wait();
+chassis.pid_drive_set(22.709_in, 90);
+chassis.pid_wait();
+chassis.pid_turn_set(180_deg, 90);
+chassis.pid_wait();
+
+
+#PATH.JERRYIO-DATA {"appVersion":"0.10.0","format":"Rigid Code Gen v0.1","gc":{"robotWidth":14,"robotHeight":17.6,"showRobot":true,"uol":2.54,"pointDensity":0.7874015748031495,"controlMagnetDistance":1.968503937007874,"fieldImage":{"displayName":"V5RC 2026 - Push Back","signature":"V5RC-PushBack-H2H-TopDownHighlighted-TileColor66_71","origin":{"__type":"built-in"}},"coordinateSystem":"VEX Gaming Positioning System","headingOutputType":"Absolute Heading","outputTemplate":"path: `// ${name}\n\n${code}\n`\nforward: `chassis.pid_drive_set(${distance}_in, 90);\nchassis.pid_wait();`\nbackward: `chassis.pid_drive_set(-${distance}_in, 90);\nchassis.pid_wait();`\nturnLeft: `chassis.pid_turn_relative_set(-${heading}_deg, 90);\nchassis.pid_wait();`\nturnRight: `chassis.pid_turn_relative_set(${heading}_deg, 90);\nchassis.pid_wait();`\nturnTo: `chassis.pid_turn_set(${heading}_deg, 90);\nchassis.pid_wait();`"},"paths":[{"segments":[{"controls":[{"uid":"YaEDZHpnDA","x":48.556999999999995,"y":17.755,"lock":false,"visible":true,"heading":0,"__type":"end-point"},{"uid":"igTojlUey8","x":48.556999999999995,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"igTojlUey8","x":48.556999999999995,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"DqJ4emAOj0","x":55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"DqJ4emAOj0","x":55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"0Ffv13yNst","x":31.343999999999998,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"blueRight\n","uid":"Nq6fqbbcfn","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"4ERqAuxS6C","x":48.556999999999995,"y":-17.755,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"Q8i2pyb0Qh","x":48.556999999999995,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"Q8i2pyb0Qh","x":48.556999999999995,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"TayRndVvoc","x":55.611,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"TayRndVvoc","x":55.611,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"IVhr0DlhlN","x":31.343999999999998,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"blueLeft","uid":"SAib8Dj0el","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"8C8vIVH7vb","x":-48.54330708661418,"y":-17.755905511811022,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"89Ho29ggsG","x":-48.54330708661418,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"89Ho29ggsG","x":-48.54330708661418,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"mqQCgKZ9Bs","x":-55.629921259842526,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"mqQCgKZ9Bs","x":-55.629921259842526,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"zisu8XHUiP","x":-31.338582677165356,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"redRight","uid":"OGQyB8IvoY","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"uir1O2qhpj","x":-48.556999999999995,"y":17.755,"lock":false,"visible":true,"heading":359.81074955856167,"__type":"end-point"},{"uid":"pMGARstVT5","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"pMGARstVT5","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"pRb7TeSCee","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":270.0188284821394,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"pRb7TeSCee","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":270.0188284821394,"__type":"end-point"},{"uid":"gZLahQ8jDN","x":-31.338582677165356,"y":46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"redRight","uid":"UAFze6YTjE","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"ppWT6UVZmk","x":-59.44881889763779,"y":18.779527559055115,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"AOGIafTHcq","x":-59.44881889763779,"y":-2.8346456692913384,"lock":false,"visible":true,"heading":180,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"og6HyHZBIG"}],"pc":{"speed":30},"name":"skills-park-only","uid":"BkMsWXOnJx","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"HtAmk5szGt","x":-48.556999999999995,"y":17.755,"lock":false,"visible":true,"heading":359.81074955856167,"__type":"end-point"},{"uid":"CS4sX7Xy6I","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"CS4sX7Xy6I","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"cSPE7mZHcg","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":90.01882848213941,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"cSPE7mZHcg","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":90.01882848213941,"__type":"end-point"},{"uid":"8YKUSXkKFH","x":-31.338582677165356,"y":46.811023622047244,"lock":false,"visible":true,"heading":241.05396156036076,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"},{"controls":[{"uid":"8YKUSXkKFH","x":-31.338582677165356,"y":46.811023622047244,"lock":false,"visible":true,"heading":241.05396156036076,"__type":"end-point"},{"uid":"pFSJg8gzHF","x":-56.18483153851369,"y":33.0690973624553,"lock":false,"visible":true,"heading":199.09349200048564,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"jDgSEWFZzX"},{"controls":[{"uid":"pFSJg8gzHF","x":-56.18483153851369,"y":33.0690973624553,"lock":false,"visible":true,"heading":199.09349200048564,"__type":"end-point"},{"uid":"W9VHJHiiDr","x":-59.85615402529944,"y":22.46305462285204,"lock":false,"visible":true,"heading":180.68614419783523,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"jm4sXvJ4ui"},{"controls":[{"uid":"W9VHJHiiDr","x":-59.85615402529944,"y":22.46305462285204,"lock":false,"visible":true,"heading":180.68614419783523,"__type":"end-point"},{"uid":"BhxaBZ05gu","x":-60.12810383913542,"y":-0.2447548324523768,"lock":false,"visible":true,"heading":180,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Hti2qgoAjX"}],"pc":{"speed":30},"name":"skills-deload","uid":"H77adfz18i","lock":false,"visible":true}]}

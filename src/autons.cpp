@@ -50,45 +50,45 @@ void default_constants() {
 }
 
 void skills_park_only() {
-
-// skills-park-only
-
-chassis.pid_drive_set(21.614_in, 100);
-chassis.Intake.intakeState = intakeOnly;
-chassis.pid_wait();
+  Intake.intakeState = intakeOnly;
+  Intake.update_intake_state();
+  chassis.pid_drive_set(21.614_in, 100);
+  chassis.pid_wait();
 }
 
 void skills_deload() {
-
-
-// skills-deload
-
-chassis.pid_drive_set(-29.064_in, 90);
-chassis.pid_wait();
-chassis.pid_turn_set(270_deg, 90);
-chassis.pid_wait();
-chassis.pid_drive_set(6.958_in, 90);
-chassis.pid_wait();
-chassis.pid_turn_set(90.019_deg, 90);
-chassis.pid_wait();
-chassis.pid_drive_set(-24.272_in, 90);
-chassis.pid_wait();
-chassis.pid_turn_set(241.054_deg, 90);
-chassis.pid_wait();
-chassis.pid_drive_set(28.393_in, 90);
-chassis.pid_wait();
-chassis.pid_turn_set(199.093_deg, 90);
-chassis.pid_wait();
-chassis.pid_drive_set(11.223_in, 90);
-chassis.pid_wait();
-chassis.pid_turn_set(180.686_deg, 90);
-chassis.pid_wait();
-chassis.pid_drive_set(22.709_in, 90);
-chassis.pid_wait();
-chassis.pid_turn_set(180_deg, 90);
-chassis.pid_wait();
-
-
+  chassis.pid_drive_set(29.064_in, 90);
+  chassis.pid_wait();
+  chassis.pid_turn_set(270.189_deg, 90);
+  chassis.pid_wait();
+  match_loader.extend(); // down
+  chassis.pid_drive_set(6.958_in, 90);
+  Intake.intakeState = intakeOnly;
+  Intake.update_intake_state();
+  chassis.pid_wait();
+  // match load
+  pros::delay(1000);
+  chassis.pid_turn_set(270.208_deg, 90);
+  chassis.pid_wait();
+  chassis.pid_drive_set(-24.272_in, 90);
+  pros::delay(40);
+  match_loader.retract(); // up
+  chassis.pid_wait();
+  Intake.intakeState = topScore;
+  Intake.update_intake_state();
+  pros::delay(2000);
+  chassis.pid_turn_set(241.243_deg, 90);
+  chassis.pid_wait();
+  chassis.pid_drive_set(28.393_in, 90);
+  chassis.pid_wait();
+  chassis.pid_turn_set(199.283_deg, 90);
+  chassis.pid_wait();
+  chassis.pid_drive_set(11.223_in, 90);
+  chassis.pid_wait();
+  chassis.pid_turn_set(180.875_deg, 90);
+  chassis.pid_wait();
+  chassis.pid_drive_set(22.709_in, 90);
+  chassis.pid_wait();
 
 }
 
