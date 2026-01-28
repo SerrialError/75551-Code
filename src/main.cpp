@@ -78,8 +78,8 @@ void initialize() {
 
   // Initialize chassis and auton selector
   chassis.initialize();
-  chassis.opcontrol_curve_default_set(3);
-  chassis.opcontrol_drive_activebrake_set(2.0);
+  chassis.opcontrol_curve_default_set(2);
+  chassis.opcontrol_drive_activebrake_set(0.6);
   chassis.opcontrol_joystick_practicemode_toggle(true);
   ez::as::initialize();
   master.rumble(chassis.drive_imu_calibrated() ? "." : "---");

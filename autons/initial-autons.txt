@@ -1,97 +1,188 @@
 // blueRight
 
 
-chassis.pid_drive_set(29.064_in, 90);
+chassis.pid_drive_set(29.064_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(90_deg, 90);
+chassis.pid_turn_set(90_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(7.054_in, 90);
+chassis.pid_drive_set(7.054_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(90_deg, 90);
+chassis.pid_turn_set(90_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(-24.267_in, 90);
+chassis.pid_drive_set(-24.267_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(90_deg, 90);
+chassis.pid_turn_set(90_deg, TURN_SPEED);
 chassis.pid_wait();
 
 // blueLeft
 
-chassis.pid_drive_set(29.064_in, 90);
+chassis.pid_drive_set(29.064_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(270_deg, 90);
+chassis.pid_turn_set(270_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(7.054_in, 90);
+chassis.pid_drive_set(7.054_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(270_deg, 90);
+chassis.pid_turn_set(270_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(-24.267_in, 90);
+chassis.pid_drive_set(-24.267_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(270_deg, 90);
-chassis.pid_wait();
-
-// redRight
-
-chassis.pid_drive_set(29.055_in, 90);
-chassis.pid_wait();
-chassis.pid_turn_set(90_deg, 90);
-chassis.pid_wait();
-chassis.pid_drive_set(7.087_in, 90);
-chassis.pid_wait();
-chassis.pid_turn_set(90_deg, 90);
-chassis.pid_wait();
-chassis.pid_drive_set(-24.291_in, 90);
-chassis.pid_wait();
-chassis.pid_turn_set(90_deg, 90);
+chassis.pid_turn_set(270_deg, TURN_SPEED);
 chassis.pid_wait();
 
 // redRight
 
-chassis.pid_drive_set(29.064_in, 90);
+chassis.pid_drive_set(29.055_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(270.189_deg, 90);
+chassis.pid_turn_set(90_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(6.958_in, 90);
+chassis.pid_drive_set(7.087_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(270.208_deg, 90);
+chassis.pid_turn_set(90_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(-24.272_in, 90);
+chassis.pid_drive_set(-24.291_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(270.189_deg, 90);
+chassis.pid_turn_set(90_deg, TURN_SPEED);
+chassis.pid_wait();
+
+// redRight
+
+chassis.pid_drive_set(29.064_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(270.189_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(6.958_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(270.208_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-24.272_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(270.189_deg, TURN_SPEED);
 chassis.pid_wait();
 
 // skills-park-only
 
-chassis.pid_drive_set(21.614_in, 90);
+chassis.pid_drive_set(21.614_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(0_deg, 90);
+chassis.pid_turn_set(0_deg, TURN_SPEED);
 chassis.pid_wait();
 
 // skills-deload
 
-chassis.pid_drive_set(29.064_in, 90);
+chassis.pid_drive_set(29.253_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(270.189_deg, 90);
+chassis.pid_turn_set(270.695_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(6.958_in, 90);
+chassis.pid_drive_set(6.958_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(270.208_deg, 90);
+chassis.pid_turn_set(269.944_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(-24.272_in, 90);
+chassis.pid_drive_set(-29.887_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(241.243_deg, 90);
+chassis.pid_turn_set(245.79_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(28.393_in, 90);
+chassis.pid_drive_set(33.581_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(199.283_deg, 90);
+chassis.pid_turn_set(199.788_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(11.223_in, 90);
+chassis.pid_drive_set(11.223_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(180.875_deg, 90);
+chassis.pid_turn_set(181.381_deg, TURN_SPEED);
 chassis.pid_wait();
-chassis.pid_drive_set(22.709_in, 90);
+chassis.pid_drive_set(22.709_in, DRIVE_SPEED);
 chassis.pid_wait();
-chassis.pid_turn_set(180.189_deg, 90);
+chassis.pid_turn_set(180.695_deg, TURN_SPEED);
+chassis.pid_wait();
+
+// driver-skills-only-long-gaols
+
+chassis.pid_drive_set(30.322_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(271.614_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-9.658_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(90_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-23.388_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(305.897_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-17.625_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(269.917_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(93.551_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(180_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-10.47_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(90_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-9.382_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(270.341_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-22.844_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(247.443_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(28.712_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(189.367_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(13.368_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(179.569_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(36.17_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(157.678_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(36.159_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(270_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(8.43_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(90.333_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(23.388_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(119.638_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-18.147_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(269.834_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-93.959_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(180_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(9.654_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(269.275_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-10.743_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(89.659_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-22.844_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(239.169_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-30.245_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(190.421_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-12.028_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(180_deg, TURN_SPEED);
+chassis.pid_wait();
+chassis.pid_drive_set(-19.988_in, DRIVE_SPEED);
+chassis.pid_wait();
+chassis.pid_turn_set(180_deg, TURN_SPEED);
 chassis.pid_wait();
 
 
-#PATH.JERRYIO-DATA {"appVersion":"0.10.0","format":"Rigid Code Gen v0.1","gc":{"robotWidth":14,"robotHeight":17.6,"showRobot":true,"uol":2.54,"pointDensity":0.7874015748031495,"controlMagnetDistance":1.968503937007874,"fieldImage":{"displayName":"V5RC 2026 - Push Back","signature":"V5RC-PushBack-H2H-TopDownHighlighted-TileColor66_71","origin":{"__type":"built-in"}},"coordinateSystem":"VEX Gaming Positioning System","headingOutputType":"Relative Heading","outputTemplate":"path: `// ${name}\n\n${code}\n`\nforward: `chassis.pid_drive_set(${distance}_in, 90);\nchassis.pid_wait();`\nbackward: `chassis.pid_drive_set(-${distance}_in, 90);\nchassis.pid_wait();`\nturnLeft: `chassis.pid_turn_relative_set(-${heading}_deg, 90);\nchassis.pid_wait();`\nturnRight: `chassis.pid_turn_relative_set(${heading}_deg, 90);\nchassis.pid_wait();`\nturnTo: `chassis.pid_turn_set(${heading}_deg, 90);\nchassis.pid_wait();`"},"paths":[{"segments":[{"controls":[{"uid":"YaEDZHpnDA","x":48.556999999999995,"y":17.755,"lock":false,"visible":true,"heading":0,"__type":"end-point"},{"uid":"igTojlUey8","x":48.556999999999995,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"igTojlUey8","x":48.556999999999995,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"DqJ4emAOj0","x":55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"DqJ4emAOj0","x":55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"0Ffv13yNst","x":31.343999999999998,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"blueRight\n","uid":"Nq6fqbbcfn","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"4ERqAuxS6C","x":48.556999999999995,"y":-17.755,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"Q8i2pyb0Qh","x":48.556999999999995,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"Q8i2pyb0Qh","x":48.556999999999995,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"TayRndVvoc","x":55.611,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"TayRndVvoc","x":55.611,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"IVhr0DlhlN","x":31.343999999999998,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"blueLeft","uid":"SAib8Dj0el","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"8C8vIVH7vb","x":-48.54330708661418,"y":-17.755905511811022,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"89Ho29ggsG","x":-48.54330708661418,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"89Ho29ggsG","x":-48.54330708661418,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"mqQCgKZ9Bs","x":-55.629921259842526,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"mqQCgKZ9Bs","x":-55.629921259842526,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"zisu8XHUiP","x":-31.338582677165356,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"redRight","uid":"OGQyB8IvoY","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"uir1O2qhpj","x":-48.556999999999995,"y":17.755,"lock":false,"visible":true,"heading":359.8107495585616,"__type":"end-point"},{"uid":"pMGARstVT5","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"pMGARstVT5","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"pRb7TeSCee","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":270.01882848213944,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"pRb7TeSCee","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":270.01882848213944,"__type":"end-point"},{"uid":"gZLahQ8jDN","x":-31.338582677165356,"y":46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"redRight","uid":"UAFze6YTjE","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"ppWT6UVZmk","x":-59.44881889763779,"y":18.779527559055115,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"AOGIafTHcq","x":-59.44881889763779,"y":-2.8346456692913384,"lock":false,"visible":true,"heading":180,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"og6HyHZBIG"}],"pc":{"speed":30},"name":"skills-park-only","uid":"BkMsWXOnJx","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"HtAmk5szGt","x":-48.556999999999995,"y":17.755,"lock":false,"visible":true,"heading":359.8107495585616,"__type":"end-point"},{"uid":"CS4sX7Xy6I","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"CS4sX7Xy6I","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"cSPE7mZHcg","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":270.01882848213944,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"cSPE7mZHcg","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":270.01882848213944,"__type":"end-point"},{"uid":"8YKUSXkKFH","x":-31.338582677165356,"y":46.811023622047244,"lock":false,"visible":true,"heading":241.05396156036076,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"},{"controls":[{"uid":"8YKUSXkKFH","x":-31.338582677165356,"y":46.811023622047244,"lock":false,"visible":true,"heading":241.05396156036076,"__type":"end-point"},{"uid":"pFSJg8gzHF","x":-56.18483153851369,"y":33.0690973624553,"lock":false,"visible":true,"heading":199.09349200048564,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"jDgSEWFZzX"},{"controls":[{"uid":"pFSJg8gzHF","x":-56.18483153851369,"y":33.0690973624553,"lock":false,"visible":true,"heading":199.09349200048564,"__type":"end-point"},{"uid":"W9VHJHiiDr","x":-59.85615402529944,"y":22.46305462285204,"lock":false,"visible":true,"heading":180.68614419783523,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"jm4sXvJ4ui"},{"controls":[{"uid":"W9VHJHiiDr","x":-59.85615402529944,"y":22.46305462285204,"lock":false,"visible":true,"heading":180.68614419783523,"__type":"end-point"},{"uid":"BhxaBZ05gu","x":-60.12810383913542,"y":-0.2447548324523768,"lock":false,"visible":true,"heading":180,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Hti2qgoAjX"}],"pc":{"speed":30},"name":"skills-deload","uid":"H77adfz18i","lock":false,"visible":true}]}
+#PATH.JERRYIO-DATA {"appVersion":"0.10.0","format":"Rigid Code Gen v0.1","gc":{"robotWidth":14,"robotHeight":17.6,"showRobot":true,"uol":2.54,"pointDensity":0.7874015748031495,"controlMagnetDistance":1.968503937007874,"fieldImage":{"displayName":"V5RC 2026 - Push Back (Skills)","signature":"V5RC-PushBack-Skills-TopDownHighlighted-TileColor66_71","origin":{"__type":"built-in"}},"coordinateSystem":"VEX Gaming Positioning System","headingOutputType":"Relative Heading","outputTemplate":"path: `// ${name}\n\n${code}\n`\nforward: `chassis.pid_drive_set(${distance}_in, DRIVE_SPEED);\nchassis.pid_wait();`\nbackward: `chassis.pid_drive_set(-${distance}_in, DRIVE_SPEED);\nchassis.pid_wait();`\nturnLeft: `chassis.pid_turn_relative_set(-${heading}_deg, TURN_SPEED);\nchassis.pid_wait();`\nturnRight: `chassis.pid_turn_relative_set(${heading}_deg, TURN_SPEED);\nchassis.pid_wait();`\nturnTo: `chassis.pid_turn_set(${heading}_deg, TURN_SPEED);\nchassis.pid_wait();`"},"paths":[{"segments":[{"controls":[{"uid":"YaEDZHpnDA","x":48.556999999999995,"y":17.755,"lock":false,"visible":true,"heading":0,"__type":"end-point"},{"uid":"igTojlUey8","x":48.556999999999995,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"igTojlUey8","x":48.556999999999995,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"DqJ4emAOj0","x":55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"DqJ4emAOj0","x":55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"0Ffv13yNst","x":31.343999999999998,"y":46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"blueRight\n","uid":"Nq6fqbbcfn","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"4ERqAuxS6C","x":48.556999999999995,"y":-17.755,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"Q8i2pyb0Qh","x":48.556999999999995,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"Q8i2pyb0Qh","x":48.556999999999995,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"TayRndVvoc","x":55.611,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"TayRndVvoc","x":55.611,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"IVhr0DlhlN","x":31.343999999999998,"y":-46.81900000000001,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"blueLeft","uid":"SAib8Dj0el","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"8C8vIVH7vb","x":-48.54330708661418,"y":-17.755905511811022,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"89Ho29ggsG","x":-48.54330708661418,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"89Ho29ggsG","x":-48.54330708661418,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"mqQCgKZ9Bs","x":-55.629921259842526,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"mqQCgKZ9Bs","x":-55.629921259842526,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"zisu8XHUiP","x":-31.338582677165356,"y":-46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"redRight","uid":"OGQyB8IvoY","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"uir1O2qhpj","x":-48.556999999999995,"y":17.755,"lock":false,"visible":true,"heading":359.8107495585616,"__type":"end-point"},{"uid":"pMGARstVT5","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"pMGARstVT5","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"pRb7TeSCee","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":270.01882848213944,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"pRb7TeSCee","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":270.01882848213944,"__type":"end-point"},{"uid":"gZLahQ8jDN","x":-31.338582677165356,"y":46.811023622047244,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"}],"pc":{"speed":30},"name":"redRight","uid":"UAFze6YTjE","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"ppWT6UVZmk","x":-59.44881889763779,"y":18.779527559055115,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"AOGIafTHcq","x":-59.44881889763779,"y":-2.8346456692913384,"lock":false,"visible":true,"heading":180,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"og6HyHZBIG"}],"pc":{"speed":30},"name":"skills-park-only","uid":"BkMsWXOnJx","lock":false,"visible":false},{"segments":[{"controls":[{"uid":"HtAmk5szGt","x":-48.29828693727024,"y":17.567957973804383,"lock":false,"visible":true,"heading":359.3052361931665,"__type":"end-point"},{"uid":"CS4sX7Xy6I","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Y528JPcDFp"},{"controls":[{"uid":"CS4sX7Xy6I","x":-48.653,"y":46.81900000000001,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"cSPE7mZHcg","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":269.2494680118845,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"aHRiZfYW3u"},{"controls":[{"uid":"cSPE7mZHcg","x":-55.611,"y":46.81900000000001,"lock":false,"visible":true,"heading":269.2494680118845,"__type":"end-point"},{"uid":"8YKUSXkKFH","x":-25.726452388883814,"y":47.21048768192632,"lock":false,"visible":true,"heading":245.09523119190482,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"UM48m9Yc4r"},{"controls":[{"uid":"8YKUSXkKFH","x":-25.726452388883814,"y":47.21048768192632,"lock":false,"visible":true,"heading":245.09523119190482,"__type":"end-point"},{"uid":"pFSJg8gzHF","x":-56.18483153851369,"y":33.0690973624553,"lock":false,"visible":true,"heading":199.09349200048564,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"jDgSEWFZzX"},{"controls":[{"uid":"pFSJg8gzHF","x":-56.18483153851369,"y":33.0690973624553,"lock":false,"visible":true,"heading":199.09349200048564,"__type":"end-point"},{"uid":"W9VHJHiiDr","x":-59.85615402529944,"y":22.46305462285204,"lock":false,"visible":true,"heading":180.68614419783523,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"jm4sXvJ4ui"},{"controls":[{"uid":"W9VHJHiiDr","x":-59.85615402529944,"y":22.46305462285204,"lock":false,"visible":true,"heading":180.68614419783523,"__type":"end-point"},{"uid":"BhxaBZ05gu","x":-60.12810383913542,"y":-0.2447548324523768,"lock":false,"visible":true,"heading":180,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Hti2qgoAjX"}],"pc":{"speed":30},"name":"skills-deload","uid":"H77adfz18i","lock":false,"visible":true},{"segments":[{"controls":[{"uid":"9s7cdsKyVr","x":-46.53061314733636,"y":-17.24161819720119,"lock":false,"visible":true,"heading":180,"__type":"end-point"},{"uid":"c9i1PJm2uz","x":-46.53061314733636,"y":-47.56402243991308,"lock":false,"visible":true,"heading":91.61353893288117,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"gJ1STaV9f1"},{"controls":[{"uid":"c9i1PJm2uz","x":-46.53061314733636,"y":-47.56402243991308,"lock":false,"visible":true,"heading":91.61353893288117,"__type":"end-point"},{"uid":"mPEmeKamFG","x":-56.18483153851369,"y":-47.2920726260771,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Mj9mibzJro"},{"controls":[{"uid":"mPEmeKamFG","x":-56.18483153851369,"y":-47.2920726260771,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"GdJRJRxbL2","x":-32.79714754861932,"y":-47.2920726260771,"lock":false,"visible":true,"heading":125.8973775117081,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"TQRkqjh5d0"},{"controls":[{"uid":"GdJRJRxbL2","x":-32.79714754861932,"y":-47.2920726260771,"lock":false,"visible":true,"heading":125.8973775117081,"__type":"end-point"},{"uid":"X0PO6SnlEb","x":-47.07451277500832,"y":-36.95797970030982,"lock":false,"visible":true,"heading":89.91672130935333,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"o5HDSSC2sn"},{"controls":[{"uid":"X0PO6SnlEb","x":-47.07451277500832,"y":-36.95797970030982,"lock":false,"visible":true,"heading":89.91672130935333,"__type":"end-point"},{"uid":"jvTM6ik5yw","x":46.47622318456916,"y":-36.82200479339183,"lock":false,"visible":true,"heading":0,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"Hy6R8xRK6L"},{"controls":[{"uid":"jvTM6ik5yw","x":46.47622318456916,"y":-36.82200479339183,"lock":false,"visible":true,"heading":0,"__type":"end-point"},{"uid":"IzT7tzSozK","x":46.47622318456916,"y":-47.2920726260771,"lock":false,"visible":true,"heading":270,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"2vdgtUZzwR"},{"controls":[{"uid":"IzT7tzSozK","x":46.47622318456916,"y":-47.2920726260771,"lock":false,"visible":true,"heading":270,"__type":"end-point"},{"uid":"gQ674YQp38","x":55.8584917619105,"y":-47.2920726260771,"lock":false,"visible":true,"heading":90.34104227885882,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"6ZLUwyHXK7"},{"controls":[{"uid":"gQ674YQp38","x":55.8584917619105,"y":-47.2920726260771,"lock":false,"visible":true,"heading":90.34104227885882,"__type":"end-point"},{"uid":"fGifUPMZ8R","x":33.01470739968809,"y":-47.156097719159106,"lock":false,"visible":true,"heading":67.44275336529435,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"LxUtkkN3VT"},{"controls":[{"uid":"fGifUPMZ8R","x":33.01470739968809,"y":-47.156097719159106,"lock":false,"visible":true,"heading":67.44275336529435,"__type":"end-point"},{"uid":"2bqZVtwkzc","x":59.52981424869625,"y":-36.14213025880188,"lock":false,"visible":true,"heading":9.366509957012113,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"yrag3wReTW"},{"controls":[{"uid":"2bqZVtwkzc","x":59.52981424869625,"y":-36.14213025880188,"lock":false,"visible":true,"heading":9.366509957012113,"__type":"end-point"},{"uid":"9HXV0FQKT2","x":61.705412759384096,"y":-22.952564287756793,"lock":false,"visible":true,"heading":359.56921278299137,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"S9B4CWtmn1"},{"controls":[{"uid":"9HXV0FQKT2","x":61.705412759384096,"y":-22.952564287756793,"lock":false,"visible":true,"heading":359.56921278299137,"__type":"end-point"},{"uid":"HE876zMZEP","x":61.433462945548115,"y":13.216760952428684,"lock":false,"visible":true,"heading":337.67846155218996,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"ZE9OyHaGhV"},{"controls":[{"uid":"HE876zMZEP","x":61.433462945548115,"y":13.216760952428684,"lock":false,"visible":true,"heading":337.67846155218996,"__type":"end-point"},{"uid":"szVmjLR2ZD","x":47.69999734683107,"y":46.666588054254355,"lock":false,"visible":true,"heading":90,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"VeCol564Qq"},{"controls":[{"uid":"szVmjLR2ZD","x":47.69999734683107,"y":46.666588054254355,"lock":false,"visible":true,"heading":90,"__type":"end-point"},{"uid":"V9gruHyOpf","x":56.13044157574648,"y":46.666588054254355,"lock":false,"visible":true,"heading":270.3331112439214,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"2QHGGUVSQg"},{"controls":[{"uid":"V9gruHyOpf","x":56.13044157574648,"y":46.666588054254355,"lock":false,"visible":true,"heading":270.3331112439214,"__type":"end-point"},{"uid":"5Ftr9MLj74","x":32.74275758585211,"y":46.80256296117234,"lock":false,"visible":true,"heading":299.63838368815135,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"bjdcQk4M2k"},{"controls":[{"uid":"5Ftr9MLj74","x":32.74275758585211,"y":46.80256296117234,"lock":false,"visible":true,"heading":299.63838368815135,"__type":"end-point"},{"uid":"IdeIKBLjxI","x":48.51584678833901,"y":37.82821910458497,"lock":false,"visible":true,"heading":89.83416607953893,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"h7pt2Wtc0x"},{"controls":[{"uid":"IdeIKBLjxI","x":48.51584678833901,"y":37.82821910458497,"lock":false,"visible":true,"heading":89.83416607953893,"__type":"end-point"},{"uid":"JYSpnPJn5j","x":-45.44281389199244,"y":37.556269290748986,"lock":false,"visible":true,"heading":0,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"0hqnrTTj6X"},{"controls":[{"uid":"JYSpnPJn5j","x":-45.44281389199244,"y":37.556269290748986,"lock":false,"visible":true,"heading":0,"__type":"end-point"},{"uid":"ooiMPszVsx","x":-45.44281389199244,"y":47.21048768192632,"lock":false,"visible":true,"heading":89.27477570094072,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"raUHPnwQN6"},{"controls":[{"uid":"ooiMPszVsx","x":-45.44281389199244,"y":47.21048768192632,"lock":false,"visible":true,"heading":89.27477570094072,"__type":"end-point"},{"uid":"f65rKDpV1U","x":-56.18483153851369,"y":47.07451277500832,"lock":false,"visible":true,"heading":269.6589577211411,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"a0Sv5O100z"},{"controls":[{"uid":"f65rKDpV1U","x":-56.18483153851369,"y":47.07451277500832,"lock":false,"visible":true,"heading":269.6589577211411,"__type":"end-point"},{"uid":"paAweopvTM","x":-33.34104717629128,"y":47.21048768192632,"lock":false,"visible":true,"heading":59.16877009244587,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"OQwOi7hp6f"},{"controls":[{"uid":"paAweopvTM","x":-33.34104717629128,"y":47.21048768192632,"lock":false,"visible":true,"heading":59.16877009244587,"__type":"end-point"},{"uid":"nHhvoWq7IM","x":-59.31225439762747,"y":31.709348293275397,"lock":false,"visible":true,"heading":10.420712396794556,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"bZzgDEveWc"},{"controls":[{"uid":"nHhvoWq7IM","x":-59.31225439762747,"y":31.709348293275397,"lock":false,"visible":true,"heading":10.420712396794556,"__type":"end-point"},{"uid":"ap2UtRtZ4D","x":-61.48785290831532,"y":19.87953139141022,"lock":false,"visible":true,"heading":0,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"KaSQnbNQMk"},{"controls":[{"uid":"ap2UtRtZ4D","x":-61.48785290831532,"y":19.87953139141022,"lock":false,"visible":true,"heading":0,"__type":"end-point"},{"uid":"ZjkFhxf0JO","x":-61.48785290831532,"y":-0.10877992553438623,"lock":false,"visible":true,"heading":0,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"NsgAuVde9c"}],"pc":{"speed":30},"name":"driver-skills-only-long-gaols","uid":"epZjN8FIv3","lock":false,"visible":false}]}
