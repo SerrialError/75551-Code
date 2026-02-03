@@ -19,7 +19,7 @@ rollers<motorStateType> intake::get_roller_states(void) {
             break;
 
         case bottomScore:
-            result = { make_running(-1.0), make_off() };
+            result = { make_running(-1.0), make_running(1.0)};
             break;
 
         case midScore:
