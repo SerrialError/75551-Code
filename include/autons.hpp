@@ -1,7 +1,7 @@
 #pragma once
 
-const int DRIVE_SPEED = 70;
-const int TURN_SPEED = 70;
+const int DRIVE_SPEED = 50;
+const int TURN_SPEED = 60;
 const int SWING_SPEED = 70;
 
 void default_constants();
