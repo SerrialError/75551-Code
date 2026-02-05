@@ -1,0 +1,20 @@
+CompileFlags:
+  Add:
+    - --target=arm-none-eabi
+    - --sysroot=/nix/store/c353gqsmf8mvg72vivm9fb2dv210wnkm-gcc-arm-embedded-14.2.rel1/arm-none-eabi
+    - -mcpu=cortex-a9
+    - -mfpu=neon-fp16
+    - -mfloat-abi=softfp
+    - -std=gnu++20
+
+    # explicit isystem entries (from your compiler search list)
+    - -isystem
+    - /nix/store/c353gqsmf8mvg72vivm9fb2dv210wnkm-gcc-arm-embedded-14.2.rel1/arm-none-eabi/include/c++/14.2.1
+    - -isystem
+    - /nix/store/c353gqsmf8mvg72vivm9fb2dv210wnkm-gcc-arm-embedded-14.2.rel1/arm-none-eabi/include/c++/14.2.1/arm-none-eabi
+    - -isystem
+    - /nix/store/c353gqsmf8mvg72vivm9fb2dv210wnkm-gcc-arm-embedded-14.2.rel1/lib/gcc/arm-none-eabi/14.2.1/include
+    - -isystem
+    - /nix/store/c353gqsmf8mvg72vivm9fb2dv210wnkm-gcc-arm-embedded-14.2.rel1/lib/gcc/arm-none-eabi/14.2.1/include-fixed
+    - -isystem
+    - /nix/store/c353gqsmf8mvg72vivm9fb2dv210wnkm-gcc-arm-embedded-14.2.rel1/arm-none-eabi/include

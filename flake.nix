@@ -46,8 +46,10 @@
     devShells.x86_64-linux.default = pkgs.mkShell {
       buildInputs = [
         pros-cli
+		pkgs.clang-tools
         pkgs.gcc
         pkgs.python3
+		pkgs.bear
       ];
 
       shellHook = ''
