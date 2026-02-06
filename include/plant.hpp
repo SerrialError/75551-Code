@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "pros/device.hpp"
+#include "pros/rtos.hpp"
 
 struct DevicesAndPlants {
     std::vector<pros::v5::Device> devices;
@@ -23,6 +24,8 @@ public:
 
     // Default empty plant
     Plant() = default;
+	virtual ~Plant() = default;
+	virtual void update() = 0;
 
 protected:
     std::vector<pros::v5::Device> devices;
