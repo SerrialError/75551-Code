@@ -33,7 +33,6 @@ void skills_deload_left_park() {
 	chassis.pid_wait();
 	chassis.pid_drive_set(20.035_in, DRIVE_SPEED);
 	chassis.pid_wait();
-
 }
 
 void skills_park_only() {
