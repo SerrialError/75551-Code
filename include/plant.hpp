@@ -4,32 +4,33 @@
 #include <vector>
 #include <memory>
 #include "pros/device.hpp"
-#include "pros/rtos.hpp"
-
-struct DevicesAndPlants {
-    std::vector<pros::v5::Device> devices;
-    std::vector<std::shared_ptr<class Plant>> subplants;
-
-    DevicesAndPlants(
-        std::vector<pros::v5::Device> devices_ = {},
-        std::vector<std::shared_ptr<class Plant>> subplants_ = {}
-    ) : devices(std::move(devices_)), subplants(std::move(subplants_)) {}
-};
 
 class Plant : public std::enable_shared_from_this<Plant> {
 public:
-    // Constructor from devices/subplants
-    explicit Plant(const DevicesAndPlants& input)
-        : devices(input.devices), subplants(input.subplants) {}
-
-    // Default empty plant
+    // default empty plant
     Plant() = default;
-	virtual ~Plant() = default;
-	virtual void update() = 0;
+
+    // construct with devices only
+    explicit Plant(std::vector<pros::v5::Device> devices)
+        : devices_(std::move(devices)) {}
+
+    // construct with subplants only
+    explicit Plant(std::vector<std::shared_ptr<Plant>> subplants)
+        : subplants_(std::move(subplants)) {}
+
+    // construct with both devices and subplants
+    Plant(std::vector<pros::v5::Device> devices,
+          std::vector<std::shared_ptr<Plant>> subplants)
+        : devices_(std::move(devices)), subplants_(std::move(subplants)) {}
+
+    virtual ~Plant() = default;
+
+    // interface
+    virtual void update() = 0;
 
 protected:
-    std::vector<pros::v5::Device> devices;
-    std::vector<std::shared_ptr<Plant>> subplants;
+    std::vector<pros::v5::Device> devices_;
+    std::vector<std::shared_ptr<Plant>> subplants_;
 };
 
 #endif // plant.hpp
