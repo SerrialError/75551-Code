@@ -57,11 +57,14 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
+  
+	  {"Full Skills route 1 clear", skills_all_match_loader_park},
+      {"Drive\n\nDrive forward and come back", drive_example},
+        {"Turn\n\nTurn 3 times.", turn_example},
       {"Full Right Left", skills_deload_left_park},
       {"Park only", skills_park_only},
-      {"Drive\n\nDrive forward and come back", drive_example},
-      {"Turn\n\nTurn 3 times.", turn_example},
-	  {"Full Skills route 1 clear", skills_all_match_loader_park},
+
+
       /*
       {"Drive and Turn\n\nDrive forward, turn, come back", drive_and_turn},
       {"Drive and Turn\n\nSlow down during drive", wait_until_change_speed},
