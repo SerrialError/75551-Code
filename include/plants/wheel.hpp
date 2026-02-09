@@ -3,18 +3,17 @@
 
 #include "plant.hpp"
 #include "motor-controller.hpp"
+#include <memory>
 
 class Wheel : public Plant {
 public:
-    explicit Wheel(MotorController motor);
+    explicit Wheel(std::shared_ptr<MotorController> motor_);
 
     void set_linear_velocity(double rpm);
     void get_linear_velocity();
 
-    void update() override;
-
 private:
-	MotorController motor;
+	std::shared_ptr<MotorController> motor;
 };
 
 #endif // wheel.hpp
