@@ -1,5 +1,33 @@
 #include "main.h"
 
+void skills_left_one() {
+	chassis.pid_drive_set(30.368_in, DRIVE_SPEED);
+	chassis.pid_wait();
+	chassis.pid_turn_set(270_deg, TURN_SPEED);
+	chassis.pid_wait();
+	match_loader.extend(); // down
+	pros::delay(200);
+	chassis.pid_drive_set(8.131_in, 90);
+	Intake.intakeState = intakeOnly;
+	Intake.update_intake_state();
+	chassis.pid_wait();
+	pros::delay(2000);
+	chassis.pid_drive_set(-28.539_in, DRIVE_SPEED);
+	match_loader.retract(); // up
+	chassis.pid_wait();
+	Intake.intakeState = topScore;
+	Intake.update_intake_state();
+	pros::delay(1500);
+	chassis.pid_drive_set(21.208_in, DRIVE_SPEED);
+	chassis.pid_wait();
+	chassis.pid_turn_set(134.287_deg, TURN_SPEED);
+	chassis.pid_wait();
+	chassis.pid_drive_set(16.367_in, DRIVE_SPEED);
+	chassis.pid_wait();
+	chassis.pid_turn_set(90_deg, TURN_SPEED);
+	chassis.pid_wait();
+}
+
 void skills_deload_left_park() {
 	chassis.pid_drive_set(29.064_in, DRIVE_SPEED);
 	chassis.pid_wait();
@@ -451,3 +479,5 @@ void move_slight() {
 	chassis.pid_turn_set(0_deg, TURN_SPEED);
 	chassis.pid_wait();
 }
+
+

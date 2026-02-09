@@ -57,10 +57,12 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
-  
+          {"One side", skills_left_one},
+          {"Turn\n\nTurn 3 times.", turn_example},
+
 	  {"Full Skills route 1 clear", skills_all_match_loader_park},
       {"Drive\n\nDrive forward and come back", drive_example},
-        {"Turn\n\nTurn 3 times.", turn_example},
+
       {"Full Right Left", skills_deload_left_park},
       {"Park only", skills_park_only},
 
@@ -255,8 +257,8 @@ void opcontrol() {
   while (true) {
     ez_template_extras();
 
-    chassis.opcontrol_tank();  // Tank control
-    // chassis.opcontrol_arcade_standard(ez::SPLIT);   // Standard split arcade
+    // chassis.opcontrol_tank();  // Tank control
+    chassis.opcontrol_arcade_standard(ez::SPLIT);   // Standard split arcade
     // chassis.opcontrol_arcade_standard(ez::SINGLE);  // Standard single arcade
     // chassis.opcontrol_arcade_flipped(ez::SPLIT);    // Flipped split arcade
     // chassis.opcontrol_arcade_flipped(ez::SINGLE);   // Flipped single arcade

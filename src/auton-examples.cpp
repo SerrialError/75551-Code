@@ -17,6 +17,8 @@ void drive_example() {
 // Turn Example
 ///
 void turn_example() {
+	Intake.intakeState = topScore;
+	Intake.update_intake_state();
   // The first parameter is the target in degrees
   // The second parameter is max speed the robot will drive at
 
