@@ -57,8 +57,9 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
+  	  {"Full Skills route 1 clear", skills_all_match_loader_park},
           {"Turn\n\nTurn 3 times.", turn_example},
-	  {"Full Skills route 1 clear", skills_all_match_loader_park},
+
           {"One side", skills_left_one},
 
 
