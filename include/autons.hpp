@@ -21,11 +21,11 @@ void odom_boomerang_injected_pure_pursuit_example();
 void measure_offsets();
 
 // custom autons
+// skills
 void skills_left_one();
-void skills_deload_left_park();
 void skills_park_only();
 void skills_all_match_loader_park();
-void skills_all_park_double_clear();
+// matches
 void redLeft_1_side_long_goal();
 void redRight_1_side_long_goal();
 void blueLeft_1_side_long_goal();
@@ -33,4 +33,3 @@ void blueRight_1_side_long_goal();
 void redRight_sawp();
 void blueRight_sawp();
 void move_slight();
-
