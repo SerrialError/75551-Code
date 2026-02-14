@@ -58,11 +58,18 @@ void initialize() {
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
   	  {"Full Skills route 1 clear", skills_all_match_loader_park},
-      {"Turn\n\nTurn 3 times.", turn_example},
+      {"Right 2 Long Goal", right_double_long_goal},
+      {"Full Match Auto No Double", left_both_sides_no_double},
+      {"Full Match Auto", left_both_sides},
+      {"Left 2 Long Goal", left_double_long_goal},
+      {"Left Only 1 Long Goal", left_single_long_goal},
       {"One side", skills_left_one},
-      {"Drive\n\nDrive forward and come back", drive_example},
       {"Park only", skills_park_only},
+      {"Right Only 1 Long Goal", right_single_long_goal},
+      {"Move for AWP", move_slight},
       /*
+      {"Turn\n\nTurn 3 times.", turn_example},
+      {"Drive\n\nDrive forward and come back", drive_example},
       {"Drive and Turn\n\nDrive forward, turn, come back", drive_and_turn},
       {"Drive and Turn\n\nSlow down during drive", wait_until_change_speed},
       {"Swing Turn\n\nSwing in an 'S' curve", swing_example},
