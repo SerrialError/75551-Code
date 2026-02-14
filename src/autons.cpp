@@ -37,7 +37,7 @@ void skills_all_match_loader_park() {
 	chassis.pid_wait();
 	match_loader.extend(); // down
 	pros::delay(200);
-	chassis.pid_drive_set(9.731_in, DRIVE_SPEED);
+	chassis.pid_drive_set(9.531_in, DRIVE_SPEED);
 	Intake.intakeState = intakeOnly;
 	Intake.update_intake_state();
 	chassis.pid_wait();
@@ -60,7 +60,7 @@ void skills_all_match_loader_park() {
 	chassis.pid_wait();
 	chassis.pid_turn_set(45.713_deg, TURN_SPEED);
 	chassis.pid_wait();
-	chassis.pid_drive_set(16.167_in, DRIVE_SPEED);
+	chassis.pid_drive_set(15.767_in, DRIVE_SPEED);
 	chassis.pid_wait();
 	chassis.pid_turn_set(90_deg, TURN_SPEED);
 	chassis.pid_wait();
