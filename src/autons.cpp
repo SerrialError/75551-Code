@@ -37,7 +37,7 @@ void skills_all_match_loader_park() {
 	chassis.pid_wait();
 	match_loader.extend(); // down
 	pros::delay(200);
-	chassis.pid_drive_set(9.531_in, DRIVE_SPEED);
+	chassis.pid_drive_set(9.331_in, DRIVE_SPEED);
 	Intake.intakeState = intakeOnly;
 	Intake.update_intake_state();
 	chassis.pid_wait();
@@ -60,13 +60,13 @@ void skills_all_match_loader_park() {
 	chassis.pid_wait();
 	chassis.pid_turn_set(45.713_deg, TURN_SPEED);
 	chassis.pid_wait();
-	chassis.pid_drive_set(15.767_in, DRIVE_SPEED);
+	chassis.pid_drive_set(16.667_in, DRIVE_SPEED);
 	chassis.pid_wait();
 	chassis.pid_turn_set(90_deg, TURN_SPEED);
 	chassis.pid_wait();
 	match_loader.extend(); // down
 	pros::delay(200);
-	chassis.pid_drive_set(13.631_in, DRIVE_SPEED);
+	chassis.pid_drive_set(14.531_in, DRIVE_SPEED);
 	Intake.intakeState = intakeOnly;
 	Intake.update_intake_state();
 	chassis.pid_wait();
@@ -95,7 +95,7 @@ void skills_all_match_loader_park() {
 	chassis.pid_wait();
 	match_loader.extend(); // down
 	pros::delay(200);
-	chassis.pid_drive_set(7.831_in, DRIVE_SPEED);
+	chassis.pid_drive_set(8.831_in, DRIVE_SPEED);
 	Intake.intakeState = intakeOnly;
 	Intake.update_intake_state();
 	chassis.pid_wait();
@@ -118,7 +118,7 @@ void skills_all_match_loader_park() {
 	chassis.pid_wait();
 	chassis.pid_turn_set(225.713_deg, TURN_SPEED);
 	chassis.pid_wait();
-	chassis.pid_drive_set(16.167_in, DRIVE_SPEED);
+	chassis.pid_drive_set(17.267_in, DRIVE_SPEED);
 	chassis.pid_wait();
 	chassis.pid_turn_set(270_deg, TURN_SPEED);
 	chassis.pid_wait();
@@ -289,7 +289,7 @@ void left_double_long_goal() {
 	Intake.intakeState = topScore;
 	Intake.update_intake_state();
 	pros::delay(2000);
-	chassis.pid_drive_set(30.839_in, DRIVE_SPEED);
+	chassis.pid_drive_set(31.039_in, DRIVE_SPEED);
 	chassis.pid_wait();
 }
 
