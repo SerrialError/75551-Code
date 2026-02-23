@@ -7,6 +7,7 @@
 extern Drive chassis;
 
 inline pros::adi::Pneumatics match_loader ('a', false, false);
+inline pros::adi::Pneumatics wings ('b', false, false);
 inline pros::Motor front(-2, pros::v5::MotorGears::blue);
 inline pros::Motor back(-9, pros::v5::MotorGears::blue);
 

@@ -285,6 +285,12 @@ void opcontrol() {
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
       match_loader.retract();
 	  }
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+			wings.extend();
+	  }
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+      wings.retract();
+	  }
 	 	Intake.update_intake_state();
     pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
   }
