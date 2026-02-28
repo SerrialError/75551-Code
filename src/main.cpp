@@ -57,15 +57,23 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
+      {"Right AWP", left_awp},
+      {"Right Large AWP", right_large_awp},
   	  {"Full Skills route 1 clear", skills_all_match_loader_park},
-      {"Right 2 Long Goal", right_double_long_goal},
-      {"Full Match Auto No Double", left_both_sides_no_double},
-      {"Full Match Auto", left_both_sides},
-      {"Left 2 Long Goal", left_double_long_goal},
-      {"Left Only 1 Long Goal", left_single_long_goal},
       {"One side", skills_left_one},
       {"Park only", skills_park_only},
-      {"Right Only 1 Long Goal", right_single_long_goal},
+
+      {"Right Long Rush", right_long_rush},
+
+      {"Right Small AWP", right_small_awp},
+      {"Right Long Middle", right_long_middle},
+      {"Right Small Long Middle", right_small_long_middle},
+
+      {"Left Long Rush", left_long_rush},
+
+      {"Left Long Midlle", left_long_middle},
+
+
       {"Move for AWP", move_slight},
       /*
       {"Turn\n\nTurn 3 times.", turn_example},
@@ -264,32 +272,37 @@ void opcontrol() {
     // chassis.opcontrol_arcade_standard(ez::SINGLE);  // Standard single arcade
     // chassis.opcontrol_arcade_flipped(ez::SPLIT);    // Flipped split arcade
     // chassis.opcontrol_arcade_flipped(ez::SINGLE);   // Flipped single arcade
-    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
 	    Intake.intakeState = topScore;
 	  }
-    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
 	    Intake.intakeState = midScore; 			
 	  }
-    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
 	    Intake.intakeState = bottomScore; 			
 	  }
-    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
 	    Intake.intakeState = intakeOnly;
 	  }
-    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
 	    Intake.intakeState = intakeOff; 			
 	  }
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
 			match_loader.extend();
 	  }
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
       match_loader.retract();
 	  }
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
-			wings.extend();
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+			wings.toggle();
 	  }
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-      wings.retract();
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
+      if (Intake.backStageSpeed == 1.0) {
+        Intake.backStageSpeed = 0.5;
+      }
+      else {
+        Intake.backStageSpeed = 1.0;
+      }
 	  }
 	 	Intake.update_intake_state();
     pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME

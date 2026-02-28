@@ -67,6 +67,9 @@ public:
     intake(const rollers<std::reference_wrapper<pros::Motor>>& motors_)
         : motors{ motors_.front, motors_.back}
     {}
+
+    double frontStageSpeed = 1.0;
+    double backStageSpeed = 1.0;
     rollerStateType intakeState = intakeOff;
 
 	void move_motor_states(const rollers<motorVelocityType>& motor_states);

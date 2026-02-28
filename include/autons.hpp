@@ -21,15 +21,19 @@ void odom_boomerang_injected_pure_pursuit_example();
 void measure_offsets();
 
 // custom autons
+
 // skills
 void skills_left_one();
 void skills_park_only();
 void skills_all_match_loader_park();
+
 // matches
-void left_both_sides();
-void left_both_sides_no_double();
-void left_single_long_goal();
-void left_double_long_goal();
-void right_double_long_goal();
-void right_single_long_goal();
+void left_long_rush();
+void left_long_middle();
+void left_awp();
+void right_small_long_middle();
+void right_long_middle();
+void right_small_awp();
+void right_large_awp();
+void right_long_rush();
 void move_slight();
