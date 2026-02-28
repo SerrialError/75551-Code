@@ -1,6 +1,6 @@
 #pragma once
 
-const int DRIVE_SPEED = 65;
+const int DRIVE_SPEED = 82.5;
 const int TURN_SPEED = 65;
 const int SWING_SPEED = 70;
 
@@ -31,6 +31,7 @@ void skills_all_match_loader_park();
 void left_long_rush();
 void left_long_middle();
 void left_awp();
+void left_large_awp();
 void right_small_long_middle();
 void right_long_middle();
 void right_small_awp();
