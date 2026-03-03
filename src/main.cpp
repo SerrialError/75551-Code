@@ -58,11 +58,9 @@ void initialize() {
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
       {"Left Large AWP", left_large_awp},
+  	  {"Full Skills route 1 clear", skills_all_match_loader_park_control_zone},
       {"Left AWP", left_awp},
       {"Right Large AWP", right_large_awp},
-  	  {"Full Skills route 1 clear", skills_all_match_loader_park},
-      {"One side", skills_left_one},
-      {"Park only", skills_park_only},
 
       {"Right Long Rush", right_long_rush},
 

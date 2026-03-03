@@ -23,9 +23,7 @@ void measure_offsets();
 // custom autons
 
 // skills
-void skills_left_one();
-void skills_park_only();
-void skills_all_match_loader_park();
+void skills_all_match_loader_park_control_zone();
 
 // matches
 void left_long_rush();
