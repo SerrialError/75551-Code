@@ -1,6 +1,9 @@
 #pragma once
 
-const int DRIVE_SPEED = 82.5;
+const int SKILLS_DRIVE_SPEED = 75;
+const int SKILLS_TURN_SPEED = 65;
+const int DRIVE_SPEED = 83;
+const int PARK_SPEED = 40;
 const int TURN_SPEED = 65;
 const int SWING_SPEED = 70;
 
@@ -24,6 +27,7 @@ void measure_offsets();
 
 // skills
 void skills_all_match_loader_park_control_zone();
+void skills_and_mid();
 
 // matches
 void left_long_rush();
