@@ -2,9 +2,10 @@
 
 const int SKILLS_DRIVE_SPEED = 75;
 const int SKILLS_TURN_SPEED = 65;
-const int DRIVE_SPEED = 83;
-const int PARK_SPEED = 40;
-const int TURN_SPEED = 65;
+const int DRIVE_SPEED = 88;
+const int PARK_SPEED = 85;
+const int LOAD_SPEED = 45;
+const int TURN_SPEED = 70;
 const int SWING_SPEED = 70;
 
 void default_constants();
