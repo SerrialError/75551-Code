@@ -32,6 +32,7 @@ void skills_and_mid();
 
 // matches
 void left_long_rush();
+void left_large_long_rush();
 void left_long_middle();
 void left_awp();
 void left_large_awp();
@@ -40,4 +41,5 @@ void right_long_middle();
 void right_small_awp();
 void right_large_awp();
 void right_long_rush();
+void right_large_long_rush();
 void move_slight();
