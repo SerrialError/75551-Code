@@ -7,11 +7,11 @@
 // Chassis constructor
 ez::Drive chassis(
     // These are your drive motors, the first motor is used for sensing!
-    {-11, -12, -13},     // Left Chassis Ports (negative port will reverse it!)
-    {18, 19, 20},  // Right Chassis Ports (negative port will reverse it!)
+    {-15, -11, -5},     // Left Chassis Ports (negative port will reverse it!)
+    {2, 6, 3},  // Right Chassis Ports (negative port will reverse it!)
 
     8,      // IMU Port
-    3.25,  // Wheel Diameter
+    2.75,  // Wheel Diameter
     450);   // Wheel RPM = cartridge * (motor gear / wheel gear)
 
 // Uncomment the trackers you're using here!
