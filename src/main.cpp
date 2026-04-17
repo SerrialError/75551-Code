@@ -57,6 +57,7 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
+      {"Full Skills", all_skills},
       {"Full Skills route 1 clear", skills_all_match_loader_park_control_zone},
       {"Left AWP", left_awp},
       {"Left Long Midlle", left_long_middle},

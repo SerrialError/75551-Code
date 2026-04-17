@@ -29,6 +29,7 @@ void measure_offsets();
 // skills
 void skills_all_match_loader_park_control_zone();
 void skills_and_mid();
+void all_skills();
 
 // matches
 void left_long_rush();
