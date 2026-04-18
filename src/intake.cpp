@@ -1,4 +1,5 @@
 #include "intake.hpp"
+#include "subsystems.hpp"
 
 void intake::move_motor_states(const rollers<motorVelocityType>& motor_states) {
     for (int i = 0; i < 2; i++) {
@@ -11,22 +12,37 @@ rollers<motorStateType> intake::get_roller_states(void) {
     // Map the high-level intake state to a desired state per roller.
     switch (intakeState) {
         case intakeOff:
+            if (two_state_system.is_extended()) {
+                two_state_system.retract();
+            }
             result = { make_off(), make_off() };
             break;
 
         case intakeOnly:
-            result = { make_running(frontStageSpeed), make_off() };
-            break;
-
-        case bottomScore:
-            result = { make_running(-frontStageSpeed), make_running(backStageSpeed)};
-            break;
-
-        case midScore:
+            if (two_state_system.is_extended()) {
+                two_state_system.retract();
+            }
             result = { make_running(frontStageSpeed), make_running(-backStageSpeed) };
             break;
 
+        case bottomScore:
+            if (two_state_system.is_extended()) {
+                two_state_system.retract();
+            }
+            result = { make_running(-frontStageSpeed), make_running(-backStageSpeed)};
+            break;
+
+        case midScore:
+            if (!two_state_system.is_extended()) {
+                two_state_system.extend();
+            }
+            result = { make_running(frontStageSpeed), make_running(backStageSpeed) };
+            break;
+
         case topScore:
+            if (two_state_system.is_extended()) {
+                two_state_system.retract();
+            }
             result = { make_running(frontStageSpeed), make_running(backStageSpeed) };
             break;
 

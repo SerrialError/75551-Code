@@ -14,6 +14,17 @@ void drive_example() {
 }
 
 ///
+// Measure IMU Offset
+///
+void measure_imu_offset() {
+  // The first parameter is the target in degrees
+  // The second parameter is max speed the robot will drive at
+
+  chassis.pid_turn_set(3600_deg, 60, ez::raw);
+  chassis.pid_wait();
+}
+
+///
 // Turn Example
 ///
 void turn_example() {

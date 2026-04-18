@@ -10,7 +10,7 @@ ez::Drive chassis(
     {-15, -11, -5},     // Left Chassis Ports (negative port will reverse it!)
     {2, 6, 3},  // Right Chassis Ports (negative port will reverse it!)
 
-    8,      // IMU Port
+    12,      // IMU Port
     2.75,  // Wheel Diameter
     450);   // Wheel RPM = cartridge * (motor gear / wheel gear)
 
@@ -57,6 +57,9 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
+      // {"Turn\n\nTurn 3 times.", turn_example},
+      // {"Drive\n\nDrive forward and come back", drive_example},
+      {"Left Large Long Rush", left_large_long_rush},
       {"Full Skills", all_skills},
       {"Full Skills route 1 clear", skills_all_match_loader_park_control_zone},
       {"Left AWP", left_awp},
@@ -77,6 +80,8 @@ void initialize() {
 
 
       {"Move for AWP", move_slight},
+      // {"Measure IMU Offset.", measure_imu_offset},
+      // {"Turn\n\nTurn 3 times.", turn_example},
       /*
       {"Turn\n\nTurn 3 times.", turn_example},
       {"Drive\n\nDrive forward and come back", drive_example},
@@ -98,7 +103,7 @@ void initialize() {
   chassis.initialize();
   chassis.opcontrol_curve_default_set(2);
   chassis.opcontrol_drive_activebrake_set(0.6);
-  chassis.opcontrol_joystick_practicemode_toggle(true);
+  chassis.opcontrol_joystick_practicemode_toggle(false);
   ez::as::initialize();
   master.rumble(chassis.drive_imu_calibrated() ? "." : "---");
 }
@@ -232,7 +237,7 @@ void ez_template_extras() {
       chassis.pid_tuner_toggle();
 
     // Trigger the selected autonomous routine
-    if (master.get_digital(DIGITAL_B) && master.get_digital(DIGITAL_DOWN)) {
+    if (master.get_digital(DIGITAL_A) && master.get_digital(DIGITAL_LEFT)) {
       pros::motor_brake_mode_e_t preference = chassis.drive_brake_get();
       autonomous();
       chassis.drive_brake_set(preference);
@@ -278,7 +283,7 @@ void opcontrol() {
 	    Intake.intakeState = topScore;
 	  }
     if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-	    Intake.intakeState = midScore; 			
+	    Intake.intakeState = midScore;	
 	  }
     if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
 	    Intake.intakeState = bottomScore; 			
