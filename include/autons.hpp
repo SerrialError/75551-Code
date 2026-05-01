@@ -2,10 +2,10 @@
 
 const int SKILLS_DRIVE_SPEED = 75;
 const int SKILLS_TURN_SPEED = 65;
-const int DRIVE_SPEED = 88;
-const int PARK_SPEED = 85;
-const int LOAD_SPEED = 45;
-const int TURN_SPEED = 70;
+const int DRIVE_SPEED = 92;
+const int PARK_SPEED = 95;
+const int LOAD_SPEED = 65;
+const int TURN_SPEED = 90;
 const int SWING_SPEED = 70;
 
 void default_constants();
@@ -42,6 +42,7 @@ void right_small_long_middle();
 void right_long_middle();
 void right_small_awp();
 void right_large_awp();
+void right_long_low();
 void right_long_rush();
 void right_large_long_rush();
 void move_slight();

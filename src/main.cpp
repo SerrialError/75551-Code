@@ -59,27 +59,23 @@ void initialize() {
   ez::as::auton_selector.autons_add({
       // {"Turn\n\nTurn 3 times.", turn_example},
       // {"Drive\n\nDrive forward and come back", drive_example},
-      {"Left Large Long Rush", left_large_long_rush},
-      {"Full Skills", all_skills},
+      {"Right Long Low", right_long_low},
       {"Full Skills route 1 clear", skills_all_match_loader_park_control_zone},
-      {"Left AWP", left_awp},
+      {"Move for AWP", move_slight},
+      {"Left Large Long Rush", left_large_long_rush},
+      {"Left Long Rush", left_long_rush},
+      {"Full Skills", all_skills},
       {"Left Long Midlle", left_long_middle},
       {"Right Large Long Rush", right_large_long_rush},
       {"Left Large Long Rush", left_large_long_rush},
-      {"Left Large AWP", left_large_awp},
       {"Right Long Middle", right_long_middle},
       {"Right Long Rush", right_long_rush},
-      {"Left Long Rush", left_long_rush},
       {"Full Skills and mid", skills_and_mid},
-      {"Right Large AWP", right_large_awp},
-
-      {"Right Small AWP", right_small_awp},
 
       {"Right Small Long Middle", right_small_long_middle},
 
 
 
-      {"Move for AWP", move_slight},
       // {"Measure IMU Offset.", measure_imu_offset},
       // {"Turn\n\nTurn 3 times.", turn_example},
       /*
