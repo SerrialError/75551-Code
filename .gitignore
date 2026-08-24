@@ -13,3 +13,9 @@ temp.log
 temp.errors
 *.ini
 .d/
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+# direnv
+.direnv
