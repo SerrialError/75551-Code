@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://devenv.sh/devenv.schema.json
+inputs:
+  nixpkgs:
+    url: github:cachix/devenv-nixpkgs/rolling
+  # To upgrade pros-cli: change the tag below to the new release, then run
+  # `devenv update`. Version string and hash are derived automatically.
+  pros-cli-src:
+    url: github:purduesigbots/pros-cli/3.5.6
+    flake: false

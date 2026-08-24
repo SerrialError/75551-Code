@@ -1,15 +1,11 @@
 # Compiled Object files
 *.o
 *.obj
-
 # Executables
 *.bin
 *.elf
-
 # PROS
 bin/
-build/
-.output/
 .vscode/
 .cache/
 compile_commands.json
@@ -17,7 +13,9 @@ temp.log
 temp.errors
 *.ini
 .d/
-
-# Doxygen
-docs/html/
-docs/latex/
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+# direnv
+.direnv

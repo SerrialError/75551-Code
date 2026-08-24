@@ -1,137 +1,26 @@
-/**
- * \file main.cpp
- * @brief PROS entry points and high-level robot wiring.
- *
- * Creates the global drivetrain and intake instances, wires up sensors
- * and motors, and implements the standard PROS callbacks (`initialize`,
- * `disabled`, `competition_initialize`, `autonomous`, and `opcontrol`).
- */
 #include "main.h"
-pros::adi::Pneumatics match_loader ('a', true, false);
-pros::Rotation linear_wheel(16);
-pros::Rotation horizontal_wheel(15);
-pros::Imu imu_sensor_1(3);
+/////
+// For installation, upgrading, documentations, and tutorials, check out our website!
+// https://ez-robotics.github.io/EZ-Template/
+/////
 
-pros::Motor m1(-2, pros::v5::MotorGears::blue);
-pros::Motor m2(14, pros::v5::MotorGears::blue);
-pros::Motor o1(-13, pros::v5::MotorGears::blue);
-pros::Motor o2(18, pros::v5::MotorGears::blue);
-pros::Motor m3(-11, pros::v5::MotorGears::blue);
-pros::Motor m4(17, pros::v5::MotorGears::blue);
+// Chassis constructor
+ez::Drive chassis(
+    // These are your drive motors, the first motor is used for sensing!
+    {-15, -11, -5},     // Left Chassis Ports (negative port will reverse it!)
+    {2, 6, 3},  // Right Chassis Ports (negative port will reverse it!)
 
-// Drivetrain motor grouping: mecanum (m1–m4) plus omni wheels (o1, o2).
-const wheels<std::reference_wrapper<pros::Motor>> driveMotors{
-	std::ref(m1),
-	std::ref(m2),
-	std::ref(o1),
-	std::ref(o2),
-	std::ref(m3),
-	std::ref(m4)
-};
+    12,      // IMU Port
+    2.75,  // Wheel Diameter
+    450);   // Wheel RPM = cartridge * (motor gear / wheel gear)
 
-// kA, kV, kS, max rad/s (calculated at 12 V), max voltage
-const wheels<FirstOrderFeedforwardConstants> dtFFConsts{ 
-	{0.0045870351481, 0.166157827462, 0.120535260966, 75.858991, 12.24}, 
-	{0.00346235990182, 0.16618573907, 0.103286863565, 74.351026, 12.055}, 
-	{0.0011750526572, 0.156487380984, 0.133576249675, 80.215332, 12.055}, 
-	{0.00169461151421, 0.161775364104, 0.136640169512, 76.235982, 12.055}, 
-	{0.0043200416094, 0.16243797244, 0.259385827274, 75.314448, 12.012}, 
-	{0.00101968096594, 0.157778384448, 0.16310482292, 78.351321, 12.012} };
-
-const wheels<PIDConstants> dtPIDConsts{ 
-	{0.f, 0.f, 0.f},
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f} };
-
-const float wheelbase = 0.292100005; // m
-const float trackwidth = 0.29508135; // m
-
-const float dt_ = 0.01f;
-
-drivetrain dt(driveMotors, wheelbase, trackwidth, dt_, dtFFConsts, dtPIDConsts, linear_wheel, horizontal_wheel, imu_sensor_1, {0, 0, 0});
-
-pros::Motor front(-5, pros::v5::MotorGears::blue);
-pros::Motor back(-6, pros::v5::MotorGears::blue);
-
-const rollers<std::reference_wrapper<pros::Motor>> intakeMotors{
-	std::ref(front),
-	std::ref(back)
-};
-
-const rollers<FirstOrderFeedforwardConstants> intakeFFConsts {
-	{0.00681526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618},
-	{0.00981526983289, 0.276443936704, 0.23522177916, 70.590165, 12.618}
-};
-
-const rollers<PIDConstants> intakePIDConsts {
-	{0.f, 0.f, 0.f}, 
-	{0.f, 0.f, 0.f}
-};
-
-
-intake Intake(intakeMotors, intakeFFConsts, intakePIDConsts, dt_);
-
-autons current_auton = blueRight;
-/**
- * A callback function for LLEMU's center button.
- *
- * When this callback is fired, it will toggle line 2 of the LCD text between
- * "I was pressed!" and nothing.
- */
-void on_left_button() {
-    static bool pressed = false;
-    pressed = !pressed;
-    if (pressed) {
-		current_auton = static_cast<autons>((current_auton - 1) % 4);
-		switch (current_auton) {
-			case blueRight:
-				pros::lcd::set_text(1, "Blue Right");
-				break;
-			case blueLeft:
-				pros::lcd::set_text(1, "Blue Left");
-				break;
-			case redLeft:
-				pros::lcd::set_text(1, "Red Left");
-				break;
-			case redRight:
-				pros::lcd::set_text(1, "Red Right");
-				break;
-			default:
-				pros::lcd::set_text(1, "Blue Right");
-				break;
-		}
-    }
-}
-
-void on_right_button() {
-    static bool pressed = false;
-    pressed = !pressed;
-    if (pressed) {
-		current_auton = static_cast<autons>((current_auton + 1) % 4);
-		switch (current_auton) {
-			case blueRight:
-				pros::lcd::set_text(1, "Blue Right");
-				break;
-			case blueLeft:
-				pros::lcd::set_text(1, "Blue Left");
-				break;
-			case redLeft:
-				pros::lcd::set_text(1, "Red Left");
-				break;
-			case redRight:
-				pros::lcd::set_text(1, "Red Right");
-				break;
-			default:
-				pros::lcd::set_text(1, "Blue Right");
-				break;
-		}
-    }
-	
-}
-
+// Uncomment the trackers you're using here!
+// - `8` and `9` are smart ports (making these negative will reverse the sensor)
+//  - you should get positive values on the encoders going FORWARD and RIGHT
+// - `2.75` is the wheel diameter
+// - `4.0` is the distance from the center of the wheel to the center of the robot
+// ez::tracking_wheel horiz_tracker(8, 2.75, 4.0);  // This tracking wheel is perpendicular to the drive wheels
+// ez::tracking_wheel vert_tracker(9, 2.75, 4.0);   // This tracking wheel is parallel to the drive wheels
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -139,22 +28,90 @@ void on_right_button() {
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-
-
 void initialize() {
-    pros::lcd::initialize();
-	pros::lcd::register_btn0_cb(on_left_button);
-	pros::lcd::register_btn2_cb(on_right_button);
-}
+  // Print our branding over your terminal :D
+  ez::ez_template_print();
 
+  pros::delay(500);  // Stop the user from doing anything while legacy ports configure
+
+  // Look at your horizontal tracking wheel and decide if it's in front of the midline of your robot or behind it
+  //  - change `back` to `front` if the tracking wheel is in front of the midline
+  //  - ignore this if you aren't using a horizontal tracker
+  // chassis.odom_tracker_back_set(&horiz_tracker);
+  // Look at your vertical tracking wheel and decide if it's to the left or right of the center of the robot
+  //  - change `left` to `right` if the tracking wheel is to the right of the centerline
+  //  - ignore this if you aren't using a vertical tracker
+  // chassis.odom_tracker_left_set(&vert_tracker);
+
+  // Configure your chassis controls
+  chassis.opcontrol_curve_buttons_toggle(true);   // Enables modifying the controller curve with buttons on the joysticks
+  chassis.opcontrol_drive_activebrake_set(0.0);   // Sets the active brake kP. We recommend ~2.  0 will disable.
+  chassis.opcontrol_curve_default_set(0.0, 0.0);  // Defaults for curve. If using tank, only the first parameter is used. (Comment this line out if you have an SD card!)
+
+  // Set the drive to your own constants from autons.cpp!
+  default_constants();
+
+  // These are already defaulted to these buttons, but you can change the left/right curve buttons here!
+  // chassis.opcontrol_curve_buttons_left_set(pros::E_CONTROLLER_DIGITAL_LEFT, pros::E_CONTROLLER_DIGITAL_RIGHT);  // If using tank, only the left side is used.
+  // chassis.opcontrol_curve_buttons_right_set(pros::E_CONTROLLER_DIGITAL_Y, pros::E_CONTROLLER_DIGITAL_A);
+
+  // Autonomous Selector using LLEMU
+  ez::as::auton_selector.autons_add({
+      // {"Turn\n\nTurn 3 times.", turn_example},
+      // {"Drive\n\nDrive forward and come back", drive_example},
+      {"Right Long Low", right_long_low},
+      {"Full Skills route 1 clear", skills_all_match_loader_park_control_zone},
+      {"Move for AWP", move_slight},
+      {"Left Large Long Rush", left_large_long_rush},
+      {"Left Long Rush", left_long_rush},
+      {"Full Skills", all_skills},
+      {"Left Long Midlle", left_long_middle},
+      {"Right Large Long Rush", right_large_long_rush},
+      {"Left Large Long Rush", left_large_long_rush},
+      {"Right Long Middle", right_long_middle},
+      {"Right Long Rush", right_long_rush},
+      {"Full Skills and mid", skills_and_mid},
+
+      {"Right Small Long Middle", right_small_long_middle},
+
+
+
+      // {"Measure IMU Offset.", measure_imu_offset},
+      // {"Turn\n\nTurn 3 times.", turn_example},
+      /*
+      {"Turn\n\nTurn 3 times.", turn_example},
+      {"Drive\n\nDrive forward and come back", drive_example},
+      {"Drive and Turn\n\nDrive forward, turn, come back", drive_and_turn},
+      {"Drive and Turn\n\nSlow down during drive", wait_until_change_speed},
+      {"Swing Turn\n\nSwing in an 'S' curve", swing_example},
+      {"Motion Chaining\n\nDrive forward, turn, and come back, but blend everything together :D", motion_chaining},
+      {"Combine all 3 movements", combining_movements},
+      {"Interference\n\nAfter driving forward, robot performs differently if interfered or not", interfered_example},
+      {"Simple Odom\n\nThis is the same as the drive example, but it uses odom instead!", odom_drive_example},
+      {"Pure Pursuit\n\nGo to (0, 30) and pass through (6, 10) on the way.  Come back to (0, 0)", odom_pure_pursuit_example},
+      {"Pure Pursuit Wait Until\n\nGo to (24, 24) but start running an intake once the robot passes (12, 24)", odom_pure_pursuit_wait_until_example},
+      {"Boomerang\n\nGo to (0, 24, 45) then come back to (0, 0, 0)", odom_boomerang_example},
+      {"Boomerang Pure Pursuit\n\nGo to (0, 24, 45) on the way to (24, 24) then come back to (0, 0, 0)", odom_boomerang_injected_pure_pursuit_example},
+      {"Measure Offsets\n\nThis will turn the robot a bunch of times and calculate your offsets for your tracking wheels.", measure_offsets},*/
+  });
+
+  // Initialize chassis and auton selector
+  chassis.initialize();
+  chassis.opcontrol_curve_default_set(2);
+  chassis.opcontrol_drive_activebrake_set(0.6);
+  chassis.opcontrol_joystick_practicemode_toggle(false);
+  ez::as::initialize();
+  master.rumble(chassis.drive_imu_calibrated() ? "." : "---");
+}
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled() {}
-
+void disabled() {
+  // . . .
+}
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -165,10 +122,8 @@ void disabled() {}
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-
-
-
 void competition_initialize() {
+  // . . .
 }
 
 /**
@@ -183,39 +138,117 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-	switch (current_auton) {
-		case blueRight:
-			dt.localization.set_pose({0.0, 0.0, 0.0});
-			Intake.intakeState = intakeOnly;
-			for (int i = 0; i < 20; i++) {
-	 			Intake.update_intake_state(dt_);
-        			pros::delay(static_cast<int>(dt_*1000.0));
-			}
-			dt.linear_mp(40 * 0.0254);
-			pros::delay(500);
-			dt.angular_mp(162.0 * M_PI / 180.0 * 0.0254);
-			pros::delay(500);
-			dt.linear_mp(21.0 * 0.0254);
-			Intake.intakeState = bottomScore;
-			for (int i = 0; i < 20; i++) {
-	 			Intake.update_intake_state(dt_);
-        			pros::delay(static_cast<int>(dt_*1000.0));
-			}
-			break;
-		case blueLeft:
-			break;
-		case redLeft:
+  chassis.pid_targets_reset();                // Resets PID targets to 0
+  chassis.drive_imu_reset();                  // Reset gyro position to 0
+  chassis.drive_sensor_reset();               // Reset drive sensors to 0
+  chassis.odom_xyt_set(0_in, 0_in, 0_deg);    // Set the current position, you can start at a specific position with this
+  chassis.drive_brake_set(MOTOR_BRAKE_HOLD);  // Set motors to hold.  This helps autonomous consistency
 
-			break;
-		case redRight:
+  /*
+  Odometry and Pure Pursuit are not magic
 
-			break;
-		default:
-			
-			break;
-	}
+  It is possible to get perfectly consistent results without tracking wheels,
+  but it is also possible to have extremely inconsistent results without tracking wheels.
+  When you don't use tracking wheels, you need to:
+   - avoid wheel slip
+   - avoid wheelies
+   - avoid throwing momentum around (super harsh turns, like in the example below)
+  You can do cool curved motions, but you have to give your robot the best chance
+  to be consistent
+  */
+
+  ez::as::auton_selector.selected_auton_call();  // Calls selected auton from autonomous selector
 }
 
+/**
+ * Simplifies printing tracker values to the brain screen
+ */
+void screen_print_tracker(ez::tracking_wheel *tracker, std::string name, int line) {
+  std::string tracker_value = "", tracker_width = "";
+  // Check if the tracker exists
+  if (tracker != nullptr) {
+    tracker_value = name + " tracker: " + util::to_string_with_precision(tracker->get());             // Make text for the tracker value
+    tracker_width = "  width: " + util::to_string_with_precision(tracker->distance_to_center_get());  // Make text for the distance to center
+  }
+  ez::screen_print(tracker_value + tracker_width, line);  // Print final tracker text
+}
+
+/**
+ * Ez screen task
+ * Adding new pages here will let you view them during user control or autonomous
+ * and will help you debug problems you're having
+ */
+void ez_screen_task() {
+  while (true) {
+    // Only run this when not connected to a competition switch
+    if (!pros::competition::is_connected()) {
+      // Blank page for odom debugging
+      if (chassis.odom_enabled() && !chassis.pid_tuner_enabled()) {
+        // If we're on the first blank page...
+        if (ez::as::page_blank_is_on(0)) {
+          // Display X, Y, and Theta
+          ez::screen_print("x: " + util::to_string_with_precision(chassis.odom_x_get()) +
+                               "\ny: " + util::to_string_with_precision(chassis.odom_y_get()) +
+                               "\na: " + util::to_string_with_precision(chassis.odom_theta_get()),
+                           1);  // Don't override the top Page line
+
+          // Display all trackers that are being used
+          screen_print_tracker(chassis.odom_tracker_left, "l", 4);
+          screen_print_tracker(chassis.odom_tracker_right, "r", 5);
+          screen_print_tracker(chassis.odom_tracker_back, "b", 6);
+          screen_print_tracker(chassis.odom_tracker_front, "f", 7);
+        }
+      }
+    }
+
+    // Remove all blank pages when connected to a comp switch
+    else {
+      if (ez::as::page_blank_amount() > 0)
+        ez::as::page_blank_remove_all();
+    }
+
+    pros::delay(ez::util::DELAY_TIME);
+  }
+}
+pros::Task ezScreenTask(ez_screen_task);
+
+/**
+ * Gives you some extras to run in your opcontrol:
+ * - run your autonomous routine in opcontrol by pressing DOWN and B
+ *   - to prevent this from accidentally happening at a competition, this
+ *     is only enabled when you're not connected to competition control.
+ * - gives you a GUI to change your PID values live by pressing X
+ */
+void ez_template_extras() {
+  // Only run this when not connected to a competition switch
+  if (!pros::competition::is_connected()) {
+    // PID Tuner
+    // - after you find values that you're happy with, you'll have to set them in auton.cpp
+
+    // Enable / Disable PID Tuner
+    //  When enabled:
+    //  * use A and Y to increment / decrement the constants
+    //  * use the arrow keys to navigate the constants
+    if (master.get_digital_new_press(DIGITAL_X))
+      chassis.pid_tuner_toggle();
+
+    // Trigger the selected autonomous routine
+    if (master.get_digital(DIGITAL_A) && master.get_digital(DIGITAL_LEFT)) {
+      pros::motor_brake_mode_e_t preference = chassis.drive_brake_get();
+      autonomous();
+      chassis.drive_brake_set(preference);
+    }
+
+    // Allow PID Tuner to iterate
+    chassis.pid_tuner_iterate();
+  }
+
+  // Disable PID Tuner when connected to a comp switch
+  else {
+    if (chassis.pid_tuner_enabled())
+      chassis.pid_tuner_disable();
+  }
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -230,37 +263,51 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-
 void opcontrol() {
-    while(true) {
-	    if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-	        Intake.intakeState = topScore;
-	    }
-        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-	        Intake.intakeState = midScore; 			
-	    }
-        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-	        Intake.intakeState = bottomScore; 			
-	    }
-        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-	        Intake.intakeState = intakeOnly;
-	    }
-        if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-	        Intake.intakeState = intakeOff; 			
-	    }
-		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-			match_loader.retract();
-	    }
-		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+  // This is preference to what you like to drive on
+  chassis.drive_brake_set(MOTOR_BRAKE_COAST);
+
+  while (true) {
+    ez_template_extras();
+
+    // chassis.opcontrol_tank();  // Tank control
+    chassis.opcontrol_arcade_standard(ez::SPLIT);   // Standard split arcade
+    // chassis.opcontrol_arcade_standard(ez::SINGLE);  // Standard single arcade
+    // chassis.opcontrol_arcade_flipped(ez::SPLIT);    // Flipped split arcade
+    // chassis.opcontrol_arcade_flipped(ez::SINGLE);   // Flipped single arcade
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
+	    Intake.intakeState = topScore;
+	  }
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+	    Intake.intakeState = midScore;	
+	  }
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+	    Intake.intakeState = bottomScore; 			
+	  }
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
+	    Intake.intakeState = intakeOnly;
+	  }
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
+	    Intake.intakeState = intakeOff; 			
+	  }
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
 			match_loader.extend();
-	    }
-		if (dt.master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
-			dt.calculate_and_print_motor_constants();
-		}
-	 	Intake.update_intake_state(dt_);
-	    // dt.field_oriented_holonomic_control(dt_);
-	    dt.tank_drive_control();
-        // dt.test_control(dt_);
-        pros::delay(static_cast<int>(dt_*1000.0));
-    }
+	  }
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
+      match_loader.retract();
+	  }
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+			wings.toggle();
+	  }
+    if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
+      if (Intake.backStageSpeed == 1.0) {
+        Intake.backStageSpeed = 0.5;
+      }
+      else {
+        Intake.backStageSpeed = 1.0;
+      }
+	  }
+	 	Intake.update_intake_state();
+    pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
+  }
 }
