@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://devenv.sh/devenv.schema.json
+inputs:
+  nixpkgs:
+    url: github:cachix/devenv-nixpkgs/rolling
+
+  # Nightly Rust with per-file component/target resolution.
+  fenix:
+    url: github:nix-community/fenix
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
+
+  # Upstream, source-built cargo-v5 derivation (the same flake vexide uses).
+  # Kept on its own pinned inputs so its build stays reproducible.
+  cargo-v5:
+    url: github:vexide/cargo-v5
