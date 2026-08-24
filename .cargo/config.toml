@@ -1,0 +1,6 @@
+[target.'cfg(target_os = "vexos")']
+rustflags = ["-Clink-arg=-Tvexide.ld"]
+
+[unstable]
+build-std = ["std", "panic_abort"]
+build-std-features = ["compiler-builtins-mem"]
