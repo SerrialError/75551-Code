@@ -4,14 +4,18 @@ use evian::prelude::*;
 use vexide::prelude::*;
 
 use evian::{
-    control::loops::{AngularPid, Pid},
-    drivetrain::model::{Arcade, Differential},
+    control::loops::{AngularPid, MotorFeedforward, Pid},
+    drivetrain::model::Arcade,
     motion::{Basic, Seeking},
     tracking::wheeled::{TrackingWheel, WheeledTracking},
 };
 
+mod velocity_differential;
+use velocity_differential::{MotorGroupVelocity, VelocityDifferential, VelocityDifferentialConfig};
+
 struct Robot {
-    drivetrain: Drivetrain<Differential, WheeledTracking>,
+    drivetrain:
+        Drivetrain<VelocityDifferential<MotorFeedforward, Pid, MotorGroupVelocity>, WheeledTracking>,
     controller: Controller,
 }
 
@@ -26,11 +30,16 @@ impl Robot {
         .error(f64::to_radians(8.0))
         .velocity(0.09)
         .duration(Duration::from_millis(15));
+
+    /// Full-stick linear velocity for teleop, in inches / second.
+    const MAX_LINEAR_VELOCITY: f64 = 0.0;
+    /// Full-stick angular velocity for teleop, in radians / second.
+    const MAX_ANGULAR_VELOCITY: f64 = 0.0;
 }
 
 impl Compete for Robot {
     async fn autonomous(&mut self) {
-        let deltat = &mut self.drivetrain;
+        let dt = &mut self.drivetrain;
         let mut seeking = Seeking {
             linear_controller: Pid::new(0.0, 0.0, 0.0, None),
             lateral_controller: Pid::new(0.0, 0.0, 0.0, None),
@@ -45,21 +54,17 @@ impl Compete for Robot {
             timeout: Some(Duration::from_secs(10)),
         };
 
-        // Drive forwards at 60% speed.
         basic
-            .drive_distance(deltat, 24.0)
+            .drive_distance(dt, 24.0)
             .with_linear_output_limit(6.0)
             .await;
 
-        // Turn to 0 degrees heading.
-        basic.turn_to_heading(deltat, 0.0.deg()).await;
+        basic.turn_to_heading(dt, 0.0.deg()).await;
 
-        // Move to point (24, 24) on the field.
-        seeking.move_to_point(deltat, (24.0, 24.0)).await;
+        seeking.move_to_point(dt, (24.0, 24.0)).await;
 
-        // Having fun with modifiers.
         basic
-            .drive_distance_at_heading(deltat, 8.0, 45.0.deg())
+            .drive_distance_at_heading(dt, 8.0, 45.0.deg())
             .with_linear_kd(1.2)
             .with_angular_tolerance_duration(Duration::from_millis(5))
             .with_angular_error_tolerance(f64::to_radians(10.0))
@@ -71,10 +76,15 @@ impl Compete for Robot {
         loop {
             let state = self.controller.state().unwrap_or_default();
 
+            // Sticks scale to a target velocity, driven through the same
+            // cascade as autonomous.
+            let linear_velocity = state.left_stick.y() * Self::MAX_LINEAR_VELOCITY;
+            let angular_velocity = state.left_stick.x() * Self::MAX_ANGULAR_VELOCITY;
+
             _ = self
                 .drivetrain
                 .model
-                .drive_arcade(state.left_stick.y(), state.left_stick.x());
+                .drive_arcade(linear_velocity, angular_velocity);
             println!("{}", self.drivetrain.tracking.position());
 
             sleep(Motor::WRITE_INTERVAL).await;
@@ -102,7 +112,25 @@ async fn main(peripherals: Peripherals) {
 
     Robot {
         drivetrain: Drivetrain::new(
-            Differential::new(left_motors, right_motors),
+            VelocityDifferential::new(
+                left_motors,
+                right_motors,
+                // gear_ratio: wheel revs per motor output-shaft rev; 1.0 for
+                // direct drive.
+                0.0,
+                // TODO: characterize the drivetrain and fill these in. Tune the
+                // feedforward first, then the velocity feedback, then the outer
+                // position PIDs above. Gains are in radians / second.
+                VelocityDifferentialConfig {
+                    left_velocity_feedforward: Some(MotorFeedforward::new(0.0, 0.0, 0.0)),
+                    right_velocity_feedforward: Some(MotorFeedforward::new(0.0, 0.0, 0.0)),
+                    left_velocity_feedback: Some(Pid::new(0.0, 0.0, 0.0, None)),
+                    right_velocity_feedback: Some(Pid::new(0.0, 0.0, 0.0, None)),
+                    wheel_diameter: 0.0,
+                    track_width: 0.0,
+                    max_velocity: 0.0,
+                },
+            ),
             WheeledTracking::new(
                 (0.0, 0.0),
                 90.0.deg(),
