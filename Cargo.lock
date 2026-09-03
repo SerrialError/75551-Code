@@ -113,7 +113,7 @@ dependencies = [
 [[package]]
 name = "evian"
 version = "0.3.0-rc.1"
-source = "git+https://github.com/SerrialError/evian?branch=main#bc300becbbbc8612de4a0d559fc66159040cd841"
+source = "git+https://github.com/SerrialError/evian?branch=integration#7c230707494f7dca51454719315b148414d67bf1"
 dependencies = [
  "evian-control",
  "evian-drivetrain",
@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "evian-control"
 version = "0.0.1-rc.1"
-source = "git+https://github.com/SerrialError/evian?branch=main#bc300becbbbc8612de4a0d559fc66159040cd841"
+source = "git+https://github.com/SerrialError/evian?branch=integration#7c230707494f7dca51454719315b148414d67bf1"
 dependencies = [
  "evian-math",
  "vexide",
@@ -134,7 +134,7 @@ dependencies = [
 [[package]]
 name = "evian-drivetrain"
 version = "0.0.1-rc.1"
-source = "git+https://github.com/SerrialError/evian?branch=main#bc300becbbbc8612de4a0d559fc66159040cd841"
+source = "git+https://github.com/SerrialError/evian?branch=integration#7c230707494f7dca51454719315b148414d67bf1"
 dependencies = [
  "evian-math",
  "evian-tracking",
@@ -144,7 +144,7 @@ dependencies = [
 [[package]]
 name = "evian-math"
 version = "0.0.1-rc.1"
-source = "git+https://github.com/SerrialError/evian?branch=main#bc300becbbbc8612de4a0d559fc66159040cd841"
+source = "git+https://github.com/SerrialError/evian?branch=integration#7c230707494f7dca51454719315b148414d67bf1"
 dependencies = [
  "num-traits",
  "vexide-devices",
@@ -153,7 +153,7 @@ dependencies = [
 [[package]]
 name = "evian-motion"
 version = "0.0.1-rc.1"
-source = "git+https://github.com/SerrialError/evian?branch=main#bc300becbbbc8612de4a0d559fc66159040cd841"
+source = "git+https://github.com/SerrialError/evian?branch=integration#7c230707494f7dca51454719315b148414d67bf1"
 dependencies = [
  "evian-control",
  "evian-drivetrain",
@@ -165,7 +165,7 @@ dependencies = [
 [[package]]
 name = "evian-tracking"
 version = "0.0.1-rc.1"
-source = "git+https://github.com/SerrialError/evian?branch=main#bc300becbbbc8612de4a0d559fc66159040cd841"
+source = "git+https://github.com/SerrialError/evian?branch=integration#7c230707494f7dca51454719315b148414d67bf1"
 dependencies = [
  "evian-math",
  "vexide",

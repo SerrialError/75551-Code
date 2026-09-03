@@ -16,7 +16,7 @@ compress = true
 
 [dependencies]
 vexide = { version = "0.8.0", features = ["full", "default-sdk"] }
-evian = { git = "https://github.com/SerrialError/evian", branch = "main" }
+evian = { git = "https://github.com/SerrialError/evian", branch = "integration" }
 autons = "0.2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -13,6 +13,16 @@ use evian::{
 mod velocity_differential;
 use velocity_differential::{MotorGroupVelocity, VelocityDifferential, VelocityDifferentialConfig};
 
+mod sysid;
+use sysid::SysIdConfig;
+
+/// Set to `true` to run the feedforward system-identification collector
+/// (`sysid::collect`) instead of the normal competition code. It drives a
+/// forward-then-reverse voltage staircase and, when done, prints the data as
+/// Desmos list literals; copy each block into Desmos to fit `Ks`, `Kv`, and
+/// `Ka` (see `sysid.rs`). Flip back to `false` afterwards.
+const RUN_SYSID: bool = false;
+
 struct Robot {
     drivetrain:
         Drivetrain<VelocityDifferential<MotorFeedforward, Pid, MotorGroupVelocity>, WheeledTracking>,
@@ -96,16 +106,34 @@ impl Compete for Robot {
 async fn main(peripherals: Peripherals) {
     let forwards_enc = AdiOpticalEncoder::new(peripherals.adi_a, peripherals.adi_b);
     let sideways_enc = AdiOpticalEncoder::new(peripherals.adi_c, peripherals.adi_d);
-    let left_motors = [
+    let mut left_motors = [
         Motor::new(peripherals.port_7, Gearset::Blue, Direction::Forward),
         Motor::new(peripherals.port_8, Gearset::Blue, Direction::Reverse),
         Motor::new(peripherals.port_9, Gearset::Blue, Direction::Reverse),
     ];
-    let right_motors = [
+    let mut right_motors = [
         Motor::new(peripherals.port_17, Gearset::Blue, Direction::Reverse),
         Motor::new(peripherals.port_18, Gearset::Blue, Direction::Reverse),
         Motor::new(peripherals.port_19, Gearset::Blue, Direction::Forward),
     ];
+
+    // System-identification collector: raw-voltage staircase, no drivetrain
+    // model or IMU needed. Runs to completion, prints Desmos lists, then exits.
+    if RUN_SYSID {
+        sysid::collect(
+            &mut left_motors,
+            &mut right_motors,
+            &SysIdConfig {
+                // TODO: set this to the drivetrain's real wheel-per-motor gear
+                // ratio (the same value passed to `VelocityDifferential::new`
+                // below) so the fitted constants are in the controller's units.
+                gear_ratio: 1.0,
+                ..SysIdConfig::default()
+            },
+        )
+        .await;
+        return;
+    }
 
     let mut imu = InertialSensor::new(peripherals.port_15);
     imu.calibrate().await.unwrap();
