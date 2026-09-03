@@ -89,7 +89,7 @@ impl Default for SysIdConfig {
     fn default() -> Self {
         Self {
             step_voltages: &[2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
-            hold: Duration::from_millis(1500),
+            hold: Duration::from_millis(1000),
             rest: Duration::from_millis(1500),
             sample_interval: Duration::from_millis(10),
             gear_ratio: 1.0,
@@ -115,8 +115,12 @@ struct Step {
 pub async fn collect(left: &mut [Motor], right: &mut [Motor], config: &SysIdConfig) {
     let mut steps = Vec::new();
 
-    for (phase, sign) in [("fwd", 1.0), ("rev", -1.0)] {
-        for &level in config.step_voltages {
+    // Interleave direction per level — run each level forward then immediately
+    // in reverse — so a battery sag or grip change over the run biases both
+    // directions of a level equally instead of skewing all of forward against
+    // all of reverse.
+    for &level in config.step_voltages {
+        for (phase, sign) in [("fwd", 1.0), ("rev", -1.0)] {
             let volts = sign * level;
             let samples = run_step(left, right, volts, config).await;
             steps.push(Step {
