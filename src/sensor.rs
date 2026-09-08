@@ -33,9 +33,9 @@ impl TimestampedPosition for Motor {
     fn timestamped_position(&self) -> Result<(i32, u32), Self::Error> {
         let ticks = self.raw_position()?;
 
-        // Motor::timestamp() reports the motor's own sample clock (equivalent to
-        // the vexDeviceMotorPositionRawGet out-param), so it pairs with the raw
-        // position read above.
+        // TODO: this is the Brain's packet-processed timestamp, not the motor's own record
+        // of when it sampled, and the two reads below may describe different samples. Swap
+        // to the vexDeviceMotorPositionRawGet out-param once vexide exposes it (vexide#386).
         let timestamp = self
             .timestamp()?
             .duration_since(LowResolutionTime::EPOCH)
