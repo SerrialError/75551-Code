@@ -9,6 +9,15 @@
 //! Sharing the motors' `RefCell` with the drivetrain means the borrow to sample
 //! positions must never be held across an `.await`, or it would collide with the
 //! drivetrain's borrow to write voltages.
+//!
+//! # Sampling vs. consumption
+//!
+//! The estimator is sampled by this fixed-rate background task, so a controller
+//! reading the shared cell may see a value up to one poll period old. This is
+//! deliberate. The filter windows are sample-count based, so their time constants
+//! are set by the poll rate; driving them from a control loop whose period varies
+//! would make every time constant drift with loop load. The staleness is bounded
+//! below the motor's data interval and is not significant.
 
 use std::{cell::RefCell, rc::Rc};
 

@@ -50,7 +50,7 @@ impl Median {
         }
     }
 
-    /// Pushes `input` and returns the middle of the sorted window (the lower of
+    /// Pushes `input` and returns the middle of the sorted window (the upper of
     /// the two middles while the window holds an even number of samples).
     pub fn filter(&mut self, input: f64) -> f64 {
         if self.samples.len() == self.window {

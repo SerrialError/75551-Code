@@ -19,6 +19,14 @@
 //! All time in this file is in **milliseconds**. The gain constants in step 8
 //! are calibrated to that scale, so do not convert to seconds anywhere here.
 //!
+//! # Startup
+//!
+//! The filters operate on partial windows, so the first ~20 samples are
+//! progressively smoothed rather than fully filtered. This is intentional and
+//! matches sylib, which divides by the actual sample count. The alternative —
+//! reporting zero until every window fills — would emit ~200 ms of false zero
+//! velocity that a feedback loop would integrate as real error.
+//!
 //! This module has no `vexide`/hardware dependency and is unit-tested on the
 //! host; the caller supplies `(ticks, timestamp_ms)` (see
 //! [`TimestampedPosition`](crate::sensor::TimestampedPosition)).
