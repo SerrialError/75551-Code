@@ -14,8 +14,9 @@
 //! Each side's feedforward (`FF`) and feedback (`FB`) are independently optional;
 //! a missing half contributes `0.0` volts. The velocity feedback comes from a
 //! per-side [`WheelVelocity`] source (`S`); the built-in [`MotorGroupVelocity`]
-//! reads the drive motors' own encoders, since `WheeledTracking` only reports
-//! robot-frame velocity.
+//! averages the drive motors' filtered velocities published by a
+//! [`MotorVelocityTracker`], since `WheeledTracking` only reports robot-frame
+//! velocity.
 //!
 //! The inner loop regulates each wheel's angular velocity in **radians / second**
 //! — hence a plain `Pid` over `f64` rather than an `AngularPid`, whose `±π` error
@@ -36,47 +37,43 @@ use evian::{
 };
 use vexide::{prelude::Motor, smart::PortError};
 
+use crate::motor_velocity::MotorVelocityTracker;
+
 /// A source of a drivetrain side's measured wheel angular velocity, in
 /// radians / second.
 pub trait WheelVelocity {
     fn velocity(&mut self) -> f64;
 }
 
-/// A [`WheelVelocity`] source backed by a group of drive motors' internal
-/// encoders, sharing ownership of the motors with the drivetrain so they can be
-/// both driven and read.
+/// A [`WheelVelocity`] source backed by a [`MotorVelocityTracker`]'s shared
+/// per-motor RPM cell, averaging the group's filtered output-shaft velocities.
 pub struct MotorGroupVelocity {
-    motors: Rc<RefCell<dyn AsMut<[Motor]>>>,
+    /// Latest per-motor output-shaft RPM, published by the background tracker.
+    velocities: Rc<RefCell<Vec<f64>>>,
     /// Wheel revolutions per motor output-shaft revolution (external gearing
-    /// only; [`Motor::velocity`] already reports gearset-reduced RPM). `1.0` for
-    /// direct drive.
+    /// only; the tracker already reports gearset-reduced RPM). `1.0` for direct
+    /// drive.
     gear_ratio: f64,
 }
 
 impl MotorGroupVelocity {
-    pub fn new(motors: Rc<RefCell<dyn AsMut<[Motor]>>>, gear_ratio: f64) -> Self {
-        Self { motors, gear_ratio }
+    pub fn new(velocities: Rc<RefCell<Vec<f64>>>, gear_ratio: f64) -> Self {
+        Self {
+            velocities,
+            gear_ratio,
+        }
     }
 }
 
 impl WheelVelocity for MotorGroupVelocity {
     fn velocity(&mut self) -> f64 {
-        let mut borrow = self.motors.borrow_mut();
-        let motors = borrow.as_mut();
-
-        let mut sum_rpm = 0.0;
-        let mut count = 0.0;
-        for motor in motors.iter() {
-            if let Ok(rpm) = motor.velocity() {
-                sum_rpm += rpm;
-                count += 1.0;
-            }
-        }
-        if count == 0.0 {
+        let velocities = self.velocities.borrow();
+        if velocities.is_empty() {
             return 0.0;
         }
+        let mean_rpm = velocities.iter().sum::<f64>() / velocities.len() as f64;
         // motor output RPM -> wheel RPM -> wheel rad/s
-        (sum_rpm / count) * self.gear_ratio * (2.0 * PI / 60.0)
+        mean_rpm * self.gear_ratio * (2.0 * PI / 60.0)
     }
 }
 
@@ -127,8 +124,16 @@ impl<FF, FB> VelocityDifferential<FF, FB, MotorGroupVelocity> {
     {
         let left: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(left));
         let right: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(right));
-        let left_source = MotorGroupVelocity::new(left.clone(), gear_ratio);
-        let right_source = MotorGroupVelocity::new(right.clone(), gear_ratio);
+
+        // Each side gets its own background estimator; the trackers can be
+        // dropped here because their detached tasks keep the shared velocity
+        // cells alive alongside the sources that read them.
+        let left_source =
+            MotorGroupVelocity::new(MotorVelocityTracker::new(left.clone()).velocities(), gear_ratio);
+        let right_source = MotorGroupVelocity::new(
+            MotorVelocityTracker::new(right.clone()).velocities(),
+            gear_ratio,
+        );
 
         Self {
             left,
@@ -247,9 +252,8 @@ where
             (0.0, 0.0)
         };
 
-        // Read the velocity feedback *before* borrowing the motors for writing:
-        // the default source shares the same motor `RefCell`, so the read and
-        // the write must not overlap.
+        // Read the velocity feedback from the trackers' shared cells before
+        // borrowing the motors for writing.
         let left_measured = self.left_source.velocity();
         let right_measured = self.right_source.velocity();
 

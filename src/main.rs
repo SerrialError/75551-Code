@@ -10,6 +10,11 @@ use evian::{
     tracking::wheeled::{TrackingWheel, WheeledTracking},
 };
 
+mod filters;
+mod motor_velocity;
+mod sensor;
+mod velocity_estimator;
+
 mod velocity_differential;
 use velocity_differential::{MotorGroupVelocity, VelocityDifferential, VelocityDifferentialConfig};
 
