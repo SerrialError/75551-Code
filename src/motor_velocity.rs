@@ -16,6 +16,7 @@ use vexide::{
     math::Direction,
     prelude::sleep,
     smart::{motor::Motor, SmartDevice},
+    task::Task,
 };
 
 use crate::{
@@ -31,6 +32,9 @@ const DEFAULT_GEARSET_RPM: f64 = 600.0;
 /// latest per-motor output-shaft RPM through a shared cell.
 pub struct MotorVelocityTracker {
     velocities: Rc<RefCell<Vec<f64>>>,
+    /// The tracking task, held so it's stopped when the tracker is dropped
+    /// rather than leaked via `detach()`. Never read directly.
+    _task: Task<()>,
 }
 
 impl MotorVelocityTracker {
@@ -54,10 +58,14 @@ impl MotorVelocityTracker {
 
         let task_motors = motors.clone();
         let task_velocities = velocities.clone();
-        vexide::task::spawn(async move {
+        let task = vexide::task::spawn(async move {
             let mut estimators = estimators;
             loop {
-                sleep(Motor::UPDATE_INTERVAL).await;
+                // Poll at twice the ~10 ms publish rate: at exactly the publish
+                // rate, loop overhead would periodically read one packet twice
+                // and skip the next. Oversampling avoids that; the estimator's
+                // `dt == 0` early return discards the redundant reads for free.
+                sleep(Motor::UPDATE_INTERVAL / 2).await;
 
                 // Borrow only for the synchronous update; drop everything before
                 // the next `.await` so the drivetrain can borrow to drive.
@@ -76,10 +84,12 @@ impl MotorVelocityTracker {
                     results[index] = rpm;
                 }
             }
-        })
-        .detach();
+        });
 
-        Self { velocities }
+        Self {
+            velocities,
+            _task: task,
+        }
     }
 
     /// A shared handle to the latest per-motor output-shaft RPM, updated in

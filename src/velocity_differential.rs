@@ -45,11 +45,12 @@ pub trait WheelVelocity {
     fn velocity(&mut self) -> f64;
 }
 
-/// A [`WheelVelocity`] source backed by a [`MotorVelocityTracker`]'s shared
-/// per-motor RPM cell, averaging the group's filtered output-shaft velocities.
+/// A [`WheelVelocity`] source backed by a [`MotorVelocityTracker`], averaging the
+/// group's filtered output-shaft velocities.
 pub struct MotorGroupVelocity {
-    /// Latest per-motor output-shaft RPM, published by the background tracker.
-    velocities: Rc<RefCell<Vec<f64>>>,
+    /// Owns the background tracker so its task lives exactly as long as this
+    /// source (and the drivetrain that holds it).
+    tracker: MotorVelocityTracker,
     /// Wheel revolutions per motor output-shaft revolution (external gearing
     /// only; the tracker already reports gearset-reduced RPM). `1.0` for direct
     /// drive.
@@ -57,9 +58,9 @@ pub struct MotorGroupVelocity {
 }
 
 impl MotorGroupVelocity {
-    pub fn new(velocities: Rc<RefCell<Vec<f64>>>, gear_ratio: f64) -> Self {
+    pub fn new(tracker: MotorVelocityTracker, gear_ratio: f64) -> Self {
         Self {
-            velocities,
+            tracker,
             gear_ratio,
         }
     }
@@ -67,7 +68,8 @@ impl MotorGroupVelocity {
 
 impl WheelVelocity for MotorGroupVelocity {
     fn velocity(&mut self) -> f64 {
-        let velocities = self.velocities.borrow();
+        let velocities = self.tracker.velocities();
+        let velocities = velocities.borrow();
         if velocities.is_empty() {
             return 0.0;
         }
@@ -125,15 +127,12 @@ impl<FF, FB> VelocityDifferential<FF, FB, MotorGroupVelocity> {
         let left: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(left));
         let right: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(right));
 
-        // Each side gets its own background estimator; the trackers can be
-        // dropped here because their detached tasks keep the shared velocity
-        // cells alive alongside the sources that read them.
+        // Each side gets its own background estimator, owned by its source so the
+        // task runs exactly as long as the drivetrain holds the source.
         let left_source =
-            MotorGroupVelocity::new(MotorVelocityTracker::new(left.clone()).velocities(), gear_ratio);
-        let right_source = MotorGroupVelocity::new(
-            MotorVelocityTracker::new(right.clone()).velocities(),
-            gear_ratio,
-        );
+            MotorGroupVelocity::new(MotorVelocityTracker::new(left.clone()), gear_ratio);
+        let right_source =
+            MotorGroupVelocity::new(MotorVelocityTracker::new(right.clone()), gear_ratio);
 
         Self {
             left,

@@ -99,11 +99,20 @@ impl VelocityEstimator {
 
         // 2. Raw internal-shaft RPM: revs over the interval, scaled to per-minute.
         let delta_ticks = (ticks as i64 - self.previous_ticks as i64) as f64;
+
+        // Advance the baseline *before* the reset guard below can bail out.
+        // Otherwise a real `reset_position()` wedges the estimator forever: every
+        // later sample would difference against the stale pre-reset ticks, so
+        // `raw_rpm` would stay above the threshold and we'd never output again.
+        self.previous_ticks = ticks;
+        self.previous_timestamp_ms = timestamp_ms;
+
         let raw_rpm = (delta_ticks / TICKS_PER_INTERNAL_REV) / dt * 60_000.0;
 
         // 3. An implausible jump means the encoder was reset, not that the motor
-        //    briefly hit thousands of RPM: drop the sample without disturbing
-        //    the filters or the baseline.
+        //    briefly hit thousands of RPM: drop the sample. The baseline was
+        //    already advanced above, so the next sample differences against this
+        //    one; only the filters and `last_output` are left untouched.
         if raw_rpm.abs() > MAX_PLAUSIBLE_RAW_RPM {
             return self.last_output;
         }
@@ -124,8 +133,6 @@ impl VelocityEstimator {
         let output =
             self.ema.filter(smoothed, gain) * self.gearset_rpm / INTERNAL_FREE_SPEED_RPM;
 
-        self.previous_ticks = ticks;
-        self.previous_timestamp_ms = timestamp_ms;
         self.last_output = output;
         output
     }
@@ -160,9 +167,20 @@ mod tests {
         estimator.update(0, 0);
         // 30 ticks / 10 ms = 3600 internal RPM: plausible motion.
         let before = estimator.update(30, 10);
-        // A huge tick jump over a short interval is an encoder reset, not motion.
+        // A huge tick jump over a short interval is an encoder reset, not motion:
+        // the sample is dropped and the last output held.
         let after = estimator.update(1_000_000, 20);
         assert_eq!(before, after);
+
+        // Because the baseline advanced to the reset value, normal motion resumes
+        // immediately: the next samples difference against 1_000_000, not the
+        // stale pre-reset ticks, so the estimator recovers instead of wedging.
+        let recovered = estimator.update(1_000_030, 30);
+        let recovered = estimator.update(1_000_060, 40).max(recovered);
+        assert!(
+            recovered > 1.0,
+            "estimator should recover after a reset, got {recovered}"
+        );
     }
 
     #[test]
