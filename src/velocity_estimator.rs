@@ -9,7 +9,9 @@
 //!
 //! The pipeline, per [`update`](VelocityEstimator::update):
 //!
-//! 1. A raw RPM from the tick/time difference (at the motor's *internal* shaft).
+//! 1. A raw RPM from the tick/time difference (at the motor's *internal* shaft),
+//!    with `dt` snapped to the motor's 5 ms sampling grid to reject timestamp
+//!    jitter.
 //! 2. A 3-tap moving average to knock down encoder quantization noise.
 //! 3. A 7-tap median off the smoothed value to reject single-sample spikes.
 //! 4. A derivative of the median (an acceleration estimate) whose recent peak
@@ -90,12 +92,15 @@ impl VelocityEstimator {
             return self.last_output;
         }
 
-        // 1. dt from the motor's own clock. No elapsed time -> nothing new to say.
-        let dt = timestamp_ms.wrapping_sub(self.previous_timestamp_ms);
-        if dt == 0 {
+        // 1. dt from the motor's own clock, snapped to the motor's 5 ms sampling
+        //    grid. The reported timestamps jitter by a millisecond or two, and
+        //    that jitter would otherwise turn a constant speed into velocity
+        //    quantization noise; rounding to the grid removes it permanently.
+        //    Reads closer together than 5 ms round to 0 -> no new sample yet.
+        let dt = 5.0 * (timestamp_ms.wrapping_sub(self.previous_timestamp_ms) as f64 / 5.0).round();
+        if dt == 0.0 {
             return self.last_output;
         }
-        let dt = dt as f64;
 
         // 2. Raw internal-shaft RPM: revs over the interval, scaled to per-minute.
         let delta_ticks = (ticks as i64 - self.previous_ticks as i64) as f64;
@@ -151,6 +156,16 @@ mod tests {
         let a = estimator.update(50, 110);
         // Same timestamp -> dt == 0 -> unchanged.
         let b = estimator.update(999, 110);
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn sub_grid_reads_snap_to_no_new_sample() {
+        let mut estimator = VelocityEstimator::new(BLUE_RPM);
+        estimator.update(0, 0);
+        let a = estimator.update(30, 10);
+        // Only 2 ms later: rounds to a 0 ms dt, so nothing changes.
+        let b = estimator.update(45, 12);
         assert_eq!(a, b);
     }
 
