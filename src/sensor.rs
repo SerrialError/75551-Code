@@ -49,38 +49,73 @@ impl TimestampedPosition for Motor {
     }
 }
 
-/// One-shot hardware diagnostic for [`MOTOR_RAW_POSITION_RESPECTS_DIRECTION`].
+/// One-shot hardware diagnostic for [`MOTOR_RAW_POSITION_RESPECTS_DIRECTION`] and
+/// `TICKS_PER_INTERNAL_REV`.
 ///
-/// Configures `motor` as [`Direction::Reverse`], drives it at a low positive
-/// voltage for ~500 ms, and prints the sign of the resulting change in
-/// `raw_position()` along with the value the constant should hold. Leaves the
-/// motor stopped. Run once against a free-spinning motor and set the constant to
-/// match; nothing in the normal code path calls this.
+/// Configures `motor` as [`Direction::Reverse`] — required, since under
+/// [`Direction::Forward`] `raw_position()` and `position()` move the same way
+/// regardless of whether the raw reading honors the flag — drives it at a low
+/// positive voltage for ~500 ms, then compares the raw tick change against
+/// `position()`, which definitively applies the flag. It prints whether the two
+/// agree (the value the constant should hold) and the measured ticks per internal
+/// revolution (expect ~50). The original direction is always restored before
+/// returning. Run once against a free-spinning motor; nothing in the normal code
+/// path calls this.
 // One-shot diagnostic, wired up by hand when characterizing hardware.
 #[allow(dead_code)]
-pub async fn probe_direction(motor: &mut Motor) {
-    let _ = motor.set_direction(Direction::Reverse);
+pub async fn probe_direction(motor: &mut Motor) -> Result<(), PortError> {
+    let original = motor.direction()?;
+    motor.set_direction(Direction::Reverse)?;
 
-    let start = motor.raw_position().unwrap_or(0);
-    let _ = motor.set_voltage(3.0);
-    sleep(Duration::from_millis(500)).await;
-    let end = motor.raw_position().unwrap_or(start);
-    let _ = motor.set_voltage(0.0);
+    // Measure with the flag set, then *always* restore the original direction —
+    // never leave the motor reconfigured, on any path.
+    let measured = drive_and_measure(motor).await;
+    motor.set_direction(original)?;
+    let (raw_delta, pos_delta) = measured?;
 
-    // A Reverse-configured motor driven at *positive* voltage spins physically
-    // backward. If raw_position() honors the direction flag its reported ticks go
-    // negative; if it reports the bare encoder they go positive.
-    let delta = end - start;
-    if delta == 0 {
+    // Keep the stalled/disconnected guard: no raw motion means nothing to compare.
+    if raw_delta == 0 {
         println!(
             "probe_direction: raw_position() did not change over 500 ms at +3 V \
              (motor stalled or disconnected?) — inconclusive."
         );
-        return;
+        return Ok(());
     }
-    let respects_direction = delta < 0;
+
+    // `position()` applies the direction flag; `raw_position()` honors it only if
+    // the two move the same way under Reverse.
+    let respects_direction = (raw_delta > 0) == (pos_delta > 0.0);
+
+    // Ticks per revolution of the 3600 RPM internal rotor: raw ticks per *output*
+    // revolution divided by the gearset reduction (blue = 6.0).
+    let gearset_ratio = 3600.0 / motor.gearset()?.max_rpm();
+    let ticks_per_internal_rev = (raw_delta as f64 / pos_delta).abs() / gearset_ratio;
+
     println!(
-        "probe_direction: raw_position() delta = {delta} over 500 ms at +3 V (Reverse). \
-         Set MOTOR_RAW_POSITION_RESPECTS_DIRECTION = {respects_direction}."
+        "probe_direction: raw_delta = {raw_delta} ticks, pos_delta = {pos_delta:.4} rev \
+         over 500 ms at +3 V (Reverse). Set MOTOR_RAW_POSITION_RESPECTS_DIRECTION = \
+         {respects_direction}; TICKS_PER_INTERNAL_REV ≈ {ticks_per_internal_rev:.1} (expect ~50)."
     );
+    Ok(())
+}
+
+/// Drives `motor` at +3 V for 500 ms and returns `(raw tick delta, output-shaft
+/// revolution delta)`. Always stops the motor before returning, even if a read
+/// fails, so the caller only has to restore the direction flag.
+#[allow(dead_code)]
+async fn drive_and_measure(motor: &mut Motor) -> Result<(i32, f64), PortError> {
+    let raw_start = motor.raw_position()?;
+    let pos_start = motor.position()?;
+
+    motor.set_voltage(3.0)?;
+    sleep(Duration::from_millis(500)).await;
+
+    // Read before stopping, but stop regardless of whether the reads succeeded.
+    let raw_end = motor.raw_position();
+    let pos_end = motor.position();
+    let _ = motor.set_voltage(0.0);
+
+    let raw_delta = raw_end? - raw_start;
+    let pos_delta = (pos_end? - pos_start).as_turns();
+    Ok((raw_delta, pos_delta))
 }

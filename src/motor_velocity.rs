@@ -101,9 +101,9 @@ impl MotorVelocityTracker {
         }
     }
 
-    /// A shared handle to the latest per-motor output-shaft RPM, updated in
-    /// place by the background task.
-    pub fn velocities(&self) -> Rc<RefCell<Vec<f64>>> {
-        self.velocities.clone()
+    /// Runs `f` over the latest per-motor output-shaft RPM without cloning the
+    /// shared `Rc` — for hot-path readers called every control iteration.
+    pub fn with_velocities<R>(&self, f: impl FnOnce(&[f64]) -> R) -> R {
+        f(&self.velocities.borrow())
     }
 }

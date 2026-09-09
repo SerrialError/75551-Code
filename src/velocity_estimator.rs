@@ -35,8 +35,13 @@ use crate::filters::{Derivative, Ema, MaxAbs, Median, Sma};
 
 /// Raw encoder ticks per revolution of the motor's *internal* (pre-gearset)
 /// shaft.
-// TODO: verify on hardware by spinning one full output revolution and diffing
-// raw_position().
+//
+// 50 ticks per revolution of the 3600 RPM internal rotor. Confirmed by VEX's
+// published per-output-revolution figures (1800 at 36:1, 900 at 18:1, 300 at
+// 6:1), which are also vexide's `Gearset::*_TICKS_PER_REVOLUTION` constants —
+// each divided by its reduction gives 50. Note that vexide's `raw_position` doc
+// comment claims a TPR of 4096; that contradicts vexide's own gearset constants
+// and is wrong.
 const TICKS_PER_INTERNAL_REV: f64 = 50.0;
 
 /// Free speed of the motor's internal shaft, in RPM. Output-shaft RPM is
