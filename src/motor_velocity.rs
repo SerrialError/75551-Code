@@ -38,9 +38,11 @@ use crate::{
 const DEFAULT_GEARSET_RPM: f64 = 600.0;
 
 /// Runs a [`VelocityEstimator`] per motor on a background task, exposing the
-/// latest per-motor output-shaft RPM through a shared cell.
+/// latest per-motor output-shaft RPM through a shared cell. An entry is `None`
+/// while its motor's most recent read failed (e.g. unplugged), so consumers can
+/// exclude it rather than average a stale value.
 pub struct MotorVelocityTracker {
-    velocities: Rc<RefCell<Vec<f64>>>,
+    velocities: Rc<RefCell<Vec<Option<f64>>>>,
     /// The tracking task, held so it's stopped when the tracker is dropped
     /// rather than leaked via `detach()`. Never read directly.
     _task: Task<()>,
@@ -63,7 +65,7 @@ impl MotorVelocityTracker {
             }
         }
 
-        let velocities = Rc::new(RefCell::new(vec![0.0; estimators.len()]));
+        let velocities = Rc::new(RefCell::new(vec![None; estimators.len()]));
 
         let task_motors = motors.clone();
         let task_velocities = velocities.clone();
@@ -81,11 +83,10 @@ impl MotorVelocityTracker {
                 let mut motors = task_motors.borrow_mut();
                 let mut results = task_velocities.borrow_mut();
                 for (index, motor) in motors.as_mut().iter().enumerate() {
-                    // TODO: on error a motor keeps its last `results[index]`, which
-                    // `MotorGroupVelocity::velocity()` still averages in — a
-                    // disconnected motor biases the side mean toward a stale/zero
-                    // value. Consider tracking per-motor validity.
+                    // A failed read publishes `None` so consumers drop this motor
+                    // from the mean instead of averaging a stale value.
                     let Ok((ticks, timestamp)) = motor.timestamped_position() else {
+                        results[index] = None;
                         continue;
                     };
                     let mut rpm = estimators[index].update(ticks, timestamp);
@@ -94,7 +95,7 @@ impl MotorVelocityTracker {
                     {
                         rpm = -rpm;
                     }
-                    results[index] = rpm;
+                    results[index] = Some(rpm);
                 }
             }
         });
@@ -105,9 +106,10 @@ impl MotorVelocityTracker {
         }
     }
 
-    /// Runs `f` over the latest per-motor output-shaft RPM without cloning the
-    /// shared `Rc` — for hot-path readers called every control iteration.
-    pub fn with_velocities<R>(&self, f: impl FnOnce(&[f64]) -> R) -> R {
+    /// Runs `f` over the latest per-motor output-shaft RPM (`None` where the last
+    /// read failed) without cloning the shared `Rc` — for hot-path readers called
+    /// every control iteration.
+    pub fn with_velocities<R>(&self, f: impl FnOnce(&[Option<f64>]) -> R) -> R {
         f(&self.velocities.borrow())
     }
 }

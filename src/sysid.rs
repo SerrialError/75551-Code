@@ -89,7 +89,11 @@ pub struct SysIdConfig {
     pub hold: Duration,
     /// How long to coast between steps so the robot returns to rest.
     pub rest: Duration,
-    /// Logging period. ≈10 ms gives the target ~100 Hz.
+    /// Sampling period. Must match
+    /// [`MotorVelocityTracker`](crate::motor_velocity::MotorVelocityTracker)'s poll
+    /// rate (`Motor::UPDATE_INTERVAL / 2` = 5 ms) so the estimator's sample-count
+    /// filter windows have identical time constants during identification and in
+    /// the control loop. Changing it invalidates the fitted `Kv`/`Ka`.
     pub sample_interval: Duration,
     /// Wheel revolutions per motor output-shaft revolution — the *same*
     /// `gear_ratio` passed to `VelocityDifferential`, so the fitted constants
@@ -104,7 +108,7 @@ impl Default for SysIdConfig {
             step_voltages: &[2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
             hold: Duration::from_millis(1000),
             rest: Duration::from_millis(1500),
-            sample_interval: Duration::from_millis(10),
+            sample_interval: Duration::from_millis(5),
             gear_ratio: 1.0,
         }
     }

@@ -70,12 +70,19 @@ impl WheelVelocity for MotorGroupVelocity {
     fn velocity(&mut self) -> f64 {
         let gear_ratio = self.gear_ratio;
         self.tracker.with_velocities(|velocities| {
-            if velocities.is_empty() {
+            // Average only the live motors; a failed read contributes `None` and
+            // is excluded rather than dragging the mean toward a stale value.
+            let mut sum_rpm = 0.0;
+            let mut count = 0.0;
+            for &rpm in velocities.iter().flatten() {
+                sum_rpm += rpm;
+                count += 1.0;
+            }
+            if count == 0.0 {
                 return 0.0;
             }
-            let mean_rpm = velocities.iter().sum::<f64>() / velocities.len() as f64;
             // motor output RPM -> wheel RPM -> wheel rad/s
-            mean_rpm * gear_ratio * (2.0 * PI / 60.0)
+            (sum_rpm / count) * gear_ratio * (2.0 * PI / 60.0)
         })
     }
 }
