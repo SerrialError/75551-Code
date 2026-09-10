@@ -252,8 +252,8 @@ where
             (0.0, 0.0)
         };
 
-        // Read the velocity feedback from the trackers' shared cells before
-        // borrowing the motors for writing.
+        // Current per-side velocity feedback, a cheap read of the trackers'
+        // shared cells (does not touch the motors).
         let left_measured = self.left_source.velocity();
         let right_measured = self.right_source.velocity();
 

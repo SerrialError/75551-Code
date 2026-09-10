@@ -14,13 +14,13 @@ use vexide::{
     time::LowResolutionTime,
 };
 
-/// Whether `Motor::raw_position()` already accounts for the motor's configured
-/// [`Direction`](vexide::smart::motor::Direction) (so a reversed motor reads
-/// negative ticks when driven "forward").
+/// Whether `Motor::raw_position()` applies the motor's configured
+/// [`Direction`](vexide::smart::motor::Direction) — i.e. reports the same sign as
+/// `Motor::position()`.
 ///
-/// If this is `false`, callers must negate the estimator's output for motors
-/// configured [`Direction::Reverse`](vexide::smart::motor::Direction::Reverse).
-// TODO: verify on hardware.
+/// If `false`, callers must negate the estimator's output for motors configured
+/// [`Direction::Reverse`](vexide::smart::motor::Direction::Reverse).
+// TODO: verify on hardware with `probe_direction`.
 pub const MOTOR_RAW_POSITION_RESPECTS_DIRECTION: bool = true;
 
 /// A source of a device's raw encoder position tagged with the device's own
@@ -61,7 +61,6 @@ impl TimestampedPosition for Motor {
 /// revolution (expect ~50). The original direction is always restored before
 /// returning. Run once against a free-spinning motor; nothing in the normal code
 /// path calls this.
-// One-shot diagnostic, wired up by hand when characterizing hardware.
 #[allow(dead_code)]
 pub async fn probe_direction(motor: &mut Motor) -> Result<(), PortError> {
     let original = motor.direction()?;
@@ -73,7 +72,7 @@ pub async fn probe_direction(motor: &mut Motor) -> Result<(), PortError> {
     motor.set_direction(original)?;
     let (raw_delta, pos_delta) = measured?;
 
-    // Keep the stalled/disconnected guard: no raw motion means nothing to compare.
+    // No raw motion means the motor stalled or is disconnected: nothing to compare.
     if raw_delta == 0 {
         println!(
             "probe_direction: raw_position() did not change over 500 ms at +3 V \

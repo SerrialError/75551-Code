@@ -27,7 +27,8 @@
 //!
 //!    ```text
 //!    x_1=[time since step start]
-//!    y_1=[measured omega]
+//!    y_1=[filtered estimator omega]   # fit this
+//!    z_1=[raw unfiltered omega]       # plotted as a sanity check, not fitted
 //!    ```
 //!    then in Desmos: `y_1 ~ a(1 - e^{-x_1/b})`, where `b` is the time constant
 //!    `tau` and `Ka = Kv * tau` (from `tau = Ka/Kv`). Fit each step's block on
@@ -39,11 +40,11 @@
 //! straight into [`MotorFeedforward::new`](evian::control::loops::MotorFeedforward).
 //!
 //! ## Paste rules (Desmos silently breaks otherwise)
-//! - Every list is on its own line and starts with `x_1=[` / `y_1=[` — copy one
-//!   whole line at a time; the `# ...` label lines are just guides, don't paste
-//!   them.
-//! - Paste one block (its `x_1` and `y_1`) into a fresh Desmos before fitting;
-//!   the reused `x_1`/`y_1` names collide if you paste two blocks at once.
+//! - Every list is on its own line and starts with `x_1=[`, `y_1=[`, or `z_1=[`
+//!   — copy one whole line at a time; the `# ...` label lines are just guides,
+//!   don't paste them.
+//! - Paste one block's lists into a fresh Desmos before fitting; the reused
+//!   `x_1`/`y_1`/`z_1` names collide if you paste two blocks at once.
 //! - Numbers are fixed-decimal — Desmos can't read scientific notation like
 //!   `1.2e-3` inside a list.
 //!
@@ -93,7 +94,7 @@ pub struct SysIdConfig {
     /// Wheel revolutions per motor output-shaft revolution — the *same*
     /// `gear_ratio` passed to `VelocityDifferential`, so the fitted constants
     /// land in the controller's wheel-rad/s units. `1.0` for direct drive.
-    /// ([`Motor::velocity`] already reports gearset-reduced RPM.)
+    /// (The estimator already reports gearset-reduced output-shaft RPM.)
     pub gear_ratio: f64,
 }
 

@@ -16,8 +16,8 @@
 //!    magnitude drives an adaptive EMA gain: the filter tracks quickly during
 //!    acceleration transients and smooths hard when the speed is steady.
 //!
-//! All time in this file is in **milliseconds**. The gain constants in step 8
-//! are calibrated to that scale, so do not convert to seconds anywhere here.
+//! All time in this file is in **milliseconds**. The adaptive-gain constants are
+//! calibrated to that scale, so do not convert to seconds anywhere here.
 //!
 //! # Startup
 //!
@@ -138,8 +138,11 @@ impl VelocityEstimator {
         let accel = self.derivative.filter(median, dt);
         // 7. ...and its recent peak magnitude.
         let peak = self.max_abs_20.filter(accel);
-        // 8. Adaptive gain: near 0 when steady, rising toward 0.75 during
-        //    acceleration transients so the estimate keeps up.
+        // 8. Adaptive gain: floors at ~0.01 (peak == 0 gives 0.75*(1 - 1/1.013))
+        //    when steady, rising toward 0.75 during acceleration transients so the
+        //    estimate keeps up. The low floor means slow steady-state settling —
+        //    ~100 samples (~1 s at the motor's ~10 ms data interval); deliberate
+        //    heavy smoothing, so account for it in feedback tuning.
         let gain = 0.75 * (1.0 - 1.0 / ((peak * peak / 50.0) + 1.013));
         // 9. EMA the *smoothed* value with the adaptive gain, then convert
         //    internal-shaft RPM to output-shaft RPM.

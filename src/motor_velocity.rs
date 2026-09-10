@@ -3,8 +3,8 @@
 //! [`MotorVelocityTracker`] owns one
 //! [`VelocityEstimator`](crate::velocity_estimator::VelocityEstimator) per motor
 //! and runs them from a background task, publishing the latest per-motor
-//! output-shaft RPM into a shared cell that consumers (the drivetrain's velocity
-//! feedback and the sysid collector) read without touching the motors directly.
+//! output-shaft RPM into a shared cell that the drivetrain's velocity feedback
+//! reads without touching the motors directly.
 //!
 //! Sharing the motors' `RefCell` with the drivetrain means the borrow to sample
 //! positions must never be held across an `.await`, or it would collide with the
@@ -81,6 +81,10 @@ impl MotorVelocityTracker {
                 let mut motors = task_motors.borrow_mut();
                 let mut results = task_velocities.borrow_mut();
                 for (index, motor) in motors.as_mut().iter().enumerate() {
+                    // TODO: on error a motor keeps its last `results[index]`, which
+                    // `MotorGroupVelocity::velocity()` still averages in — a
+                    // disconnected motor biases the side mean toward a stale/zero
+                    // value. Consider tracking per-motor validity.
                     let Ok((ticks, timestamp)) = motor.timestamped_position() else {
                         continue;
                     };
