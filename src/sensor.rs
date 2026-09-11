@@ -73,11 +73,11 @@ pub async fn probe_direction(motor: &mut Motor) -> Result<(), PortError> {
     let (raw_delta, pos_delta) = measured?;
 
     // No motion on either reading means the motor stalled or is disconnected:
-    // nothing to compare, and `pos_delta` would divide to inf/NaN below.
+    // nothing to compare, and `pos_delta == 0` would divide to inf/NaN below.
     if raw_delta == 0 || pos_delta == 0.0 {
         println!(
-            "probe_direction: raw_position() did not change over 500 ms at +3 V \
-             (motor stalled or disconnected?) — inconclusive."
+            "probe_direction: no motion over 500 ms at +3 V (raw_delta = {raw_delta} ticks, \
+             pos_delta = {pos_delta:.4} rev; motor stalled or disconnected?) — inconclusive."
         );
         return Ok(());
     }

@@ -174,7 +174,7 @@ async fn run_step(
 ) -> Vec<(f64, f64, f64)> {
     let mut samples = Vec::new();
     let mut estimators = build_estimators(left, right);
-    let mut velocities = vec![0.0; estimators.len()];
+    let mut velocities = vec![None; estimators.len()];
 
     let start = Instant::now();
     while start.elapsed() < config.hold {
@@ -205,16 +205,18 @@ fn build_estimators(left: &[Motor], right: &[Motor]) -> Vec<VelocityEstimator> {
 }
 
 /// Feeds one timestamped sample into every estimator, writing the resulting
-/// per-motor output-shaft RPM into `velocities` (left then right). Motors that
-/// error out keep their previous value.
+/// per-motor output-shaft RPM into `velocities` (left then right). A motor whose
+/// read fails gets `None`, so `mean_omega` excludes it rather than reusing a
+/// stale value.
 fn update_estimators(
     left: &[Motor],
     right: &[Motor],
     estimators: &mut [VelocityEstimator],
-    velocities: &mut [f64],
+    velocities: &mut [Option<f64>],
 ) {
     for (index, motor) in left.iter().chain(right.iter()).enumerate() {
         let Ok((ticks, timestamp)) = motor.timestamped_position() else {
+            velocities[index] = None;
             continue;
         };
         let mut rpm = estimators[index].update(ticks, timestamp);
@@ -223,7 +225,7 @@ fn update_estimators(
         {
             rpm = -rpm;
         }
-        velocities[index] = rpm;
+        velocities[index] = Some(rpm);
     }
 }
 
@@ -289,13 +291,19 @@ fn set_all(left: &mut [Motor], right: &mut [Motor], volts: f64) {
 
 /// Mean wheel angular velocity (rad/s) from the estimator pipeline's per-motor
 /// output-shaft RPM in `velocities`, converting to wheel rad/s exactly as
-/// `MotorGroupVelocity` does.
-fn mean_omega(velocities: &[f64], gear_ratio: f64) -> f64 {
-    if velocities.is_empty() {
+/// `MotorGroupVelocity` does. Motors whose read failed (`None`) are excluded;
+/// returns `0.0` when none are live.
+fn mean_omega(velocities: &[Option<f64>], gear_ratio: f64) -> f64 {
+    let mut sum_rpm = 0.0;
+    let mut count = 0.0;
+    for &rpm in velocities.iter().flatten() {
+        sum_rpm += rpm;
+        count += 1.0;
+    }
+    if count == 0.0 {
         return 0.0;
     }
-    let mean_rpm = velocities.iter().sum::<f64>() / velocities.len() as f64;
-    mean_rpm * gear_ratio * (2.0 * PI / 60.0)
+    (sum_rpm / count) * gear_ratio * (2.0 * PI / 60.0)
 }
 
 /// Mean wheel angular velocity (rad/s) from the motors' own *unfiltered*
