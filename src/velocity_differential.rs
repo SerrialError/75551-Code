@@ -34,7 +34,10 @@ use evian::{
     drivetrain::model::{Arcade, DrivetrainModel},
     math::desaturate,
 };
-use vexide::{prelude::Motor, smart::PortError};
+use vexide::{
+    prelude::Motor,
+    smart::{motor::Gearset, PortError},
+};
 
 use crate::motor_velocity::{live_rpm_sum, wheel_omega_from_rpm, MotorVelocityTracker};
 
@@ -111,20 +114,22 @@ pub struct VelocityDifferential<FF, FB, S> {
 
 impl<FF, FB> VelocityDifferential<FF, FB, MotorGroupVelocity> {
     /// Reads its velocity feedback from the drive motors' own encoders.
-    /// `gear_ratio` configures the built-in [`MotorGroupVelocity`] sources; for a
+    /// `gear_ratio` configures the built-in [`MotorGroupVelocity`] sources and
+    /// `gearset` seeds their estimators (shared across every motor); for a
     /// custom velocity source, use [`with_sources`](Self::with_sources) instead.
     pub fn new(
         left: Rc<RefCell<dyn AsMut<[Motor]>>>,
         right: Rc<RefCell<dyn AsMut<[Motor]>>>,
         gear_ratio: f64,
+        gearset: Gearset,
         config: VelocityDifferentialConfig<FF, FB>,
     ) -> Self {
         // Each side gets its own background estimator, owned by its source so the
         // task runs exactly as long as the drivetrain holds the source.
         let left_source =
-            MotorGroupVelocity::new(MotorVelocityTracker::new(left.clone()), gear_ratio);
+            MotorGroupVelocity::new(MotorVelocityTracker::new(left.clone(), gearset), gear_ratio);
         let right_source =
-            MotorGroupVelocity::new(MotorVelocityTracker::new(right.clone()), gear_ratio);
+            MotorGroupVelocity::new(MotorVelocityTracker::new(right.clone(), gearset), gear_ratio);
 
         Self {
             left,

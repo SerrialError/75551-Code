@@ -62,7 +62,10 @@ use std::{
     time::{Duration, Instant},
 };
 
-use vexide::prelude::{sleep, Motor};
+use vexide::{
+    prelude::{sleep, Motor},
+    smart::motor::Gearset,
+};
 
 use crate::motor_velocity::{live_rpm_sum, wheel_omega_from_rpm, MotorVelocityTracker};
 
@@ -127,14 +130,15 @@ struct Step {
 pub async fn collect(
     left: Rc<RefCell<dyn AsMut<[Motor]>>>,
     right: Rc<RefCell<dyn AsMut<[Motor]>>>,
+    gearset: Gearset,
     config: &SysIdConfig,
 ) {
     // One background estimator per side, the same tracker the drivetrain uses.
     // They run for the entire staircase — including the `rest` coasts between
     // steps — so every step starts with warm filter windows instead of the
     // empty ones a per-step estimator would give.
-    let left_tracker = MotorVelocityTracker::new(left.clone());
-    let right_tracker = MotorVelocityTracker::new(right.clone());
+    let left_tracker = MotorVelocityTracker::new(left.clone(), gearset);
+    let right_tracker = MotorVelocityTracker::new(right.clone(), gearset);
 
     let mut steps = Vec::new();
 

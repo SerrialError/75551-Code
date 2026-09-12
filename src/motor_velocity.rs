@@ -24,7 +24,10 @@ use std::{cell::RefCell, f64::consts::PI, rc::Rc};
 use vexide::{
     math::Direction,
     prelude::sleep,
-    smart::{motor::Motor, SmartDevice},
+    smart::{
+        motor::{Gearset, Motor},
+        SmartDevice,
+    },
     task::Task,
 };
 
@@ -32,10 +35,6 @@ use crate::{
     sensor::{TimestampedPosition, MOTOR_RAW_POSITION_RESPECTS_DIRECTION},
     velocity_estimator::VelocityEstimator,
 };
-
-/// Fallback output-shaft free speed (blue cartridge) used if a motor's gearset
-/// can't be read while building its estimator.
-const DEFAULT_GEARSET_RPM: f64 = 600.0;
 
 /// Running sum and count of the live (`Some`) per-motor output-shaft RPM
 /// readings, skipping failed reads so a `None` never drags the mean toward a
@@ -71,19 +70,19 @@ pub struct MotorVelocityTracker {
 impl MotorVelocityTracker {
     /// Spawns the tracking task over the shared `motors`. Sample order matches
     /// the motor slice order.
-    pub fn new(motors: Rc<RefCell<dyn AsMut<[Motor]>>>) -> Self {
-        // Build one estimator per motor, seeding each with its own gearset speed.
-        let mut estimators = Vec::new();
-        {
-            let mut borrow = motors.borrow_mut();
-            for motor in borrow.as_mut().iter() {
-                let gearset_rpm = motor
-                    .gearset()
-                    .map(|gearset| gearset.max_rpm())
-                    .unwrap_or(DEFAULT_GEARSET_RPM);
-                estimators.push(VelocityEstimator::new(gearset_rpm));
-            }
-        }
+    ///
+    /// `gearset` is supplied by the caller rather than read from each motor, so a
+    /// motor that hasn't enumerated yet at power-on can't be silently mis-scaled
+    /// by a failed `gearset()` read. This assumes every motor in the group shares
+    /// the same gearset.
+    pub fn new(motors: Rc<RefCell<dyn AsMut<[Motor]>>>, gearset: Gearset) -> Self {
+        // One estimator per motor, all seeded with the caller-supplied output
+        // free speed for the shared gearset.
+        let gearset_rpm = gearset.max_rpm();
+        let count = motors.borrow_mut().as_mut().len();
+        let estimators: Vec<_> = (0..count)
+            .map(|_| VelocityEstimator::new(gearset_rpm))
+            .collect();
 
         let velocities = Rc::new(RefCell::new(vec![None; estimators.len()]));
 
