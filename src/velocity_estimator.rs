@@ -60,6 +60,38 @@ const INTERNAL_FREE_SPEED_RPM: f64 = 3600.0;
 /// reset (e.g. `raw_position()` being re-zeroed) rather than real motion.
 const MAX_PLAUSIBLE_RAW_RPM: f64 = 5000.0;
 
+/// EMA gain approached under hard acceleration.
+const GAIN_MAX: f64 = 0.75;
+
+/// EMA gain at zero acceleration — heavy steady-state smoothing.
+///
+/// At the estimator's ~10 ms effective sample rate this is a time constant near
+/// one second.
+///
+// TODO: this is probably too low for a drivetrain velocity loop. These constants
+// come from sylib, where they were tuned empirically for flywheels — a plant
+// that is slow anyway and cares far more about steady-state accuracy than
+// latency. A drivetrain velocity loop is the opposite trade: ~1 s of lag in the
+// feedback path forces the velocity PID's gains down far enough to partly defeat
+// having the loop at all.
+//
+// The adaptive gain rescues large transients, which is its purpose. It does not
+// rescue small disturbances near steady state, where `peak` stays low, the gain
+// sits at this floor, and the loop reacts to information up to a second stale.
+//
+// Check this against the sysid traces: if `y_1` visibly lags into the flat
+// region while `z_1` has already settled, the floor is too low. First thing to
+// try is raising this to ~0.05 (a ~200 ms time constant) and re-running.
+const GAIN_MIN: f64 = 0.0096;
+
+/// Knee of the gain curve, in (RPM/ms)². The gain sits midway between
+/// [`GAIN_MIN`] and [`GAIN_MAX`] when peak acceleration is `sqrt` of this
+/// (≈ 7.1 RPM/ms, about 1180 output RPM/s on a blue cartridge).
+///
+/// Also from sylib, also empirical — there is no derivation behind it, and this
+/// drivetrain has no particular reason to want the same knee.
+const ACCEL_SCALE: f64 = 50.0;
+
 /// Estimates a single motor's output-shaft velocity from timestamped raw
 /// encoder samples.
 pub struct VelocityEstimator {
@@ -145,13 +177,15 @@ impl VelocityEstimator {
         // 6. Acceleration estimate (RPM per millisecond)...
         let accel = self.derivative.filter(median, dt);
         // 7. ...and its recent peak magnitude.
-        let peak = self.max_abs_20.filter(accel);
-        // 8. Adaptive gain: floors at ~0.01 (peak == 0 gives 0.75*(1 - 1/1.013))
-        //    when steady, rising toward 0.75 during acceleration transients so the
-        //    estimate keeps up. The low floor means slow steady-state settling —
-        //    ~100 samples (~1 s at the motor's ~10 ms data interval); deliberate
-        //    heavy smoothing, so account for it in feedback tuning.
-        let gain = 0.75 * (1.0 - 1.0 / ((peak * peak / 50.0) + 1.013));
+        let peak = self.max_abs_20.filter(accel);        
+        // 8. Adaptive gain: a saturating curve from GAIN_MIN at rest toward
+        //    GAIN_MAX under acceleration, so the estimate tracks quickly through
+        //    transients and smooths hard when the speed is steady. `shape` is the
+        //    constant that places the floor at GAIN_MIN; it is derived from the
+        //    other two rather than tuned. See GAIN_MIN's note on the floor being
+        //    likely too low for a drivetrain.
+        let shape = GAIN_MAX / (GAIN_MAX - GAIN_MIN);
+        let gain = GAIN_MAX * (1.0 - 1.0 / ((peak * peak / ACCEL_SCALE) + shape));
         // 9. EMA the *smoothed* value with the adaptive gain, then convert
         //    internal-shaft RPM to output-shaft RPM.
         let output =
