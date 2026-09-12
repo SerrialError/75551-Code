@@ -7,6 +7,14 @@
 //! filter chain, closely following sylib's approach:
 //! <https://sylvie.fyi/sylib/docs/db/d8e/md_module_writeups__velocity__estimation.html>
 //!
+//! The filter chain follows sylib; the dT handling deliberately does not. sylib
+//! corrects dt using a per-sample motor timestamp, quantizing it to 5 ms
+//! multiples to undo the motor's ~5 ms sampling straddle. That correction is
+//! omitted here: V5 motors transmit no timestamp of their own, so the straddle
+//! it compensates for is not observable from the Brain's clock. Re-adding it
+//! would only distort dt whenever a packet publish is missed. (This has been
+//! mistakenly re-added once — leave it out.)
+//!
 //! The pipeline, per [`update`](VelocityEstimator::update):
 //!
 //! 1. A raw RPM from the tick/time difference (at the motor's *internal* shaft).

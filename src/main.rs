@@ -28,6 +28,13 @@ use sysid::SysIdConfig;
 /// `Ka` (see `sysid.rs`). Flip back to `false` afterwards.
 const RUN_SYSID: bool = false;
 
+/// Set to `true` to run the one-shot hardware diagnostic
+/// (`sensor::probe_direction`) against the first left-side motor instead of the
+/// normal competition code. It reports whether `raw_position()` honors the
+/// direction flag and the measured ticks per internal revolution, then exits.
+/// Flip back to `false` afterwards.
+const RUN_PROBE: bool = false;
+
 struct Robot {
     drivetrain:
         Drivetrain<VelocityDifferential<MotorFeedforward, Pid, MotorGroupVelocity>, WheeledTracking>,
@@ -107,6 +114,18 @@ impl Compete for Robot {
     }
 }
 
+/// Runs the one-shot direction/ticks probe against the first left-side motor.
+// The probe holds a `&mut Motor` across its internal awaits, so the `RefCell`
+// guard must live that long too. Nothing else borrows these cells on the probe
+// path, so the hold is safe; the lint doesn't know that.
+#[allow(clippy::await_holding_refcell_ref)]
+async fn run_probe(left: &Rc<RefCell<dyn AsMut<[Motor]>>>) {
+    let mut motors = left.borrow_mut();
+    if let Some(motor) = motors.as_mut().first_mut() {
+        let _ = sensor::probe_direction(motor).await;
+    }
+}
+
 #[vexide::main]
 async fn main(peripherals: Peripherals) {
     let forwards_enc = AdiOpticalEncoder::new(peripherals.adi_a, peripherals.adi_b);
@@ -127,6 +146,13 @@ async fn main(peripherals: Peripherals) {
     // same `Rc<RefCell<..>>`.
     let left: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(left_motors));
     let right: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(right_motors));
+
+    // Hardware diagnostic: probe one motor for the direction/ticks constants,
+    // then exit. No drivetrain model or IMU needed.
+    if RUN_PROBE {
+        run_probe(&left).await;
+        return;
+    }
 
     // System-identification collector: raw-voltage staircase, no drivetrain
     // model or IMU needed. Runs to completion, prints Desmos lists, then exits.

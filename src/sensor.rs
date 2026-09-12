@@ -27,7 +27,7 @@ pub const MOTOR_RAW_POSITION_RESPECTS_DIRECTION: bool = true;
 /// reading.
 pub trait TimestampedPosition {
     type Error;
-    /// Returns (raw encoder ticks, device clock reading in milliseconds).
+    /// Returns (raw encoder ticks, the Brain's clock reading in milliseconds).
     fn timestamped_position(&self) -> Result<(i32, u32), Self::Error>;
 }
 
@@ -65,7 +65,6 @@ impl TimestampedPosition for Motor {
 /// revolution (expect ~50). The original direction is always restored before
 /// returning. Run once against a free-spinning motor; nothing in the normal code
 /// path calls this.
-#[allow(dead_code)]
 pub async fn probe_direction(motor: &mut Motor) -> Result<(), PortError> {
     let original = motor.direction()?;
     motor.set_direction(Direction::Reverse)?;
