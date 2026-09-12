@@ -25,7 +25,6 @@
 
 use std::{
     cell::RefCell,
-    f64::consts::PI,
     rc::Rc,
     time::{Duration, Instant},
 };
@@ -37,32 +36,12 @@ use evian::{
 };
 use vexide::{prelude::Motor, smart::PortError};
 
-use crate::motor_velocity::MotorVelocityTracker;
+use crate::motor_velocity::{live_rpm_sum, wheel_omega_from_rpm, MotorVelocityTracker};
 
 /// A source of a drivetrain side's measured wheel angular velocity, in
 /// radians / second.
 pub trait WheelVelocity {
     fn velocity(&mut self) -> f64;
-}
-
-/// Running sum and count of the live (`Some`) per-motor output-shaft RPM
-/// readings, skipping failed reads so a `None` never drags the mean toward a
-/// stale value. Shared by [`MotorGroupVelocity`] and the sysid collector so both
-/// average the group identically.
-pub(crate) fn live_rpm_sum(velocities: &[Option<f64>]) -> (f64, usize) {
-    let mut sum = 0.0;
-    let mut count = 0;
-    for &rpm in velocities.iter().flatten() {
-        sum += rpm;
-        count += 1;
-    }
-    (sum, count)
-}
-
-/// Converts a mean motor output-shaft RPM to wheel angular velocity (rad/s):
-/// motor output RPM -> wheel RPM (via the external `gear_ratio`) -> rad/s.
-pub(crate) fn wheel_omega_from_rpm(mean_rpm: f64, gear_ratio: f64) -> f64 {
-    mean_rpm * gear_ratio * (2.0 * PI / 60.0)
 }
 
 /// A [`WheelVelocity`] source backed by a [`MotorVelocityTracker`], averaging the

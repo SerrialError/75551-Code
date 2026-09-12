@@ -58,17 +58,13 @@
 
 use std::{
     cell::RefCell,
-    f64::consts::PI,
     rc::Rc,
     time::{Duration, Instant},
 };
 
 use vexide::prelude::{sleep, Motor};
 
-use crate::{
-    motor_velocity::MotorVelocityTracker,
-    velocity_differential::{live_rpm_sum, wheel_omega_from_rpm},
-};
+use crate::motor_velocity::{live_rpm_sum, wheel_omega_from_rpm, MotorVelocityTracker};
 
 /// Fraction of each step's samples (from the end) averaged for the settled
 /// speed that feeds the steady-state fit.
@@ -291,5 +287,5 @@ fn mean_raw_omega(left: &[Motor], right: &[Motor], gear_ratio: f64) -> f64 {
     if count == 0.0 {
         return 0.0;
     }
-    (sum_rpm / count) * gear_ratio * (2.0 * PI / 60.0)
+    wheel_omega_from_rpm(sum_rpm / count, gear_ratio)
 }

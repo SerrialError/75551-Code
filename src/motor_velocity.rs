@@ -19,7 +19,7 @@
 //! would make every time constant drift with loop load. The staleness is bounded
 //! below the motor's data interval and is not significant.
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, f64::consts::PI, rc::Rc};
 
 use vexide::{
     math::Direction,
@@ -36,6 +36,26 @@ use crate::{
 /// Fallback output-shaft free speed (blue cartridge) used if a motor's gearset
 /// can't be read while building its estimator.
 const DEFAULT_GEARSET_RPM: f64 = 600.0;
+
+/// Running sum and count of the live (`Some`) per-motor output-shaft RPM
+/// readings, skipping failed reads so a `None` never drags the mean toward a
+/// stale value. Shared by the drivetrain's velocity feedback and the sysid
+/// collector so both average the group identically.
+pub(crate) fn live_rpm_sum(velocities: &[Option<f64>]) -> (f64, usize) {
+    let mut sum = 0.0;
+    let mut count = 0;
+    for &rpm in velocities.iter().flatten() {
+        sum += rpm;
+        count += 1;
+    }
+    (sum, count)
+}
+
+/// Converts a mean motor output-shaft RPM to wheel angular velocity (rad/s):
+/// motor output RPM -> wheel RPM (via the external `gear_ratio`) -> rad/s.
+pub(crate) fn wheel_omega_from_rpm(mean_rpm: f64, gear_ratio: f64) -> f64 {
+    mean_rpm * gear_ratio * (2.0 * PI / 60.0)
+}
 
 /// Runs a [`VelocityEstimator`] per motor on a background task, exposing the
 /// latest per-motor output-shaft RPM through a shared cell. An entry is `None`
