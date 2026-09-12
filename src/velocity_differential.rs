@@ -143,20 +143,16 @@ impl<FF, FB, S> VelocityDifferential<FF, FB, S> {
     /// Uses custom per-side [`WheelVelocity`] feedback sources.
     // Deliberate public plug-point; not exercised by the default wiring.
     #[allow(dead_code)]
-    pub fn with_sources<L, R>(
-        left: L,
-        right: R,
+    pub fn with_sources(
+        left: Rc<RefCell<dyn AsMut<[Motor]>>>,
+        right: Rc<RefCell<dyn AsMut<[Motor]>>>,
         left_source: S,
         right_source: S,
         config: VelocityDifferentialConfig<FF, FB>,
-    ) -> Self
-    where
-        L: AsMut<[Motor]> + 'static,
-        R: AsMut<[Motor]> + 'static,
-    {
+    ) -> Self {
         Self {
-            left: Rc::new(RefCell::new(left)),
-            right: Rc::new(RefCell::new(right)),
+            left,
+            right,
             left_source,
             right_source,
             config,
