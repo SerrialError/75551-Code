@@ -3,7 +3,7 @@
 //! V5 Smart motors report an internally-estimated velocity ([`Motor::velocity`]),
 //! but that estimate is noisy and laggy at the speeds a drivetrain velocity loop
 //! cares about. This estimator instead differentiates the motor's raw encoder
-//! position against the motor's own clock and runs the result through a small
+//! position against the Brain's clock and runs the result through a small
 //! filter chain, closely following sylib's approach:
 //! <https://sylvie.fyi/sylib/docs/db/d8e/md_module_writeups__velocity__estimation.html>
 //!
@@ -93,7 +93,7 @@ impl VelocityEstimator {
     /// output-shaft velocity in RPM.
     ///
     /// `ticks` is the raw (pre-gearset) encoder count and `timestamp_ms` is the
-    /// motor's own clock reading in milliseconds.
+    /// Brain's clock reading in milliseconds.
     pub fn update(&mut self, ticks: i32, timestamp_ms: u32) -> f64 {
         // The first sample only establishes a baseline to difference against.
         if !self.seeded {
@@ -103,7 +103,7 @@ impl VelocityEstimator {
             return self.last_output;
         }
 
-        // 1. dt from the motor's own clock. No elapsed time -> nothing new to say.
+        // 1. dt from the Brain's clock. No elapsed time -> nothing new to say.
         let dt = timestamp_ms.wrapping_sub(self.previous_timestamp_ms);
         if dt == 0 {
             return self.last_output;

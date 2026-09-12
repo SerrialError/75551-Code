@@ -1,7 +1,7 @@
 //! Position/time sampling for the velocity estimator.
 //!
 //! The [`VelocityEstimator`](crate::velocity_estimator::VelocityEstimator)
-//! differentiates raw encoder ticks against the device's own clock. This module
+//! differentiates raw encoder ticks against the Brain's clock. This module
 //! defines the [`TimestampedPosition`] source that feeds it and implements it for
 //! a V5 Smart [`Motor`].
 
@@ -23,8 +23,8 @@ use vexide::{
 // TODO: verify on hardware with `probe_direction`.
 pub const MOTOR_RAW_POSITION_RESPECTS_DIRECTION: bool = true;
 
-/// A source of a device's raw encoder position tagged with the device's own
-/// clock reading, both sampled as close together as the API allows.
+/// A source of a device's raw encoder position tagged with the Brain's clock
+/// reading.
 pub trait TimestampedPosition {
     type Error;
     /// Returns (raw encoder ticks, device clock reading in milliseconds).
@@ -37,9 +37,13 @@ impl TimestampedPosition for Motor {
     fn timestamped_position(&self) -> Result<(i32, u32), Self::Error> {
         let ticks = self.raw_position()?;
 
-        // TODO: this is the Brain's packet-processed timestamp, not the motor's own record
-        // of when it sampled, and the two reads below may describe different samples. Swap
-        // to the vexDeviceMotorPositionRawGet out-param once vexide exposes it (vexide#386).
+        // `Motor::timestamp()` and the old `vexDeviceMotorPositionRawGet` out-param
+        // return the same value: `vexSystemTimeGet()` sampled when CPU1's V5_Device
+        // simpletask published this motor's packet. V5 motors transmit no timestamp of
+        // their own (their data packet carries only temperature, current, position,
+        // velocity, voltage, flags, faults), so the motor's actual sample time is not
+        // observable and may precede this by up to 10 ms. Both values refresh only
+        // during `vexTasksRun`, so these two reads always describe the same packet.
         let timestamp = self
             .timestamp()?
             .duration_since(LowResolutionTime::EPOCH)
