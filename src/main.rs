@@ -42,20 +42,28 @@ struct Robot {
 }
 
 impl Robot {
-    const LINEAR_PID: Pid = Pid::new(1.0, 0.0, 0.125, None);
-    const ANGULAR_PID: AngularPid = AngularPid::new(16.0, 0.0, 1.0, None);
+    // TODO: tune the outer linear position PID (kp, ki, kd) for this robot.
+    const LINEAR_PID: Pid = Pid::new(0.0, 0.0, 0.0, None);
+    // TODO: tune the outer angular (heading) PID (kp, ki, kd) for this robot.
+    const ANGULAR_PID: AngularPid = AngularPid::new(0.0, 0.0, 0.0, None);
+    // TODO: set the linear settling tolerances — error (inches), velocity
+    // (in/s), and settle duration.
     const LINEAR_TOLERANCES: Tolerances = Tolerances::new()
-        .error(4.0)
-        .velocity(0.25)
-        .duration(Duration::from_millis(15));
+        .error(0.0)
+        .velocity(0.0)
+        .duration(Duration::from_millis(0));
+    // TODO: set the angular settling tolerances — error (radians), velocity
+    // (rad/s), and settle duration.
     const ANGULAR_TOLERANCES: Tolerances = Tolerances::new()
-        .error(f64::to_radians(8.0))
-        .velocity(0.09)
-        .duration(Duration::from_millis(15));
+        .error(f64::to_radians(0.0))
+        .velocity(0.0)
+        .duration(Duration::from_millis(0));
 
     /// Full-stick linear velocity for teleop, in inches / second.
+    // TODO: set the teleop full-stick linear velocity (in/s).
     const MAX_LINEAR_VELOCITY: f64 = 0.0;
     /// Full-stick angular velocity for teleop, in radians / second.
+    // TODO: set the teleop full-stick angular velocity (rad/s).
     const MAX_ANGULAR_VELOCITY: f64 = 0.0;
 }
 
@@ -76,21 +84,24 @@ impl Compete for Robot {
             timeout: Some(Duration::from_secs(10)),
         };
 
+        // TODO: this is a placeholder demonstration path — replace it with the
+        // real autonomous routine. Every distance (inches), heading, point, and
+        // per-call override below is zeroed and needs to be set.
         basic
-            .drive_distance(dt, 24.0)
-            .with_linear_output_limit(6.0)
+            .drive_distance(dt, 0.0)
+            .with_linear_output_limit(0.0)
             .await;
 
         basic.turn_to_heading(dt, 0.0.deg()).await;
 
-        seeking.move_to_point(dt, (24.0, 24.0)).await;
+        seeking.move_to_point(dt, (0.0, 0.0)).await;
 
         basic
-            .drive_distance_at_heading(dt, 8.0, 45.0.deg())
-            .with_linear_kd(1.2)
-            .with_angular_tolerance_duration(Duration::from_millis(5))
-            .with_angular_error_tolerance(f64::to_radians(10.0))
-            .with_linear_error_tolerance(12.0)
+            .drive_distance_at_heading(dt, 0.0, 0.0.deg())
+            .with_linear_kd(0.0)
+            .with_angular_tolerance_duration(Duration::from_millis(0))
+            .with_angular_error_tolerance(f64::to_radians(0.0))
+            .with_linear_error_tolerance(0.0)
             .await;
     }
 
@@ -185,11 +196,13 @@ async fn main(peripherals: Peripherals) {
                     max_velocity: 0.0,
                 },
             ),
+            // TODO: set the starting pose (position in inches, heading) and the
+            // tracking-wheel geometry (wheel diameter and offset, in inches).
             WheeledTracking::new(
                 (0.0, 0.0),
-                90.0.deg(),
-                [TrackingWheel::new(forwards_enc, 2.0, 0.0, None)],
-                [TrackingWheel::new(sideways_enc, 2.0, 0.0, None)],
+                0.0.deg(),
+                [TrackingWheel::new(forwards_enc, 0.0, 0.0, None)],
+                [TrackingWheel::new(sideways_enc, 0.0, 0.0, None)],
                 Some(imu),
             ),
         ),
