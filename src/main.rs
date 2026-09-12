@@ -114,23 +114,11 @@ impl Compete for Robot {
     }
 }
 
-/// Runs the one-shot direction/ticks probe against the first left-side motor.
-// The probe holds a `&mut Motor` across its internal awaits, so the `RefCell`
-// guard must live that long too. Nothing else borrows these cells on the probe
-// path, so the hold is safe; the lint doesn't know that.
-#[allow(clippy::await_holding_refcell_ref)]
-async fn run_probe(left: &Rc<RefCell<dyn AsMut<[Motor]>>>) {
-    let mut motors = left.borrow_mut();
-    if let Some(motor) = motors.as_mut().first_mut() {
-        let _ = sensor::probe_direction(motor).await;
-    }
-}
-
 #[vexide::main]
 async fn main(peripherals: Peripherals) {
     let forwards_enc = AdiOpticalEncoder::new(peripherals.adi_a, peripherals.adi_b);
     let sideways_enc = AdiOpticalEncoder::new(peripherals.adi_c, peripherals.adi_d);
-    let left_motors = [
+    let mut left_motors = [
         Motor::new(peripherals.port_7, Gearset::Blue, Direction::Forward),
         Motor::new(peripherals.port_8, Gearset::Blue, Direction::Reverse),
         Motor::new(peripherals.port_9, Gearset::Blue, Direction::Reverse),
@@ -141,18 +129,19 @@ async fn main(peripherals: Peripherals) {
         Motor::new(peripherals.port_19, Gearset::Blue, Direction::Forward),
     ];
 
+    // Hardware diagnostic: probe one motor for the direction/ticks constants,
+    // then exit. Runs before the motors are shared, so it never contends for a
+    // borrow. No drivetrain model or IMU needed.
+    if RUN_PROBE {
+        let _ = sensor::probe_direction(&mut left_motors[0]).await;
+        return;
+    }
+
     // Shared ownership of each side's motors: the sysid collector and the
     // drivetrain's background velocity trackers both drive these through the
     // same `Rc<RefCell<..>>`.
     let left: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(left_motors));
     let right: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(right_motors));
-
-    // Hardware diagnostic: probe one motor for the direction/ticks constants,
-    // then exit. No drivetrain model or IMU needed.
-    if RUN_PROBE {
-        run_probe(&left).await;
-        return;
-    }
 
     // System-identification collector: raw-voltage staircase, no drivetrain
     // model or IMU needed. Runs to completion, prints Desmos lists, then exits.

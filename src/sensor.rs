@@ -105,7 +105,6 @@ pub async fn probe_direction(motor: &mut Motor) -> Result<(), PortError> {
 /// Drives `motor` at +3 V for 500 ms and returns `(raw tick delta, output-shaft
 /// revolution delta)`. Always stops the motor before returning, even if a read
 /// fails, so the caller only has to restore the direction flag.
-#[allow(dead_code)]
 async fn drive_and_measure(motor: &mut Motor) -> Result<(i32, f64), PortError> {
     let raw_start = motor.raw_position()?;
     let pos_start = motor.position()?;
