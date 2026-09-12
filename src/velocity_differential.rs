@@ -45,6 +45,26 @@ pub trait WheelVelocity {
     fn velocity(&mut self) -> f64;
 }
 
+/// Running sum and count of the live (`Some`) per-motor output-shaft RPM
+/// readings, skipping failed reads so a `None` never drags the mean toward a
+/// stale value. Shared by [`MotorGroupVelocity`] and the sysid collector so both
+/// average the group identically.
+pub(crate) fn live_rpm_sum(velocities: &[Option<f64>]) -> (f64, usize) {
+    let mut sum = 0.0;
+    let mut count = 0;
+    for &rpm in velocities.iter().flatten() {
+        sum += rpm;
+        count += 1;
+    }
+    (sum, count)
+}
+
+/// Converts a mean motor output-shaft RPM to wheel angular velocity (rad/s):
+/// motor output RPM -> wheel RPM (via the external `gear_ratio`) -> rad/s.
+pub(crate) fn wheel_omega_from_rpm(mean_rpm: f64, gear_ratio: f64) -> f64 {
+    mean_rpm * gear_ratio * (2.0 * PI / 60.0)
+}
+
 /// A [`WheelVelocity`] source backed by a [`MotorVelocityTracker`], averaging the
 /// group's filtered output-shaft velocities.
 pub struct MotorGroupVelocity {
@@ -70,19 +90,11 @@ impl WheelVelocity for MotorGroupVelocity {
     fn velocity(&mut self) -> f64 {
         let gear_ratio = self.gear_ratio;
         self.tracker.with_velocities(|velocities| {
-            // Average only the live motors; a failed read contributes `None` and
-            // is excluded rather than dragging the mean toward a stale value.
-            let mut sum_rpm = 0.0;
-            let mut count = 0.0;
-            for &rpm in velocities.iter().flatten() {
-                sum_rpm += rpm;
-                count += 1.0;
-            }
-            if count == 0.0 {
+            let (sum_rpm, count) = live_rpm_sum(velocities);
+            if count == 0 {
                 return 0.0;
             }
-            // motor output RPM -> wheel RPM -> wheel rad/s
-            (sum_rpm / count) * gear_ratio * (2.0 * PI / 60.0)
+            wheel_omega_from_rpm(sum_rpm / count as f64, gear_ratio)
         })
     }
 }
@@ -122,19 +134,12 @@ impl<FF, FB> VelocityDifferential<FF, FB, MotorGroupVelocity> {
     /// Reads its velocity feedback from the drive motors' own encoders.
     /// `gear_ratio` configures the built-in [`MotorGroupVelocity`] sources; for a
     /// custom velocity source, use [`with_sources`](Self::with_sources) instead.
-    pub fn new<L, R>(
-        left: L,
-        right: R,
+    pub fn new(
+        left: Rc<RefCell<dyn AsMut<[Motor]>>>,
+        right: Rc<RefCell<dyn AsMut<[Motor]>>>,
         gear_ratio: f64,
         config: VelocityDifferentialConfig<FF, FB>,
-    ) -> Self
-    where
-        L: AsMut<[Motor]> + 'static,
-        R: AsMut<[Motor]> + 'static,
-    {
-        let left: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(left));
-        let right: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(right));
-
+    ) -> Self {
         // Each side gets its own background estimator, owned by its source so the
         // task runs exactly as long as the drivetrain holds the source.
         let left_source =

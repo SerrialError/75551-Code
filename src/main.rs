@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{cell::RefCell, rc::Rc, time::Duration};
 
 use evian::prelude::*;
 use vexide::prelude::*;
@@ -111,23 +111,29 @@ impl Compete for Robot {
 async fn main(peripherals: Peripherals) {
     let forwards_enc = AdiOpticalEncoder::new(peripherals.adi_a, peripherals.adi_b);
     let sideways_enc = AdiOpticalEncoder::new(peripherals.adi_c, peripherals.adi_d);
-    let mut left_motors = [
+    let left_motors = [
         Motor::new(peripherals.port_7, Gearset::Blue, Direction::Forward),
         Motor::new(peripherals.port_8, Gearset::Blue, Direction::Reverse),
         Motor::new(peripherals.port_9, Gearset::Blue, Direction::Reverse),
     ];
-    let mut right_motors = [
+    let right_motors = [
         Motor::new(peripherals.port_17, Gearset::Blue, Direction::Reverse),
         Motor::new(peripherals.port_18, Gearset::Blue, Direction::Reverse),
         Motor::new(peripherals.port_19, Gearset::Blue, Direction::Forward),
     ];
 
+    // Shared ownership of each side's motors: the sysid collector and the
+    // drivetrain's background velocity trackers both drive these through the
+    // same `Rc<RefCell<..>>`.
+    let left: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(left_motors));
+    let right: Rc<RefCell<dyn AsMut<[Motor]>>> = Rc::new(RefCell::new(right_motors));
+
     // System-identification collector: raw-voltage staircase, no drivetrain
     // model or IMU needed. Runs to completion, prints Desmos lists, then exits.
     if RUN_SYSID {
         sysid::collect(
-            &mut left_motors,
-            &mut right_motors,
+            left.clone(),
+            right.clone(),
             &SysIdConfig {
                 // TODO: set this to the drivetrain's real wheel-per-motor gear
                 // ratio (the same value passed to `VelocityDifferential::new`
@@ -146,8 +152,8 @@ async fn main(peripherals: Peripherals) {
     Robot {
         drivetrain: Drivetrain::new(
             VelocityDifferential::new(
-                left_motors,
-                right_motors,
+                left.clone(),
+                right.clone(),
                 // gear_ratio: wheel revs per motor output-shaft rev; 1.0 for
                 // direct drive.
                 0.0,

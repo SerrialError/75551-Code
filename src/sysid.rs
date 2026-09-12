@@ -57,23 +57,18 @@
 //!   enough that the robot fully coasts back to rest between steps.
 
 use std::{
+    cell::RefCell,
     f64::consts::PI,
+    rc::Rc,
     time::{Duration, Instant},
 };
 
-use vexide::{
-    math::Direction,
-    prelude::{sleep, Motor},
-};
+use vexide::prelude::{sleep, Motor};
 
 use crate::{
-    sensor::{TimestampedPosition, MOTOR_RAW_POSITION_RESPECTS_DIRECTION},
-    velocity_estimator::VelocityEstimator,
+    motor_velocity::MotorVelocityTracker,
+    velocity_differential::{live_rpm_sum, wheel_omega_from_rpm},
 };
-
-/// Fallback output-shaft free speed (blue cartridge) if a motor's gearset can't
-/// be read while building its estimator.
-const DEFAULT_GEARSET_RPM: f64 = 600.0;
 
 /// Fraction of each step's samples (from the end) averaged for the settled
 /// speed that feeds the steady-state fit.
@@ -89,11 +84,12 @@ pub struct SysIdConfig {
     pub hold: Duration,
     /// How long to coast between steps so the robot returns to rest.
     pub rest: Duration,
-    /// Sampling period. Must match
-    /// [`MotorVelocityTracker`](crate::motor_velocity::MotorVelocityTracker)'s poll
-    /// rate (`Motor::UPDATE_INTERVAL / 2` = 5 ms) so the estimator's sample-count
-    /// filter windows have identical time constants during identification and in
-    /// the control loop. Changing it invalidates the fitted `Kv`/`Ka`.
+    /// Logging period: how often a `(t, omega)` sample is buffered during each
+    /// step. This controls only the density of the printed data — it does *not*
+    /// affect any filter time constant. The estimator now runs in the shared
+    /// background [`MotorVelocityTracker`](crate::motor_velocity::MotorVelocityTracker)
+    /// at its own fixed poll rate, independent of this value, so changing it
+    /// can't invalidate the fit. 5 ms gives a dense rise for the transient fit.
     pub sample_interval: Duration,
     /// Wheel revolutions per motor output-shaft revolution — the *same*
     /// `gear_ratio` passed to `VelocityDifferential`, so the fitted constants
@@ -116,8 +112,9 @@ impl Default for SysIdConfig {
 
 /// One staircase step: its label, the signed voltage held, and the buffered
 /// `(t, estimated_omega, raw_omega)` samples of the rise. `estimated_omega` comes
-/// from the [`VelocityEstimator`] pipeline; `raw_omega` is the motor's own
-/// unfiltered velocity, kept alongside so the two can be compared in Desmos.
+/// from the per-side [`MotorVelocityTracker`] estimator pipeline; `raw_omega` is
+/// the motor's own unfiltered velocity, kept alongside so the two can be compared
+/// in Desmos.
 struct Step {
     label: String,
     volts: f64,
@@ -131,7 +128,18 @@ struct Step {
 /// `left` and `right` are the two drive sides. They're commanded identically
 /// (equal voltage) so the robot tracks straight; the two sides are lumped into
 /// a single averaged `omega` measurement.
-pub async fn collect(left: &mut [Motor], right: &mut [Motor], config: &SysIdConfig) {
+pub async fn collect(
+    left: Rc<RefCell<dyn AsMut<[Motor]>>>,
+    right: Rc<RefCell<dyn AsMut<[Motor]>>>,
+    config: &SysIdConfig,
+) {
+    // One background estimator per side, the same tracker the drivetrain uses.
+    // They run for the entire staircase — including the `rest` coasts between
+    // steps — so every step starts with warm filter windows instead of the
+    // empty ones a per-step estimator would give.
+    let left_tracker = MotorVelocityTracker::new(left.clone());
+    let right_tracker = MotorVelocityTracker::new(right.clone());
+
     let mut steps = Vec::new();
 
     // Interleave direction per level — run each level forward then immediately
@@ -141,7 +149,7 @@ pub async fn collect(left: &mut [Motor], right: &mut [Motor], config: &SysIdConf
     for &level in config.step_voltages {
         for (phase, sign) in [("fwd", 1.0), ("rev", -1.0)] {
             let volts = sign * level;
-            let samples = run_step(left, right, volts, config).await;
+            let samples = run_step(&left, &right, &left_tracker, &right_tracker, volts, config).await;
             steps.push(Step {
                 label: format!("{phase} {level:.1}V"),
                 volts,
@@ -149,13 +157,13 @@ pub async fn collect(left: &mut [Motor], right: &mut [Motor], config: &SysIdConf
             });
 
             // Coast to a stop before the next step. 0 V = coast on a V5 motor.
-            set_all(left, right, 0.0);
+            set_all(left.borrow_mut().as_mut(), right.borrow_mut().as_mut(), 0.0);
             sleep(config.rest).await;
         }
     }
 
     // Belt and suspenders: make sure nothing is still driving before printing.
-    set_all(left, right, 0.0);
+    set_all(left.borrow_mut().as_mut(), right.borrow_mut().as_mut(), 0.0);
 
     print_desmos(&steps);
 }
@@ -164,69 +172,46 @@ pub async fn collect(left: &mut [Motor], right: &mut [Motor], config: &SysIdConf
 /// `(t, estimated_omega, raw_omega)` sample every `config.sample_interval`. `t`
 /// is measured from the start of this step.
 ///
-/// A fresh [`VelocityEstimator`] per motor is built for each step so the filter
-/// state doesn't carry across the coast between steps.
+/// The estimated velocity is read from the persistent per-side
+/// [`MotorVelocityTracker`]s, which run continuously across all steps, so each
+/// step's filter windows are already warm when it begins.
 async fn run_step(
-    left: &mut [Motor],
-    right: &mut [Motor],
+    left: &Rc<RefCell<dyn AsMut<[Motor]>>>,
+    right: &Rc<RefCell<dyn AsMut<[Motor]>>>,
+    left_tracker: &MotorVelocityTracker,
+    right_tracker: &MotorVelocityTracker,
     volts: f64,
     config: &SysIdConfig,
 ) -> Vec<(f64, f64, f64)> {
     let mut samples = Vec::new();
-    let mut estimators = build_estimators(left, right);
-    let mut velocities = vec![None; estimators.len()];
 
     let start = Instant::now();
     while start.elapsed() < config.hold {
-        set_all(left, right, volts);
-        update_estimators(left, right, &mut estimators, &mut velocities);
-        let estimated = mean_omega(&velocities, config.gear_ratio);
-        let raw = mean_raw_omega(left, right, config.gear_ratio);
+        // Short synchronous borrows only — the tracker task borrows these same
+        // cells on its own schedule, so none may be held across the `.await`.
+        set_all(left.borrow_mut().as_mut(), right.borrow_mut().as_mut(), volts);
+
+        // Lump both sides' live motors into one mean, excluding failed (`None`)
+        // reads, then convert exactly as `MotorGroupVelocity` does.
+        let (left_sum, left_count) = left_tracker.with_velocities(live_rpm_sum);
+        let (right_sum, right_count) = right_tracker.with_velocities(live_rpm_sum);
+        let count = left_count + right_count;
+        let estimated = if count == 0 {
+            0.0
+        } else {
+            wheel_omega_from_rpm((left_sum + right_sum) / count as f64, config.gear_ratio)
+        };
+
+        let raw = mean_raw_omega(
+            left.borrow_mut().as_mut(),
+            right.borrow_mut().as_mut(),
+            config.gear_ratio,
+        );
         let t = start.elapsed().as_secs_f64();
         samples.push((t, estimated, raw));
         sleep(config.sample_interval).await;
     }
     samples
-}
-
-/// One [`VelocityEstimator`] per drive motor (left then right), each seeded with
-/// its motor's gearset free speed.
-fn build_estimators(left: &[Motor], right: &[Motor]) -> Vec<VelocityEstimator> {
-    left.iter()
-        .chain(right.iter())
-        .map(|motor| {
-            let gearset_rpm = motor
-                .gearset()
-                .map(|gearset| gearset.max_rpm())
-                .unwrap_or(DEFAULT_GEARSET_RPM);
-            VelocityEstimator::new(gearset_rpm)
-        })
-        .collect()
-}
-
-/// Feeds one timestamped sample into every estimator, writing the resulting
-/// per-motor output-shaft RPM into `velocities` (left then right). A motor whose
-/// read fails gets `None`, so `mean_omega` excludes it rather than reusing a
-/// stale value.
-fn update_estimators(
-    left: &[Motor],
-    right: &[Motor],
-    estimators: &mut [VelocityEstimator],
-    velocities: &mut [Option<f64>],
-) {
-    for (index, motor) in left.iter().chain(right.iter()).enumerate() {
-        let Ok((ticks, timestamp)) = motor.timestamped_position() else {
-            velocities[index] = None;
-            continue;
-        };
-        let mut rpm = estimators[index].update(ticks, timestamp);
-        if !MOTOR_RAW_POSITION_RESPECTS_DIRECTION
-            && matches!(motor.direction(), Ok(Direction::Reverse))
-        {
-            rpm = -rpm;
-        }
-        velocities[index] = Some(rpm);
-    }
 }
 
 /// Prints the collected steps as Desmos list literals: one steady-state block
@@ -287,23 +272,6 @@ fn set_all(left: &mut [Motor], right: &mut [Motor], volts: f64) {
         let limit = motor.max_voltage();
         let _ = motor.set_voltage(volts.clamp(-limit, limit));
     }
-}
-
-/// Mean wheel angular velocity (rad/s) from the estimator pipeline's per-motor
-/// output-shaft RPM in `velocities`, converting to wheel rad/s exactly as
-/// `MotorGroupVelocity` does. Motors whose read failed (`None`) are excluded;
-/// returns `0.0` when none are live.
-fn mean_omega(velocities: &[Option<f64>], gear_ratio: f64) -> f64 {
-    let mut sum_rpm = 0.0;
-    let mut count = 0.0;
-    for &rpm in velocities.iter().flatten() {
-        sum_rpm += rpm;
-        count += 1.0;
-    }
-    if count == 0.0 {
-        return 0.0;
-    }
-    (sum_rpm / count) * gear_ratio * (2.0 * PI / 60.0)
 }
 
 /// Mean wheel angular velocity (rad/s) from the motors' own *unfiltered*
