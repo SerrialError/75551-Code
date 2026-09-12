@@ -4,6 +4,8 @@
 # Executables
 *.bin
 *.elf
+# Rust / Cargo
+target/
 # PROS
 bin/
 .vscode/
