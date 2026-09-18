@@ -35,11 +35,6 @@ const RUN_SYSID: bool = false;
 /// Flip back to `false` afterwards.
 const RUN_PROBE: bool = false;
 
-/// Gearset shared by every drive motor. Passed to the velocity trackers instead
-/// of read per motor, so a motor that hasn't enumerated yet at power-on can't be
-/// silently mis-scaled.
-const DRIVE_GEARSET: Gearset = Gearset::Blue;
-
 struct Robot {
     drivetrain:
         Drivetrain<VelocityDifferential<MotorFeedforward, Pid, MotorGroupVelocity>, WheeledTracking>,
@@ -135,14 +130,12 @@ async fn main(peripherals: Peripherals) {
     let forwards_enc = AdiOpticalEncoder::new(peripherals.adi_a, peripherals.adi_b);
     let sideways_enc = AdiOpticalEncoder::new(peripherals.adi_c, peripherals.adi_d);
     let mut left_motors = [
-        Motor::new(peripherals.port_7, DRIVE_GEARSET, Direction::Forward),
-        Motor::new(peripherals.port_8, DRIVE_GEARSET, Direction::Reverse),
-        Motor::new(peripherals.port_9, DRIVE_GEARSET, Direction::Reverse),
+        Motor::new(peripherals.port_7, Gearset::Blue, Direction::Forward),
+        Motor::new(peripherals.port_8, Gearset::Blue, Direction::Reverse),
     ];
     let right_motors = [
-        Motor::new(peripherals.port_17, DRIVE_GEARSET, Direction::Reverse),
-        Motor::new(peripherals.port_18, DRIVE_GEARSET, Direction::Reverse),
-        Motor::new(peripherals.port_19, DRIVE_GEARSET, Direction::Forward),
+        Motor::new(peripherals.port_17, Gearset::Blue, Direction::Reverse),
+        Motor::new(peripherals.port_18, Gearset::Blue, Direction::Reverse),
     ];
 
     // Hardware diagnostic: probe one motor for the direction/ticks constants,
