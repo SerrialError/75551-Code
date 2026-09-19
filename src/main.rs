@@ -158,7 +158,7 @@ async fn main(peripherals: Peripherals) {
         sysid::collect(
             left.clone(),
             right.clone(),
-            DRIVE_GEARSET,
+            Gearset::Blue,
             &SysIdConfig {
                 // TODO: set this to the drivetrain's real wheel-per-motor gear
                 // ratio (the same value passed to `VelocityDifferential::new`
@@ -182,7 +182,7 @@ async fn main(peripherals: Peripherals) {
                 // gear_ratio: wheel revs per motor output-shaft rev; 1.0 for
                 // direct drive.
                 0.0,
-                DRIVE_GEARSET,
+                Gearset::Blue,
                 // TODO: characterize the drivetrain and fill these in. Tune the
                 // feedforward first, then the velocity feedback, then the outer
                 // position PIDs above. Gains are in radians / second.
