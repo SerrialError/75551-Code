@@ -15,6 +15,11 @@ mod motor_velocity;
 mod sensor;
 mod velocity_estimator;
 
+mod motion_profile;
+use motion_profile::ProfileConfig;
+
+mod profiles;
+
 mod velocity_differential;
 use velocity_differential::{MotorGroupVelocity, VelocityDifferential, VelocityDifferentialConfig};
 
@@ -65,6 +70,18 @@ impl Robot {
     /// Full-stick angular velocity for teleop, in radians / second.
     // TODO: set the teleop full-stick angular velocity (rad/s).
     const MAX_ANGULAR_VELOCITY: f64 = 0.0;
+
+    /// Corrections applied on top of a motion profile's feedforward.
+    ///
+    /// Tune these *after* the feedforward and the inner velocity loop, and with
+    /// a profile the robot already roughly tracks open loop. Both start at zero,
+    /// which replays the profile with no correction at all. That is a useful first
+    /// run: how far off it lands tells you whether the feedforward is the thing
+    /// that actually needs work.
+    // TODO: tune the profile forward-travel correction (in/s per inch of error).
+    const PROFILE_LINEAR_PID: Pid = Pid::new(0.0, 0.0, 0.0, None);
+    // TODO: tune the profile heading correction (rad/s per radian of error).
+    const PROFILE_ANGULAR_PID: AngularPid = AngularPid::new(0.0, 0.0, 0.0, None);
 }
 
 impl Compete for Robot {
@@ -103,6 +120,18 @@ impl Compete for Robot {
             .with_angular_error_tolerance(f64::to_radians(0.0))
             .with_linear_error_tolerance(0.0)
             .await;
+
+        // Replay a vmplib motion profile. `profiles::example` is placeholder
+        // data; point this at the module generated for the real path. The
+        // profile starts from wherever the robot is now, so whatever ran before
+        // it has to have settled.
+        let mut profile = ProfileConfig {
+            linear_controller: Some(Self::PROFILE_LINEAR_PID),
+            angular_controller: Some(Self::PROFILE_ANGULAR_PID),
+            wheel_units_per_meter: motion_profile::INCHES_PER_METER,
+            update_interval: Motor::WRITE_INTERVAL,
+        };
+        _ = motion_profile::follow(dt, profiles::example::SAMPLES, &mut profile).await;
     }
 
     async fn driver(&mut self) {
