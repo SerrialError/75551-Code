@@ -5,8 +5,8 @@
 //! *velocities* and runs an inner per-side loop that turns them into voltages:
 //!
 //! ```text
-//! left_v  = linear_v + angular_v * (track_width / 2)   [in/s]
-//! right_v = linear_v - angular_v * (track_width / 2)   [in/s]
+//! left_v  = linear_v - angular_v * (track_width / 2)   [in/s]
+//! right_v = linear_v + angular_v * (track_width / 2)   [in/s]
 //! target_w = side_v / wheel_radius                     [rad/s]
 //! volts    = feedforward(target_w, target_a) + feedback(target_w - measured_w)
 //! ```
@@ -17,6 +17,38 @@
 //! averages the drive motors' filtered velocities published by a
 //! [`MotorVelocityTracker`], since `WheeledTracking` only reports robot-frame
 //! velocity.
+//!
+//! [`TankVelocity`] is the second way in. It skips the arcade mixing and takes
+//! per-side velocity and acceleration setpoints directly, which is what
+//! [`motion_profile::follow`](crate::motion_profile::follow) needs to hand the
+//! feedforward a profile's own acceleration instead of a finite difference.
+//!
+//! # Which way is positive
+//!
+//! `steer` is **counterclockwise-positive**: a positive value speeds the right
+//! wheels up and slows the left, turning the robot left. This matches evian's
+//! own frame, where [`TracksHeading`] documents anticlockwise as a positive
+//! rotation and [`TracksVelocity::angular_velocity`] reports in that frame, and
+//! it matches the SI convention a vmplib profile's `angular_velocity` uses.
+//!
+//! evian itself is not consistent about this, so it is worth knowing which of
+//! its motions agree. `Basic::drive_distance`, `Basic::drive_distance_at_heading`,
+//! `Basic::turn_to_heading`, and `Seeking::move_to_point` all sign their angular
+//! output counterclockwise-positive and work correctly here.
+//! `Basic::turn_to_point` and `Seeking::boomerang` sign theirs the other way
+//! (they feed `AngularPid` a negated error against a zero setpoint, which lands
+//! on `heading - target` rather than `target - heading`) and will turn away from
+//! their target with this model. No convention satisfies both halves; this one
+//! satisfies the motions `main.rs` actually calls, plus the tracking system, plus
+//! the profile format. Fixing the other two belongs upstream in the evian fork.
+//!
+//! Note that evian's blanket `impl<T: Tank> Arcade for T` is clockwise-positive,
+//! so a drivetrain built on the stock `Differential` behaves the opposite way.
+//! Teleop code that scales a stick's x-axis into `steer` needs a negation, since
+//! a stick pushed right asks for a clockwise turn.
+//!
+//! [`TracksHeading`]: evian::tracking::TracksHeading
+//! [`TracksVelocity::angular_velocity`]: evian::tracking::TracksVelocity::angular_velocity
 //!
 //! The inner loop regulates each wheel's angular velocity in **radians / second**
 //! — hence a plain `Pid` over `f64` rather than an `AngularPid`, whose `±π` error
@@ -45,6 +77,36 @@ use crate::motor_velocity::{live_rpm_sum, wheel_omega_from_rpm, MotorVelocityTra
 /// radians / second.
 pub trait WheelVelocity {
     fn velocity(&mut self) -> f64;
+}
+
+/// One side's wheel velocity setpoint and the acceleration the feedforward's
+/// `ka` term should assume, in inches / second and inches / second^2.
+///
+/// These are *linear* wheel velocities, the same units as `drive_arcade`'s
+/// `throttle`; the model converts them to radians / second internally.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct WheelSetpoint {
+    pub velocity: f64,
+    pub acceleration: f64,
+}
+
+/// A differential model that takes per-side wheel setpoints directly, skipping
+/// arcade mixing.
+///
+/// [`Arcade`] can only express a velocity, so its model has to finite-difference
+/// the acceleration that feeds the feedforward's `ka` term. A caller replaying a
+/// motion profile already has the exact per-side acceleration and should not
+/// have it thrown away and re-estimated. Such a caller also usually has exact
+/// per-side velocities, which arcade mixing would round-trip through a
+/// track-width that may not match the one the profile was generated against.
+pub trait TankVelocity: DrivetrainModel {
+    /// Commands both sides. `left` and `right` are in inches / second and
+    /// inches / second^2.
+    fn drive_tank_velocity(
+        &mut self,
+        left: WheelSetpoint,
+        right: WheelSetpoint,
+    ) -> Result<(), Self::Error>;
 }
 
 /// A [`WheelVelocity`] source backed by a [`MotorVelocityTracker`], averaging the
@@ -173,6 +235,15 @@ impl<FF, FB, S> VelocityDifferential<FF, FB, S> {
     }
 }
 
+/// Splits a robot-frame command into per-side linear wheel velocities.
+///
+/// `steer` is counterclockwise-positive, so the right side takes the positive
+/// half and the left the negative one. Pulled out of `drive_arcade` so the sign
+/// convention is covered by a test rather than resting on a comment.
+fn arcade_to_sides(throttle: f64, steer: f64, half_track: f64) -> (f64, f64) {
+    (throttle - steer * half_track, throttle + steer * half_track)
+}
+
 /// Clamps `volts` to each motor's range and applies it, returning the last error.
 fn apply_side_voltage(motors: &mut [Motor], volts: f64) -> Result<(), PortError> {
     let mut result = Ok(());
@@ -194,30 +265,32 @@ where
     type Error = PortError;
 }
 
-// We implement `Arcade` directly rather than `Tank`: evian's blanket
-// `impl<T: Tank> Arcade for T` desaturates to 1.0 (normalized power), which would
-// destroy our absolute feedforward voltages. This means `pursuit`, which requires
-// `Tank`, is unavailable with this model.
-impl<FF, FB, S> Arcade for VelocityDifferential<FF, FB, S>
+impl<FF, FB, S> VelocityDifferential<FF, FB, S>
 where
     FF: Feedforward<State = MotorFeedforwardSetpoint, Signal = f64>,
     FB: Feedback<State = f64, Signal = f64>,
     S: WheelVelocity,
 {
-    /// - `throttle`: desired linear velocity, in inches / second.
-    /// - `steer`: desired robot angular velocity, in radians / second.
-    fn drive_arcade(&mut self, throttle: f64, steer: f64) -> Result<(), Self::Error> {
+    /// The shared core of [`drive_arcade`](Arcade::drive_arcade) and
+    /// [`drive_tank_velocity`](TankVelocity::drive_tank_velocity): converts
+    /// per-side *linear* wheel velocities (in/s) into wheel *angular* velocities
+    /// (rad/s) and runs each side's feedforward and feedback into a voltage.
+    ///
+    /// `acceleration` is the matching per-side linear acceleration (in/s^2) when
+    /// the caller knows it. Passing `None` finite-differences the angular
+    /// velocity target against the previous call instead, which is all
+    /// `drive_arcade` can do.
+    fn drive_sides(
+        &mut self,
+        left_linear: f64,
+        right_linear: f64,
+        acceleration: Option<(f64, f64)>,
+    ) -> Result<(), PortError> {
         let dt = self
             .prev_time
             .map(|prev| prev.elapsed())
             .unwrap_or(Duration::from_millis(5));
         let dt_secs = dt.as_secs_f64();
-
-        // Combine robot-frame velocities into per-side *linear* wheel velocities
-        // (in/s), then convert each to a wheel *angular* velocity (rad/s).
-        let half_track = self.config.track_width / 2.0;
-        let left_linear = throttle + steer * half_track;
-        let right_linear = throttle - steer * half_track;
 
         let radius = self.wheel_radius();
         // Guard against an un-configured (zero) wheel diameter.
@@ -233,15 +306,21 @@ where
                 desaturate([left_target, right_target], self.config.max_velocity);
         }
 
-        // Acceleration setpoint for the feedforward `ka` term (finite difference
-        // of the target angular velocity). Skipped on the first tick.
-        let (left_accel, right_accel) = if self.prev_time.is_some() && dt_secs > 0.0 {
-            (
+        // Acceleration setpoint for the feedforward `ka` term. A caller-supplied
+        // value wins: a motion profile's acceleration is exact, where the finite
+        // difference is a one-tick-late estimate that also picks up the velocity
+        // target's noise. Desaturation deliberately does not rescale it. Once the
+        // wheels are saturated the profile is already being violated, and a
+        // slightly optimistic `ka` term is the smaller of the two problems.
+        let (left_accel, right_accel) = match acceleration {
+            Some((left, right)) if radius > 0.0 => (left / radius, right / radius),
+            Some(_) => (0.0, 0.0),
+            // Skipped on the first tick, which has no previous target.
+            None if self.prev_time.is_some() && dt_secs > 0.0 => (
                 (left_target - self.prev_left_target) / dt_secs,
                 (right_target - self.prev_right_target) / dt_secs,
-            )
-        } else {
-            (0.0, 0.0)
+            ),
+            None => (0.0, 0.0),
         };
 
         // Current per-side velocity feedback, a cheap read of the trackers'
@@ -288,6 +367,45 @@ where
     }
 }
 
+// We implement `Arcade` directly rather than `Tank`: evian's blanket
+// `impl<T: Tank> Arcade for T` desaturates to 1.0 (normalized power), which would
+// destroy our absolute feedforward voltages. This means `pursuit`, which requires
+// `Tank`, is unavailable with this model.
+impl<FF, FB, S> Arcade for VelocityDifferential<FF, FB, S>
+where
+    FF: Feedforward<State = MotorFeedforwardSetpoint, Signal = f64>,
+    FB: Feedback<State = f64, Signal = f64>,
+    S: WheelVelocity,
+{
+    /// - `throttle`: desired linear velocity, in inches / second.
+    /// - `steer`: desired robot angular velocity, in radians / second,
+    ///   counterclockwise positive. See the module docs for why, and for which
+    ///   evian motions agree.
+    fn drive_arcade(&mut self, throttle: f64, steer: f64) -> Result<(), Self::Error> {
+        let (left, right) = arcade_to_sides(throttle, steer, self.config.track_width / 2.0);
+        self.drive_sides(left, right, None)
+    }
+}
+
+impl<FF, FB, S> TankVelocity for VelocityDifferential<FF, FB, S>
+where
+    FF: Feedforward<State = MotorFeedforwardSetpoint, Signal = f64>,
+    FB: Feedback<State = f64, Signal = f64>,
+    S: WheelVelocity,
+{
+    fn drive_tank_velocity(
+        &mut self,
+        left: WheelSetpoint,
+        right: WheelSetpoint,
+    ) -> Result<(), Self::Error> {
+        self.drive_sides(
+            left.velocity,
+            right.velocity,
+            Some((left.acceleration, right.acceleration)),
+        )
+    }
+}
+
 /// Sums the (optional) feedforward and (optional) feedback contributions for one
 /// side into a voltage. A missing half contributes `0.0`.
 fn side_voltage<FF, FB>(
@@ -303,6 +421,11 @@ where
     FB: Feedback<State = f64, Signal = f64>,
 {
     let ff = match feedforward {
+        // `MotorFeedforward` computes `ks * velocity.signum()`, and Rust's
+        // `f64::signum` returns `1.0` for `0.0`. Left alone, commanding a full
+        // stop would hold `ks` volts on the motors and creep the robot forward.
+        // A side asked for neither velocity nor acceleration gets no push.
+        Some(_) if target_velocity == 0.0 && target_acceleration == 0.0 => 0.0,
         Some(controller) => controller.update(
             MotorFeedforwardSetpoint {
                 velocity: target_velocity,
@@ -317,4 +440,28 @@ where
         None => 0.0,
     };
     ff + fb
+}
+
+#[cfg(test)]
+mod tests {
+    use super::arcade_to_sides;
+
+    #[test]
+    fn straight_drives_both_sides_equally() {
+        assert_eq!(arcade_to_sides(12.0, 0.0, 6.0), (12.0, 12.0));
+    }
+
+    #[test]
+    fn positive_steer_turns_counterclockwise() {
+        // Turning left: the right wheels outrun the left.
+        let (left, right) = arcade_to_sides(10.0, 1.0, 6.0);
+        assert!(right > left);
+        assert_eq!((left, right), (4.0, 16.0));
+    }
+
+    #[test]
+    fn steer_alone_spins_in_place() {
+        let (left, right) = arcade_to_sides(0.0, 2.0, 6.0);
+        assert_eq!((left, right), (-12.0, 12.0));
+    }
 }

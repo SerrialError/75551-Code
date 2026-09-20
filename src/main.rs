@@ -15,6 +15,11 @@ mod motor_velocity;
 mod sensor;
 mod velocity_estimator;
 
+mod motion_profile;
+use motion_profile::ProfileConfig;
+
+mod profiles;
+
 mod velocity_differential;
 use velocity_differential::{MotorGroupVelocity, VelocityDifferential, VelocityDifferentialConfig};
 
@@ -103,6 +108,15 @@ impl Compete for Robot {
             .with_angular_error_tolerance(f64::to_radians(0.0))
             .with_linear_error_tolerance(0.0)
             .await;
+
+        // Replay a vmplib motion profile. `profiles::example` is placeholder
+        // data; point this at the module generated for the real path.
+        //
+        // This is open loop in position: the only feedback is the drivetrain's
+        // per-side velocity loop, so the `VelocityDifferentialConfig`
+        // feedforward and feedback gains below are what determine whether the
+        // robot ends up where the profile said it would.
+        _ = motion_profile::follow(dt, profiles::example::SAMPLES, &ProfileConfig::default()).await;
     }
 
     async fn driver(&mut self) {
@@ -111,8 +125,12 @@ impl Compete for Robot {
 
             // Sticks scale to a target velocity, driven through the same
             // cascade as autonomous.
+            //
+            // The x-axis is negated because `drive_arcade`'s `steer` is
+            // counterclockwise-positive while a stick pushed right (positive x)
+            // is the driver asking to turn right, which is clockwise.
             let linear_velocity = state.left_stick.y() * Self::MAX_LINEAR_VELOCITY;
-            let angular_velocity = state.left_stick.x() * Self::MAX_ANGULAR_VELOCITY;
+            let angular_velocity = -state.left_stick.x() * Self::MAX_ANGULAR_VELOCITY;
 
             _ = self
                 .drivetrain
