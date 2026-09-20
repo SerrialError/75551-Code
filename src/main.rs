@@ -70,18 +70,6 @@ impl Robot {
     /// Full-stick angular velocity for teleop, in radians / second.
     // TODO: set the teleop full-stick angular velocity (rad/s).
     const MAX_ANGULAR_VELOCITY: f64 = 0.0;
-
-    /// Corrections applied on top of a motion profile's feedforward.
-    ///
-    /// Tune these *after* the feedforward and the inner velocity loop, and with
-    /// a profile the robot already roughly tracks open loop. Both start at zero,
-    /// which replays the profile with no correction at all. That is a useful first
-    /// run: how far off it lands tells you whether the feedforward is the thing
-    /// that actually needs work.
-    // TODO: tune the profile forward-travel correction (in/s per inch of error).
-    const PROFILE_LINEAR_PID: Pid = Pid::new(0.0, 0.0, 0.0, None);
-    // TODO: tune the profile heading correction (rad/s per radian of error).
-    const PROFILE_ANGULAR_PID: AngularPid = AngularPid::new(0.0, 0.0, 0.0, None);
 }
 
 impl Compete for Robot {
@@ -122,16 +110,13 @@ impl Compete for Robot {
             .await;
 
         // Replay a vmplib motion profile. `profiles::example` is placeholder
-        // data; point this at the module generated for the real path. The
-        // profile starts from wherever the robot is now, so whatever ran before
-        // it has to have settled.
-        let mut profile = ProfileConfig {
-            linear_controller: Some(Self::PROFILE_LINEAR_PID),
-            angular_controller: Some(Self::PROFILE_ANGULAR_PID),
-            wheel_units_per_meter: motion_profile::INCHES_PER_METER,
-            update_interval: Motor::WRITE_INTERVAL,
-        };
-        _ = motion_profile::follow(dt, profiles::example::SAMPLES, &mut profile).await;
+        // data; point this at the module generated for the real path.
+        //
+        // This is open loop in position: the only feedback is the drivetrain's
+        // per-side velocity loop, so the `VelocityDifferentialConfig`
+        // feedforward and feedback gains below are what determine whether the
+        // robot ends up where the profile said it would.
+        _ = motion_profile::follow(dt, profiles::example::SAMPLES, &ProfileConfig::default()).await;
     }
 
     async fn driver(&mut self) {

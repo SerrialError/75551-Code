@@ -19,24 +19,26 @@
 //! values instead of a finite difference of the velocity targets, which is the
 //! whole reason a profile carries acceleration in the first place.
 //!
-//! # Correction
+//! # Where the feedback lives
 //!
-//! Replaying velocities open loop is a dead reckoning bet: every unmodelled
-//! loss, every wheel slip, every volt of battery sag integrates straight into
-//! position error, and nothing ever pulls it back. So the follower integrates
-//! the profile's own `linear_velocity` and `angular_velocity` into a *reference*
-//! forward travel and heading, then runs two correction loops against what the
-//! tracking system reports. The linear correction is added to both sides, the
-//! angular correction is added to one and subtracted from the other.
+//! All of it is in the drivetrain's inner per-side velocity loop, none of it
+//! here. Each side's [`MotorFeedforward`] turns the commanded velocity and
+//! acceleration into volts, and each side's optional velocity [`Pid`] trims what
+//! the feedforward gets wrong, both configured on
+//! [`VelocityDifferentialConfig`]. This module adds no loop of its own: it reads
+//! the clock, interpolates the profile, and hands the setpoints over.
 //!
-//! Both controllers are optional. Leave them `None` for a pure open-loop replay,
-//! which is worth doing once when first checking a profile: if open loop already
-//! lands close, the feedforward constants are good and the correction gains only
-//! have to clean up the remainder.
+//! That makes a run **open loop in position**. The velocity loop can hold each
+//! wheel at its commanded speed, but nothing measures where the robot ended up,
+//! so wheel slip, a scrubbed turn, or a wheel diameter that is off by a percent
+//! all integrate into position error that never gets pulled back. Accuracy rests
+//! entirely on the feedforward constants and the velocity loop tracking well.
+//! Check the endpoint against what the profile promised before trusting a path,
+//! and expect error to grow with path length.
 //!
-//! There is no cross-track correction, because these samples carry no pose. A
-//! profile that has drifted sideways is corrected back to the right *heading* and
-//! the right *distance along the path*, not to the path itself.
+//! [`MotorFeedforward`]: evian::control::loops::MotorFeedforward
+//! [`Pid`]: evian::control::loops::Pid
+//! [`VelocityDifferentialConfig`]: crate::velocity_differential::VelocityDifferentialConfig
 //!
 //! # Units
 //!
@@ -50,13 +52,8 @@
 
 use std::time::{Duration, Instant};
 
-use evian::{
-    control::loops::Feedback,
-    drivetrain::Drivetrain,
-    math::Angle,
-    tracking::{TracksForwardTravel, TracksHeading},
-};
-use vexide::prelude::sleep;
+use evian::{drivetrain::Drivetrain, tracking::Tracking};
+use vexide::prelude::{sleep, Motor};
 
 use crate::velocity_differential::{TankVelocity, WheelSetpoint};
 
@@ -86,26 +83,27 @@ pub struct DriveSample {
     pub right_accel: f64,
 }
 
-/// Unit conversion, correction loops, and loop rate for a [`follow`] run.
+/// Unit conversion and loop rate for a [`follow`] run.
 ///
-/// `L` corrects forward travel (wheel units in, wheel units / second out) and
-/// `A` corrects heading (an [`Angle`] in, radians / second out). Either may be
-/// `None`, in which case that axis is left uncorrected.
-pub struct ProfileConfig<L, A> {
-    /// Corrects the robot's forward travel against the profile's integrated
-    /// `linear_velocity`. Output is added to both sides, in wheel units /
-    /// second.
-    pub linear_controller: Option<L>,
-    /// Corrects the robot's heading against the profile's integrated
-    /// `angular_velocity`. Output is in radians / second, counterclockwise
-    /// positive.
-    pub angular_controller: Option<A>,
+/// There are no controllers here. The only feedback in the path is the
+/// drivetrain's own per-side velocity loop; see the module docs.
+pub struct ProfileConfig {
     /// Wheel units per metre, converting vmplib's SI lengths into the units the
     /// drivetrain is configured in. [`INCHES_PER_METER`] for inches, `1.0` for a
     /// robot measured in metres.
     pub wheel_units_per_meter: f64,
     /// How long to sleep between setpoint updates.
     pub update_interval: Duration,
+}
+
+impl Default for ProfileConfig {
+    /// Inches, updated every [`Motor::WRITE_INTERVAL`].
+    fn default() -> Self {
+        Self {
+            wheel_units_per_meter: INCHES_PER_METER,
+            update_interval: Motor::WRITE_INTERVAL,
+        }
+    }
 }
 
 /// Drives `samples` in real time, returning when the profile's last timestamp
@@ -116,36 +114,21 @@ pub struct ProfileConfig<L, A> {
 /// mid-path, so the last error is returned once the profile finishes instead.
 ///
 /// An empty `samples` is a no-op.
-pub async fn follow<M, T, L, A>(
+pub async fn follow<M, T>(
     drivetrain: &mut Drivetrain<M, T>,
     samples: &[DriveSample],
-    config: &mut ProfileConfig<L, A>,
+    config: &ProfileConfig,
 ) -> Result<(), M::Error>
 where
     M: TankVelocity,
-    T: TracksForwardTravel + TracksHeading,
-    L: Feedback<State = f64, Signal = f64>,
-    A: Feedback<State = Angle, Signal = f64>,
+    T: Tracking,
 {
-    let (Some(first), Some(last)) = (samples.first(), samples.last()) else {
+    let Some(last) = samples.last() else {
         return Ok(());
     };
 
     let scale = config.wheel_units_per_meter;
-    let half_track = drivetrain.model.track_width() / 2.0;
-
-    // The samples describe velocities, not a pose, so the reference they imply
-    // is their running integral from wherever the robot currently sits. Anchor
-    // on the tracking system's readings now rather than assuming it was zeroed.
-    let initial_travel = drivetrain.tracking.forward_travel();
-    let initial_heading = drivetrain.tracking.heading();
-    let mut reference_travel = 0.0;
-    let mut reference_heading = 0.0;
-
     let start = Instant::now();
-    let mut prev_time = start;
-    let mut prev_linear = first.linear_velocity * scale;
-    let mut prev_angular = first.angular_velocity;
     let mut result = Ok(());
 
     loop {
@@ -159,48 +142,12 @@ where
         // iteration runs long.
         let sample = sample_at(samples, elapsed);
 
-        let dt = prev_time.elapsed();
-        prev_time = Instant::now();
-        let dt_secs = dt.as_secs_f64();
-
-        // Trapezoidal integration of the commanded velocities. This uses the
-        // loop's own dt, not the profile timestep, because the sample was
-        // interpolated at wall time and the two would otherwise drift apart.
-        let linear = sample.linear_velocity * scale;
-        let angular = sample.angular_velocity;
-        reference_travel += 0.5 * (prev_linear + linear) * dt_secs;
-        reference_heading += 0.5 * (prev_angular + angular) * dt_secs;
-        prev_linear = linear;
-        prev_angular = angular;
-
-        let travel_correction = match config.linear_controller.as_mut() {
-            Some(controller) => controller.update(
-                drivetrain.tracking.forward_travel(),
-                initial_travel + reference_travel,
-                dt,
-            ),
-            None => 0.0,
-        };
-        let heading_correction = match config.angular_controller.as_mut() {
-            Some(controller) => controller.update(
-                drivetrain.tracking.heading(),
-                initial_heading + Angle::from_radians(reference_heading),
-                dt,
-            ),
-            None => 0.0,
-        };
-
-        // Counterclockwise-positive, matching the profile's own sign convention:
-        // turning left means the right wheels speed up and the left slow down.
         let left = WheelSetpoint {
-            velocity: sample.left_velocity * scale + travel_correction
-                - heading_correction * half_track,
+            velocity: sample.left_velocity * scale,
             acceleration: sample.left_accel * scale,
         };
         let right = WheelSetpoint {
-            velocity: sample.right_velocity * scale
-                + travel_correction
-                + heading_correction * half_track,
+            velocity: sample.right_velocity * scale,
             acceleration: sample.right_accel * scale,
         };
 

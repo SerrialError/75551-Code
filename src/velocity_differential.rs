@@ -107,10 +107,6 @@ pub trait TankVelocity: DrivetrainModel {
         left: WheelSetpoint,
         right: WheelSetpoint,
     ) -> Result<(), Self::Error>;
-
-    /// Distance between the left and right wheels, in inches. Callers need it to
-    /// convert a robot-frame angular correction into a per-side one.
-    fn track_width(&self) -> f64;
 }
 
 /// A [`WheelVelocity`] source backed by a [`MotorVelocityTracker`], averaging the
@@ -407,10 +403,6 @@ where
             right.velocity,
             Some((left.acceleration, right.acceleration)),
         )
-    }
-
-    fn track_width(&self) -> f64 {
-        self.config.track_width
     }
 }
 
