@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Everything runs inside the project's devenv shell rather than a rustup
       # toolchain installed here. `cargo v5 build` cross-compiles with
@@ -40,7 +40,7 @@ jobs:
         run: nix profile install nixpkgs#devenv
 
       - name: Cache cargo and build output
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry/index
@@ -69,7 +69,7 @@ jobs:
         run: devenv shell -- cargo v5 build --release
 
       - name: Upload binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: scaffold-bin
           path: target/armv7a-vex-v5/release/*.bin
