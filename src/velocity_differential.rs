@@ -5,8 +5,8 @@
 //! *velocities* and runs an inner per-side loop that turns them into voltages:
 //!
 //! ```text
-//! left_v  = linear_v + angular_v * (track_width / 2)   [in/s]
-//! right_v = linear_v - angular_v * (track_width / 2)   [in/s]
+//! left_v  = linear_v - angular_v * (track_width / 2)   [in/s]
+//! right_v = linear_v + angular_v * (track_width / 2)   [in/s]
 //! target_w = side_v / wheel_radius                     [rad/s]
 //! volts    = feedforward(target_w, target_a) + feedback(target_w - measured_w)
 //! ```
@@ -22,6 +22,33 @@
 //! per-side velocity and acceleration setpoints directly, which is what
 //! [`motion_profile::follow`](crate::motion_profile::follow) needs to hand the
 //! feedforward a profile's own acceleration instead of a finite difference.
+//!
+//! # Which way is positive
+//!
+//! `steer` is **counterclockwise-positive**: a positive value speeds the right
+//! wheels up and slows the left, turning the robot left. This matches evian's
+//! own frame, where [`TracksHeading`] documents anticlockwise as a positive
+//! rotation and [`TracksVelocity::angular_velocity`] reports in that frame, and
+//! it matches the SI convention a vmplib profile's `angular_velocity` uses.
+//!
+//! evian itself is not consistent about this, so it is worth knowing which of
+//! its motions agree. `Basic::drive_distance`, `Basic::drive_distance_at_heading`,
+//! `Basic::turn_to_heading`, and `Seeking::move_to_point` all sign their angular
+//! output counterclockwise-positive and work correctly here.
+//! `Basic::turn_to_point` and `Seeking::boomerang` sign theirs the other way
+//! (they feed `AngularPid` a negated error against a zero setpoint, which lands
+//! on `heading - target` rather than `target - heading`) and will turn away from
+//! their target with this model. No convention satisfies both halves; this one
+//! satisfies the motions `main.rs` actually calls, plus the tracking system, plus
+//! the profile format. Fixing the other two belongs upstream in the evian fork.
+//!
+//! Note that evian's blanket `impl<T: Tank> Arcade for T` is clockwise-positive,
+//! so a drivetrain built on the stock `Differential` behaves the opposite way.
+//! Teleop code that scales a stick's x-axis into `steer` needs a negation, since
+//! a stick pushed right asks for a clockwise turn.
+//!
+//! [`TracksHeading`]: evian::tracking::TracksHeading
+//! [`TracksVelocity::angular_velocity`]: evian::tracking::TracksVelocity::angular_velocity
 //!
 //! The inner loop regulates each wheel's angular velocity in **radians / second**
 //! — hence a plain `Pid` over `f64` rather than an `AngularPid`, whose `±π` error
@@ -212,6 +239,15 @@ impl<FF, FB, S> VelocityDifferential<FF, FB, S> {
     }
 }
 
+/// Splits a robot-frame command into per-side linear wheel velocities.
+///
+/// `steer` is counterclockwise-positive, so the right side takes the positive
+/// half and the left the negative one. Pulled out of `drive_arcade` so the sign
+/// convention is covered by a test rather than resting on a comment.
+fn arcade_to_sides(throttle: f64, steer: f64, half_track: f64) -> (f64, f64) {
+    (throttle - steer * half_track, throttle + steer * half_track)
+}
+
 /// Clamps `volts` to each motor's range and applies it, returning the last error.
 fn apply_side_voltage(motors: &mut [Motor], volts: f64) -> Result<(), PortError> {
     let mut result = Ok(());
@@ -346,15 +382,12 @@ where
     S: WheelVelocity,
 {
     /// - `throttle`: desired linear velocity, in inches / second.
-    /// - `steer`: desired robot angular velocity, in radians / second.
+    /// - `steer`: desired robot angular velocity, in radians / second,
+    ///   counterclockwise positive. See the module docs for why, and for which
+    ///   evian motions agree.
     fn drive_arcade(&mut self, throttle: f64, steer: f64) -> Result<(), Self::Error> {
-        // Combine robot-frame velocities into per-side linear wheel velocities.
-        let half_track = self.config.track_width / 2.0;
-        self.drive_sides(
-            throttle + steer * half_track,
-            throttle - steer * half_track,
-            None,
-        )
+        let (left, right) = arcade_to_sides(throttle, steer, self.config.track_width / 2.0);
+        self.drive_sides(left, right, None)
     }
 }
 
@@ -415,4 +448,28 @@ where
         None => 0.0,
     };
     ff + fb
+}
+
+#[cfg(test)]
+mod tests {
+    use super::arcade_to_sides;
+
+    #[test]
+    fn straight_drives_both_sides_equally() {
+        assert_eq!(arcade_to_sides(12.0, 0.0, 6.0), (12.0, 12.0));
+    }
+
+    #[test]
+    fn positive_steer_turns_counterclockwise() {
+        // Turning left: the right wheels outrun the left.
+        let (left, right) = arcade_to_sides(10.0, 1.0, 6.0);
+        assert!(right > left);
+        assert_eq!((left, right), (4.0, 16.0));
+    }
+
+    #[test]
+    fn steer_alone_spins_in_place() {
+        let (left, right) = arcade_to_sides(0.0, 2.0, 6.0);
+        assert_eq!((left, right), (-12.0, 12.0));
+    }
 }

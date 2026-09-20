@@ -140,8 +140,12 @@ impl Compete for Robot {
 
             // Sticks scale to a target velocity, driven through the same
             // cascade as autonomous.
+            //
+            // The x-axis is negated because `drive_arcade`'s `steer` is
+            // counterclockwise-positive while a stick pushed right (positive x)
+            // is the driver asking to turn right, which is clockwise.
             let linear_velocity = state.left_stick.y() * Self::MAX_LINEAR_VELOCITY;
-            let angular_velocity = state.left_stick.x() * Self::MAX_ANGULAR_VELOCITY;
+            let angular_velocity = -state.left_stick.x() * Self::MAX_ANGULAR_VELOCITY;
 
             _ = self
                 .drivetrain
