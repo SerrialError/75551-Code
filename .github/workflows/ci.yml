@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [vexide-evian]
+  pull_request:
+  workflow_dispatch:
+
+# A force-push while a run is in flight should cancel the stale run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Everything runs inside the project's devenv shell rather than a rustup
+      # toolchain installed here. `cargo v5 build` cross-compiles with
+      # -Zbuild-std against a custom target, which is exactly the thing that
+      # breaks on toolchain drift, so CI uses the same pinned rustc and
+      # cargo-v5 that rust-toolchain.toml and devenv.lock give a developer.
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+            extra-substituters = https://devenv.cachix.org https://nix-community.cachix.org
+            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+
+      - name: Install devenv
+        run: nix profile install nixpkgs#devenv
+
+      - name: Cache cargo and build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - name: Show toolchain
+        run: devenv shell -- bash -c 'rustc --version && cargo --version && cargo v5 --version'
+
+      # `-D warnings` because the tree is currently clippy-clean and should stay
+      # that way. There is deliberately no `cargo fmt --check`: several files
+      # predate the 2024 style edition and rustfmt wants to reorder their
+      # imports, so a format gate would fail on untouched code.
+      - name: Clippy
+        run: devenv shell -- cargo clippy --all-targets -- -D warnings
+
+      # Host-only. The filter, velocity estimator, and motion profile units have
+      # tests; anything touching a Motor does not and cannot here.
+      - name: Test
+        run: devenv shell -- cargo test
+
+      - name: Build for V5
+        run: devenv shell -- cargo v5 build --release
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: scaffold-bin
+          path: target/armv7a-vex-v5/release/*.bin
+          if-no-files-found: error
