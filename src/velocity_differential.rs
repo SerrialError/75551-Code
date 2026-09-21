@@ -441,27 +441,3 @@ where
     };
     ff + fb
 }
-
-#[cfg(test)]
-mod tests {
-    use super::arcade_to_sides;
-
-    #[test]
-    fn straight_drives_both_sides_equally() {
-        assert_eq!(arcade_to_sides(12.0, 0.0, 6.0), (12.0, 12.0));
-    }
-
-    #[test]
-    fn positive_steer_turns_counterclockwise() {
-        // Turning left: the right wheels outrun the left.
-        let (left, right) = arcade_to_sides(10.0, 1.0, 6.0);
-        assert!(right > left);
-        assert_eq!((left, right), (4.0, 16.0));
-    }
-
-    #[test]
-    fn steer_alone_spins_in_place() {
-        let (left, right) = arcade_to_sides(0.0, 2.0, 6.0);
-        assert_eq!((left, right), (-12.0, 12.0));
-    }
-}

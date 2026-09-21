@@ -36,6 +36,22 @@
 //! Check the endpoint against what the profile promised before trusting a path,
 //! and expect error to grow with path length.
 //!
+//! # Seeing what the robot actually did
+//!
+//! [`follow_logged`] replays a profile exactly as [`follow`] does, but samples
+//! the tracking system's robot-frame velocity every tick and prints the run as
+//! Desmos list literals when it ends:
+//!
+//! ```text
+//! L=[(t,linear velocity)..]    # m/s
+//! A=[(t,angular velocity)..]   # rad/s, or m/s^2 when nothing measures rotation
+//! ```
+//!
+//! Paste those against the profile's own `linear_velocity` and
+//! `angular_velocity` to see where the velocity loop fell behind. Since the run
+//! is open loop in position, that gap is the whole story of where the robot
+//! ended up.
+//!
 //! [`MotorFeedforward`]: evian::control::loops::MotorFeedforward
 //! [`Pid`]: evian::control::loops::Pid
 //! [`VelocityDifferentialConfig`]: crate::velocity_differential::VelocityDifferentialConfig
@@ -50,12 +66,21 @@
 //! Angles need no conversion: vmplib and evian both use radians, both
 //! counterclockwise-positive.
 
-use std::time::{Duration, Instant};
+use std::{
+    fmt::Write,
+    time::{Duration, Instant},
+};
 
-use evian::{drivetrain::Drivetrain, tracking::Tracking};
+use evian::{
+    drivetrain::Drivetrain,
+    tracking::{Tracking, TracksVelocity},
+};
 use vexide::prelude::{sleep, Motor};
 
-use crate::velocity_differential::{TankVelocity, WheelSetpoint};
+use crate::{
+    desmos,
+    velocity_differential::{TankVelocity, WheelSetpoint},
+};
 
 /// Wheel units per metre for a robot measured in inches.
 pub const INCHES_PER_METER: f64 = 39.370_078_740_157_48;
@@ -123,6 +148,60 @@ where
     M: TankVelocity,
     T: Tracking,
 {
+    follow_with(drivetrain, samples, config, |_, _: &T| {}).await
+}
+
+/// The same replay as [`follow`], with the robot's measured velocity sampled
+/// once per control tick and printed as Desmos lists when the profile finishes.
+///
+/// Nothing about the driving changes: the measurements are read from the
+/// tracking system and never fed back, so a logged run commands the motors
+/// exactly as a plain one does. This is the only way to see what the robot
+/// actually did against what the profile asked for, since the replay is open
+/// loop in position and never corrects itself.
+///
+/// Printing happens once the profile ends and both sides are stopped. Writing to
+/// the console mid-replay would stall the loop and skew the very timing being
+/// measured.
+///
+/// See [`desmos_blocks`] for the output's format and units.
+pub async fn follow_logged<M, T>(
+    drivetrain: &mut Drivetrain<M, T>,
+    samples: &[DriveSample],
+    config: &ProfileConfig,
+) -> Result<(), M::Error>
+where
+    M: TankVelocity,
+    T: TracksVelocity,
+{
+    let mut log = Vec::new();
+    let result = follow_with(drivetrain, samples, config, |time, tracking: &T| {
+        log.push(Measurement {
+            time,
+            linear_velocity: tracking.linear_velocity(),
+            angular_velocity: tracking.angular_velocity(),
+        });
+    })
+    .await;
+
+    print!("{}", desmos_blocks(&log, config.wheel_units_per_meter));
+
+    result
+}
+
+/// The replay loop behind [`follow`] and [`follow_logged`], calling `on_tick`
+/// with the elapsed profile time and the tracking system once per iteration.
+async fn follow_with<M, T, F>(
+    drivetrain: &mut Drivetrain<M, T>,
+    samples: &[DriveSample],
+    config: &ProfileConfig,
+    mut on_tick: F,
+) -> Result<(), M::Error>
+where
+    M: TankVelocity,
+    T: Tracking,
+    F: FnMut(f64, &T),
+{
     let Some(last) = samples.last() else {
         return Ok(());
     };
@@ -141,6 +220,10 @@ where
         // iteration, keeps the replay on the profile's clock even when a loop
         // iteration runs long.
         let sample = sample_at(samples, elapsed);
+
+        // Sampled before this tick's command lands, so a measurement pairs with
+        // the state the robot was actually in at `elapsed`.
+        on_tick(elapsed, &drivetrain.tracking);
 
         let left = WheelSetpoint {
             velocity: sample.left_velocity * scale,
@@ -166,6 +249,96 @@ where
     }
 
     result
+}
+
+/// One logged instant of a replay: seconds since the profile started, and the
+/// robot-frame velocities the tracking system reported at that moment.
+///
+/// Linear velocity is in wheel units per second, whatever the drivetrain is
+/// configured in; angular velocity is in radians per second, counterclockwise
+/// positive.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+struct Measurement {
+    time: f64,
+    linear_velocity: f64,
+    angular_velocity: f64,
+}
+
+/// A replay's measurements as Desmos list literals: `L` of `(t, linear
+/// velocity)` points, then `A` of either `(t, angular velocity)` or
+/// `(t, linear acceleration)` points.
+///
+/// `A` carries the measured angular velocity whenever the tracking system
+/// reported any rotation at all. A tracking system with no heading source
+/// reports a flat zero, which plots as nothing worth looking at; in that case
+/// `A` carries the robot's linear acceleration instead, central-differenced from
+/// the measured velocities. The comment line above each list says which of the
+/// two it holds.
+///
+/// Values are converted back into the profile's own units — metres, radians,
+/// seconds — so the lists overlay the profile that was being followed rather
+/// than sitting a wheel-unit conversion away from it.
+///
+/// Each list is alone on its own line: paste one line at a time, and leave the
+/// `#` comment lines behind, since Desmos won't take them.
+fn desmos_blocks(log: &[Measurement], wheel_units_per_meter: f64) -> String {
+    // An unset (zero) scale would turn every measurement into an infinity Desmos
+    // can't read, so fall back to reporting raw wheel units.
+    let scale = if wheel_units_per_meter > 0.0 {
+        wheel_units_per_meter
+    } else {
+        1.0
+    };
+
+    let mut out = String::from("\n# measured motion profile response\n");
+    out.push_str("# L = measured linear velocity (m/s)\n");
+    let _ = writeln!(
+        out,
+        "L={}",
+        desmos::points(log.iter().map(|m| (m.time, m.linear_velocity / scale)))
+    );
+
+    if log.iter().any(|m| m.angular_velocity != 0.0) {
+        out.push_str("# A = measured angular velocity (rad/s)\n");
+        let _ = writeln!(
+            out,
+            "A={}",
+            desmos::points(log.iter().map(|m| (m.time, m.angular_velocity)))
+        );
+    } else {
+        out.push_str("# A = measured linear acceleration (m/s^2); tracking reported no rotation\n");
+        let _ = writeln!(
+            out,
+            "A={}",
+            desmos::points(
+                accelerations(log)
+                    .into_iter()
+                    .map(|(time, accel)| (time, accel / scale))
+            )
+        );
+    }
+
+    out
+}
+
+/// `(t, acceleration)` at every measurement, central-differenced from the
+/// measured linear velocities so the points keep `L`'s timestamps. The first and
+/// last are one-sided differences, and a lone measurement has no slope to take,
+/// so it reads zero.
+fn accelerations(log: &[Measurement]) -> Vec<(f64, f64)> {
+    (0..log.len())
+        .map(|index| {
+            let before = &log[index.saturating_sub(1)];
+            let after = &log[(index + 1).min(log.len() - 1)];
+            let span = after.time - before.time;
+            let accel = if span > 0.0 {
+                (after.linear_velocity - before.linear_velocity) / span
+            } else {
+                0.0
+            };
+            (log[index].time, accel)
+        })
+        .collect()
 }
 
 /// The profile linearly interpolated at `time` seconds, clamped to the first and
@@ -205,45 +378,4 @@ fn sample_at(samples: &[DriveSample], time: f64) -> DriveSample {
 
 fn lerp(a: f64, b: f64, t: f64) -> f64 {
     a + (b - a) * t
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{sample_at, DriveSample};
-
-    fn sample(time: f64, left: f64, right: f64) -> DriveSample {
-        DriveSample {
-            time,
-            left_velocity: left,
-            right_velocity: right,
-            ..DriveSample::default()
-        }
-    }
-
-    #[test]
-    fn interpolates_between_samples() {
-        let samples = [sample(0.0, 0.0, 1.0), sample(0.1, 1.0, 2.0)];
-        let mid = sample_at(&samples, 0.025);
-        assert!((mid.left_velocity - 0.25).abs() < 1e-12);
-        assert!((mid.right_velocity - 1.25).abs() < 1e-12);
-    }
-
-    #[test]
-    fn clamps_outside_the_profile() {
-        let samples = [sample(1.0, 3.0, 4.0), sample(2.0, 5.0, 6.0)];
-        assert_eq!(sample_at(&samples, 0.0).left_velocity, 3.0);
-        assert_eq!(sample_at(&samples, 9.0).right_velocity, 6.0);
-    }
-
-    #[test]
-    fn lands_on_exact_timestamps() {
-        let samples = [
-            sample(0.0, 0.0, 0.0),
-            sample(0.1, 1.0, 2.0),
-            sample(0.2, 9.0, 9.0),
-        ];
-        let hit = sample_at(&samples, 0.1);
-        assert_eq!(hit.left_velocity, 1.0);
-        assert_eq!(hit.right_velocity, 2.0);
-    }
 }

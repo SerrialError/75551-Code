@@ -58,6 +58,7 @@
 
 use std::{
     cell::RefCell,
+    fmt::Write,
     rc::Rc,
     time::{Duration, Instant},
 };
@@ -67,7 +68,10 @@ use vexide::{
     smart::motor::Gearset,
 };
 
-use crate::motor_velocity::{live_rpm_sum, wheel_omega_from_rpm, MotorVelocityTracker};
+use crate::{
+    desmos,
+    motor_velocity::{live_rpm_sum, wheel_omega_from_rpm, MotorVelocityTracker},
+};
 
 /// Fraction of each step's samples (from the end) averaged for the settled
 /// speed that feeds the steady-state fit.
@@ -214,46 +218,63 @@ async fn run_step(
     samples
 }
 
-/// Prints the collected steps as Desmos list literals: one steady-state block
-/// for `Ks`/`Kv`, then one transient block per step for `Ka`. Each list is
-/// alone on its own line with a fixed-decimal, scientific-notation-free format
-/// so it pastes into Desmos cleanly.
+/// Prints what [`desmos_blocks`] formatted.
 fn print_desmos(steps: &[Step]) {
+    print!("{}", desmos_blocks(steps));
+}
+
+/// The collected steps as Desmos list literals: one steady-state block for
+/// `Ks`/`Kv`, then one transient block per step for `Ka`. Each list is alone on
+/// its own line with a fixed-decimal, scientific-notation-free format so it
+/// pastes into Desmos cleanly; see [`desmos`](crate::desmos).
+fn desmos_blocks(steps: &[Step]) -> String {
+    let mut out = String::new();
+
     // --- Steady-state fit: settled omega vs commanded volts, one per level ---
-    println!();
-    println!("# steady-state fit -> Ks, Kv   (paste both lists, then:  y_1 ~ K_s sign(x_1) + K_v x_1)");
-    let omegas: Vec<String> = steps
-        .iter()
-        .map(|step| format!("{:.4}", settled_omega(&step.samples)))
-        .collect();
-    let volts: Vec<String> = steps.iter().map(|step| format!("{:.4}", step.volts)).collect();
-    println!("x_1=[{}]", omegas.join(","));
-    println!("y_1=[{}]", volts.join(","));
+    // x_1 is the settled omega of each step and y_1 the volts that held it, in
+    // matching order, which is the pair the module docs' first example fits.
+    out.push('\n');
+    out.push_str(
+        "# steady-state fit -> Ks, Kv   (paste both lists, then:  y_1 ~ K_s sign(x_1) + K_v x_1)\n",
+    );
+    let _ = writeln!(
+        out,
+        "x_1={}",
+        desmos::list(steps.iter().map(|step| settled_omega(&step.samples)))
+    );
+    let _ = writeln!(
+        out,
+        "y_1={}",
+        desmos::list(steps.iter().map(|step| step.volts))
+    );
 
     // --- Transient fits: one step at a time -> tau, then Ka = Kv * tau ---
     // y_1 is the filtered estimator omega (fit this); z_1 is the raw unfiltered
     // omega, plotted alongside as a sanity check on the estimator.
     for step in steps {
-        println!();
-        println!(
-            "# transient {} -> tau=b, Ka=Kv*b   (fit y_1 ~ a(1 - e^{{-x_1/b}}); z_1 is raw omega)",
+        let _ = writeln!(
+            out,
+            "\n# transient {} -> tau=b, Ka=Kv*b   (fit y_1 ~ a(1 - e^{{-x_1/b}}); z_1 is raw omega)",
             step.label
         );
-        let ts: Vec<String> = step.samples.iter().map(|(t, ..)| format!("{t:.4}")).collect();
-        let ws: Vec<String> = step
-            .samples
-            .iter()
-            .map(|(_, estimated, _)| format!("{estimated:.4}"))
-            .collect();
-        let raws: Vec<String> = step
-            .samples
-            .iter()
-            .map(|(.., raw)| format!("{raw:.4}"))
-            .collect();
-        println!("x_1=[{}]", ts.join(","));
-        println!("y_1=[{}]", ws.join(","));
-        println!("z_1=[{}]", raws.join(","));
+        let _ = writeln!(
+            out,
+            "x_1={}",
+            desmos::list(step.samples.iter().map(|&(t, ..)| t))
+        );
+        let _ = writeln!(
+            out,
+            "y_1={}",
+            desmos::list(step.samples.iter().map(|&(_, estimated, _)| estimated))
+        );
+        let _ = writeln!(
+            out,
+            "z_1={}",
+            desmos::list(step.samples.iter().map(|&(.., raw)| raw))
+        );
     }
+
+    out
 }
 
 /// Mean estimated omega over the settled tail of a step's samples.
