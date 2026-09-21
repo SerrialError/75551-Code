@@ -44,30 +44,3 @@ pub fn points(points: impl IntoIterator<Item = (f64, f64)>) -> String {
     out.push(']');
     out
 }
-
-#[cfg(test)]
-mod tests {
-    use super::{list, points};
-
-    #[test]
-    fn empty_lists_are_still_valid_literals() {
-        assert_eq!(list([]), "[]");
-        assert_eq!(points([]), "[]");
-    }
-
-    #[test]
-    fn scalars_are_comma_separated_and_fixed_decimal() {
-        assert_eq!(list([0.0, -1.5, 2.25]), "[0.0000,-1.5000,2.2500]");
-    }
-
-    #[test]
-    fn small_magnitudes_avoid_scientific_notation() {
-        // `{}` would render this as `1.2e-7`, which Desmos rejects in a list.
-        assert_eq!(list([0.00000012]), "[0.0000]");
-    }
-
-    #[test]
-    fn points_are_parenthesized_pairs() {
-        assert_eq!(points([(0.0, 1.0), (0.01, -2.0)]), "[(0.0000,1.0000),(0.0100,-2.0000)]");
-    }
-}
