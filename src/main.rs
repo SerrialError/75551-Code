@@ -10,6 +10,7 @@ use evian::{
     tracking::wheeled::{TrackingWheel, WheeledTracking},
 };
 
+mod desmos;
 mod filters;
 mod motor_velocity;
 mod sensor;
@@ -32,6 +33,14 @@ use sysid::SysIdConfig;
 /// Desmos list literals; copy each block into Desmos to fit `Ks`, `Kv`, and
 /// `Ka` (see `sysid.rs`). Flip back to `false` afterwards.
 const RUN_SYSID: bool = false;
+
+/// Set to `true` to log the motion-profile replay in autonomous. The robot
+/// drives the same path either way; the logged run additionally samples the
+/// tracking system's measured linear and angular velocity every tick and, once
+/// the profile ends, prints them as Desmos lists (`L` and `A`, see
+/// `motion_profile.rs`). Plot those against the profile's own velocities to see
+/// how well the velocity loop tracked it.
+const LOG_PROFILE: bool = false;
 
 /// Set to `true` to run the one-shot hardware diagnostic
 /// (`sensor::probe_direction`) against the first left-side motor instead of the
@@ -116,7 +125,12 @@ impl Compete for Robot {
         // per-side velocity loop, so the `VelocityDifferentialConfig`
         // feedforward and feedback gains below are what determine whether the
         // robot ends up where the profile said it would.
-        _ = motion_profile::follow(dt, profiles::example::SAMPLES, &ProfileConfig::default()).await;
+        let profile_config = ProfileConfig::default();
+        _ = if LOG_PROFILE {
+            motion_profile::follow_logged(dt, profiles::example::SAMPLES, &profile_config).await
+        } else {
+            motion_profile::follow(dt, profiles::example::SAMPLES, &profile_config).await
+        };
     }
 
     async fn driver(&mut self) {

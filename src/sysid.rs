@@ -58,6 +58,7 @@
 
 use std::{
     cell::RefCell,
+    fmt::Write,
     rc::Rc,
     time::{Duration, Instant},
 };
@@ -67,7 +68,10 @@ use vexide::{
     smart::motor::Gearset,
 };
 
-use crate::motor_velocity::{live_rpm_sum, wheel_omega_from_rpm, MotorVelocityTracker};
+use crate::{
+    desmos,
+    motor_velocity::{live_rpm_sum, wheel_omega_from_rpm, MotorVelocityTracker},
+};
 
 /// Fraction of each step's samples (from the end) averaged for the settled
 /// speed that feeds the steady-state fit.
@@ -214,46 +218,63 @@ async fn run_step(
     samples
 }
 
-/// Prints the collected steps as Desmos list literals: one steady-state block
-/// for `Ks`/`Kv`, then one transient block per step for `Ka`. Each list is
-/// alone on its own line with a fixed-decimal, scientific-notation-free format
-/// so it pastes into Desmos cleanly.
+/// Prints what [`desmos_blocks`] formatted.
 fn print_desmos(steps: &[Step]) {
+    print!("{}", desmos_blocks(steps));
+}
+
+/// The collected steps as Desmos list literals: one steady-state block for
+/// `Ks`/`Kv`, then one transient block per step for `Ka`. Each list is alone on
+/// its own line with a fixed-decimal, scientific-notation-free format so it
+/// pastes into Desmos cleanly; see [`desmos`](crate::desmos).
+fn desmos_blocks(steps: &[Step]) -> String {
+    let mut out = String::new();
+
     // --- Steady-state fit: settled omega vs commanded volts, one per level ---
-    println!();
-    println!("# steady-state fit -> Ks, Kv   (paste both lists, then:  y_1 ~ K_s sign(x_1) + K_v x_1)");
-    let omegas: Vec<String> = steps
-        .iter()
-        .map(|step| format!("{:.4}", settled_omega(&step.samples)))
-        .collect();
-    let volts: Vec<String> = steps.iter().map(|step| format!("{:.4}", step.volts)).collect();
-    println!("x_1=[{}]", omegas.join(","));
-    println!("y_1=[{}]", volts.join(","));
+    // x_1 is the settled omega of each step and y_1 the volts that held it, in
+    // matching order, which is the pair the module docs' first example fits.
+    out.push('\n');
+    out.push_str(
+        "# steady-state fit -> Ks, Kv   (paste both lists, then:  y_1 ~ K_s sign(x_1) + K_v x_1)\n",
+    );
+    let _ = writeln!(
+        out,
+        "x_1={}",
+        desmos::list(steps.iter().map(|step| settled_omega(&step.samples)))
+    );
+    let _ = writeln!(
+        out,
+        "y_1={}",
+        desmos::list(steps.iter().map(|step| step.volts))
+    );
 
     // --- Transient fits: one step at a time -> tau, then Ka = Kv * tau ---
     // y_1 is the filtered estimator omega (fit this); z_1 is the raw unfiltered
     // omega, plotted alongside as a sanity check on the estimator.
     for step in steps {
-        println!();
-        println!(
-            "# transient {} -> tau=b, Ka=Kv*b   (fit y_1 ~ a(1 - e^{{-x_1/b}}); z_1 is raw omega)",
+        let _ = writeln!(
+            out,
+            "\n# transient {} -> tau=b, Ka=Kv*b   (fit y_1 ~ a(1 - e^{{-x_1/b}}); z_1 is raw omega)",
             step.label
         );
-        let ts: Vec<String> = step.samples.iter().map(|(t, ..)| format!("{t:.4}")).collect();
-        let ws: Vec<String> = step
-            .samples
-            .iter()
-            .map(|(_, estimated, _)| format!("{estimated:.4}"))
-            .collect();
-        let raws: Vec<String> = step
-            .samples
-            .iter()
-            .map(|(.., raw)| format!("{raw:.4}"))
-            .collect();
-        println!("x_1=[{}]", ts.join(","));
-        println!("y_1=[{}]", ws.join(","));
-        println!("z_1=[{}]", raws.join(","));
+        let _ = writeln!(
+            out,
+            "x_1={}",
+            desmos::list(step.samples.iter().map(|&(t, ..)| t))
+        );
+        let _ = writeln!(
+            out,
+            "y_1={}",
+            desmos::list(step.samples.iter().map(|&(_, estimated, _)| estimated))
+        );
+        let _ = writeln!(
+            out,
+            "z_1={}",
+            desmos::list(step.samples.iter().map(|&(.., raw)| raw))
+        );
     }
+
+    out
 }
 
 /// Mean estimated omega over the settled tail of a step's samples.
@@ -292,4 +313,48 @@ fn mean_raw_omega(left: &[Motor], right: &[Motor], gear_ratio: f64) -> f64 {
         return 0.0;
     }
     wheel_omega_from_rpm(sum_rpm / count, gear_ratio)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{desmos_blocks, Step};
+
+    fn step(label: &str, volts: f64, samples: Vec<(f64, f64, f64)>) -> Step {
+        Step {
+            label: label.to_string(),
+            volts,
+            samples,
+        }
+    }
+
+    /// The module docs promise a steady-state block of one settled omega per
+    /// level in `x_1` against the volts that held it in `y_1`; that pairing is
+    /// what `y_1 ~ K_s sign(x_1) + K_v x_1` fits, so it is worth pinning.
+    #[test]
+    fn steady_state_block_pairs_omega_against_volts() {
+        // A flat step settles at its own omega, whatever `SETTLE_TAIL` keeps.
+        let steps = [
+            step("fwd 2.0V", 2.0, vec![(0.0, 10.0, 10.0); 4]),
+            step("rev 2.0V", -2.0, vec![(0.0, -10.0, -10.0); 4]),
+        ];
+        let blocks = desmos_blocks(&steps);
+
+        assert!(blocks.contains("\nx_1=[10.0000,-10.0000]\n"));
+        assert!(blocks.contains("\ny_1=[2.0000,-2.0000]\n"));
+    }
+
+    #[test]
+    fn each_step_gets_its_own_transient_block() {
+        let steps = [step(
+            "fwd 2.0V",
+            2.0,
+            vec![(0.0, 0.0, 0.1), (0.005, 1.0, 1.2)],
+        )];
+        let blocks = desmos_blocks(&steps);
+
+        assert!(blocks.contains("# transient fwd 2.0V"));
+        assert!(blocks.contains("\nx_1=[0.0000,0.0050]\n"));
+        assert!(blocks.contains("\ny_1=[0.0000,1.0000]\n"));
+        assert!(blocks.contains("\nz_1=[0.1000,1.2000]\n"));
+    }
 }
