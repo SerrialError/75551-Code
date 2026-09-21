@@ -47,7 +47,7 @@ const LOG_PROFILE: bool = false;
 /// normal competition code. It reports whether `raw_position()` honors the
 /// direction flag and the measured ticks per internal revolution, then exits.
 /// Flip back to `false` afterwards.
-const RUN_PROBE: bool = false;
+const RUN_PROBE: bool = true;
 
 struct Robot {
     drivetrain:
@@ -159,8 +159,8 @@ impl Compete for Robot {
 
 #[vexide::main]
 async fn main(peripherals: Peripherals) {
-    let forwards_enc = AdiOpticalEncoder::new(peripherals.adi_a, peripherals.adi_b);
-    let sideways_enc = AdiOpticalEncoder::new(peripherals.adi_c, peripherals.adi_d);
+    let forwards_enc = RotationSensor::new(peripherals.port_1, Direction::Forward);
+    let sideways_enc = RotationSensor::new(peripherals.port_2, Direction::Forward);
     let mut left_motors = [
         Motor::new(peripherals.port_7, Gearset::Blue, Direction::Forward),
         Motor::new(peripherals.port_8, Gearset::Blue, Direction::Reverse),
@@ -195,7 +195,7 @@ async fn main(peripherals: Peripherals) {
                 // TODO: set this to the drivetrain's real wheel-per-motor gear
                 // ratio (the same value passed to `VelocityDifferential::new`
                 // below) so the fitted constants are in the controller's units.
-                gear_ratio: 1.0,
+                gear_ratio: 0.75,
                 ..SysIdConfig::default()
             },
         )
@@ -213,7 +213,7 @@ async fn main(peripherals: Peripherals) {
                 right.clone(),
                 // gear_ratio: wheel revs per motor output-shaft rev; 1.0 for
                 // direct drive.
-                0.0,
+                0.75,
                 Gearset::Blue,
                 // TODO: characterize the drivetrain and fill these in. Tune the
                 // feedforward first, then the velocity feedback, then the outer
@@ -223,8 +223,8 @@ async fn main(peripherals: Peripherals) {
                     right_velocity_feedforward: Some(MotorFeedforward::new(0.0, 0.0, 0.0)),
                     left_velocity_feedback: Some(Pid::new(0.0, 0.0, 0.0, None)),
                     right_velocity_feedback: Some(Pid::new(0.0, 0.0, 0.0, None)),
-                    wheel_diameter: 0.0,
-                    track_width: 0.0,
+                    wheel_diameter: 3.25,
+                    track_width: 10.297218,
                     max_velocity: 0.0,
                 },
             ),
