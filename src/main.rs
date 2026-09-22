@@ -192,9 +192,6 @@ async fn main(peripherals: Peripherals) {
             right.clone(),
             Gearset::Blue,
             &SysIdConfig {
-                // TODO: set this to the drivetrain's real wheel-per-motor gear
-                // ratio (the same value passed to `VelocityDifferential::new`
-                // below) so the fitted constants are in the controller's units.
                 gear_ratio: 0.75,
                 ..SysIdConfig::default()
             },
@@ -228,8 +225,7 @@ async fn main(peripherals: Peripherals) {
                     max_velocity: 0.0,
                 },
             ),
-            // TODO: set the starting pose (position in inches, heading) and the
-            // tracking-wheel geometry (wheel diameter and offset, in inches).
+            // TODO: set the tracking-wheel geometry (wheel diameter and offset, in inches).
             WheeledTracking::new(
                 (0.0, 0.0),
                 0.0.deg(),
