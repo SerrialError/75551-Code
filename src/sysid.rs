@@ -229,8 +229,10 @@ fn desmos_blocks(steps: &[Step]) -> String {
     // x_1 is the settled omega of each step and y_1 the volts that held it, in
     // matching order, which is the pair the module docs' first example fits.
     out.push('\n');
-    out.push_str(
-        "# steady-state fit -> Ks, Kv   (paste both lists, then:  y_1 ~ K_s sign(x_1) + K_v x_1)\n",
+    let _ = writeln!(
+        out,
+        "# steady-state fit -> Ks, Kv   ({} points; each list must have this many) (paste both lists, then:  y_1 ~ K_s sign(x_1) + K_v x_1)",
+        steps.len()
     );
     let _ = writeln!(
         out,
@@ -249,8 +251,9 @@ fn desmos_blocks(steps: &[Step]) -> String {
     for step in steps {
         let _ = writeln!(
             out,
-            "\n# transient {} -> tau=b, Ka=Kv*b   (fit y_1 ~ a(1 - e^{{-x_1/b}}); z_1 is raw omega)",
-            step.label
+            "\n# transient {} ({} samples; each list must have this many) -> tau=b, Ka=Kv*b   (fit y_1 ~ a(1 - e^{{-x_1/b}}); z_1 is raw omega)",
+            step.label,
+            step.samples.len()
         );
         let _ = writeln!(
             out,
