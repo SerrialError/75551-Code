@@ -30,8 +30,8 @@ use sysid::{MotorGroup, SysIdConfig};
 /// Set to `true` to run the feedforward system-identification collector
 /// (`sysid::collect`) instead of the normal competition code. It drives a
 /// forward-then-reverse voltage staircase and, when done, prints the data as
-/// Desmos list literals; copy each block into Desmos to fit `Ks`, `Kv`, and
-/// `Ka` (see `sysid.rs`). Flip back to `false` afterwards.
+/// Desmos expressions; paste each side's block into its own Desmos graph to
+/// fit `Ks`, `Kv`, and `Ka` (see `sysid.rs`). Flip back to `false` afterwards.
 const RUN_SYSID: bool = true;
 
 /// Set to `true` to log the motion-profile replay in autonomous. The robot

@@ -79,8 +79,9 @@ const GAIN_MAX: f64 = 0.75;
 // rescue small disturbances near steady state, where `peak` stays low, the gain
 // sits at this floor, and the loop reacts to information up to a second stale.
 //
-// Check this against the sysid traces: if `y_1` visibly lags into the flat
-// region while `z_1` has already settled, the floor is too low. First thing to
+// Check this against the sysid traces: if the filtered `W` curves visibly lag
+// into the flat region while the raw `R` curves have already settled, the
+// floor is too low. First thing to
 // try is raising this to ~0.05 (a ~200 ms time constant) and re-running.
 const GAIN_MIN: f64 = 0.0096;
 

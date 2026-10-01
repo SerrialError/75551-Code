@@ -19,31 +19,44 @@
 //!
 //! Samples are buffered during the run and, once the whole staircase finishes,
 //! printed to the console as **Desmos list literals** ready to copy-paste. The
-//! dump has one section per group, in the order the groups were passed, each
-//! with the same two fits, done in Desmos:
+//! dump has one block per group, in the order the groups were passed, holding
+//! only that group's data lists:
 //!
-//! 1. **Steady-state fit → `Ks`, `Kv`.** One `(settled omega, commanded volts)`
-//!    point per step:
+//! ```text
+//! V=[signed volts per step]
+//! S=[settled omega per step]
+//! T=[time since its step started, every sample of every step]
+//! W=[filtered estimator omega, every sample]
+//! R=[raw unfiltered omega, every sample]
+//! N=[step number (1-based, into V and S) of every sample]
+//! ```
 //!
-//!    ```text
-//!    x_1=[settled omega per level]
-//!    y_1=[matching commanded volts]
-//!    ```
-//!    then in Desmos: `y_1 ~ K_s sign(x_1) + K_v x_1`.
+//! The dump carries no fitting expressions. Those live in a Desmos template
+//! graph you set up once; each run you paste one group's six lists over the
+//! template's. The template's expressions:
 //!
-//! 2. **Transient fit → `Ka`.** Each step's rise, one step at a time:
+//! ```text
+//! V ~ K_s sign(S) + K_v S
+//! t_0 = 0.05
+//! T_2 = T[T > t_0]
+//! F = W[T > t_0] / S[N[T > t_0]]
+//! F ~ 1 - e^{-(T_2 - c)/b}
+//! (T, W/S[N])
+//! (T, R/S[N])
+//! K_a = K_v b
+//! ```
 //!
-//!    ```text
-//!    x_1=[time since step start]
-//!    y_1=[filtered estimator omega]   # fit this
-//!    z_1=[raw unfiltered omega]       # plotted as a sanity check, not fitted
-//!    ```
-//!    then in Desmos: `y_1 ~ a(1 - e^{-x_1/b})`, where `b` is the time constant
-//!    `tau` and `Ka = Kv * tau` (from `tau = Ka/Kv`). Fit each step's block on
-//!    its own and take the median `tau` across steps.
+//! 1. **Steady-state fit → `Ks`, `Kv`:** `V ~ K_s sign(S) + K_v S`.
+//! 2. **Transient fit → `Ka`.** Dividing each sample by its own step's settled
+//!    speed (`W/S[N]`) turns every step's rise, at any voltage and in either
+//!    direction, into the same `0 → 1` curve `1 - e^{-t/tau}` with
+//!    `tau = Ka/Kv`. So one regression fits `tau` (`b`) across all steps at
+//!    once, `K_a = K_v b` reads off `Ka`, and plotting `(T, W/S[N])` overlays
+//!    every step so a bad one stands out. The slider `t_0` drops each step's
+//!    first `t_0` seconds (the current-limited ramp) from the fit; `c` absorbs
+//!    the resulting time shift.
 //!
-//! Fit each group's section separately and use its own `Kv` for
-//! `Ka = Kv * tau`.
+//! Each group gets its own graph and its own constants.
 //!
 //! `omega` uses the same motor-RPM → output-rad/s conversion as
 //! [`MotorGroupVelocity`](crate::velocity_differential::MotorGroupVelocity), so
@@ -52,19 +65,17 @@
 //! [`MotorFeedforward::new`](evian::control::loops::MotorFeedforward).
 //!
 //! ## Paste rules (Desmos silently breaks otherwise)
-//! - Every list is on its own line and starts with `x_1=[`, `y_1=[`, or `z_1=[`
-//!   — copy one whole line at a time; the `# ...` label lines are just guides,
-//!   don't paste them.
-//! - Paste one block's lists into a fresh Desmos before fitting; the reused
-//!   `x_1`/`y_1`/`z_1` names collide if you paste two blocks at once.
+//! - Paste each list over the matching list in the template, one whole line
+//!   at a time; the `#` lines are just guides. The groups reuse the same
+//!   names, so fit one group at a time.
 //! - Numbers are fixed-decimal — Desmos can't read scientific notation like
 //!   `1.2e-3` inside a list.
 //!
 //! ## Collecting good data
 //! - Run on the ground at competition weight, on a full battery.
 //! - Keep the step voltages modest (≈2–7 V) so the motor current limit doesn't
-//!   dominate each step's rise. When fitting a transient in Desmos, restrict the
-//!   domain to skip the current-limited start and the noisy settled tail.
+//!   dominate each step's rise. Raise `t_0` in Desmos to skip whatever
+//!   current-limited start remains.
 //! - Make `hold` long enough that the speed visibly plateaus, and `rest` long
 //!   enough that the mechanism fully coasts back to rest between steps.
 
@@ -232,65 +243,55 @@ async fn run_step(
     (times, omegas)
 }
 
-/// The collected steps as Desmos list literals, one section per group. Each
-/// section has one steady-state block for `Ks`/`Kv`, then one transient block
-/// per step for `Ka`. Each list is alone on its own line with a fixed-decimal,
-/// scientific-notation-free format so it pastes into Desmos cleanly; see
-/// [`desmos`](crate::desmos).
+/// The collected steps as one block of Desmos data lists per group, with every
+/// step's samples concatenated. The fitting expressions are not printed; they
+/// live in the Desmos template described in the module docs. Each list is
+/// alone on its own line with a fixed-decimal, scientific-notation-free format
+/// so it pastes into Desmos cleanly; see [`desmos`](crate::desmos).
 fn desmos_blocks(groups: &[MotorGroup], steps: &[Step]) -> String {
     let mut out = String::new();
 
+    // Shared by every group: all groups were sampled together.
+    let legend: Vec<String> = steps
+        .iter()
+        .enumerate()
+        .map(|(index, step)| format!("{}={}", index + 1, step.label))
+        .collect();
+    let sample_count: usize = steps.iter().map(|step| step.times.len()).sum();
+    let times = desmos::list(steps.iter().flat_map(|step| step.times.iter().copied()));
+    let step_numbers = desmos::int_list(
+        steps
+            .iter()
+            .enumerate()
+            .flat_map(|(index, step)| std::iter::repeat_n(index + 1, step.times.len())),
+    );
+
     for (index, group) in groups.iter().enumerate() {
         let name = group.name;
+        let samples = || steps.iter().flat_map(move |step| step.omegas[index].iter());
+
         let _ = writeln!(
             out,
             "\n# ===== {name} ({} motors) =====",
             group.motors.borrow_mut().as_mut().len()
         );
-
-        // --- Steady-state fit: settled omega vs commanded volts, one per level ---
-        // x_1 is the settled omega of each step and y_1 the volts that held it,
-        // in matching order, which is the pair the module docs' first example
-        // fits.
+        let _ = writeln!(out, "# steps (N): {}", legend.join(", "));
         let _ = writeln!(
             out,
-            "\n# {name} steady-state fit -> Ks, Kv   ({} points; each list must have this many) (paste both lists, then:  y_1 ~ K_s sign(x_1) + K_v x_1)",
+            "# V and S have {} entries; T, W, R and N have {sample_count}",
             steps.len()
         );
+
+        let _ = writeln!(out, "V={}", desmos::list(steps.iter().map(|step| step.volts)));
         let _ = writeln!(
             out,
-            "x_1={}",
+            "S={}",
             desmos::list(steps.iter().map(|step| settled_omega(&step.omegas[index])))
         );
-        let _ = writeln!(
-            out,
-            "y_1={}",
-            desmos::list(steps.iter().map(|step| step.volts))
-        );
-
-        // --- Transient fits: one step at a time -> tau, then Ka = Kv * tau ---
-        // y_1 is the filtered estimator omega (fit this); z_1 is the raw
-        // unfiltered omega, plotted alongside as a sanity check on the estimator.
-        for step in steps {
-            let samples = &step.omegas[index];
-            let _ = writeln!(
-                out,
-                "\n# {name} transient {} ({} samples; each list must have this many) -> tau=b, Ka=Kv*b   (fit y_1 ~ a(1 - e^{{-x_1/b}}); z_1 is raw omega)",
-                step.label,
-                samples.len()
-            );
-            let _ = writeln!(out, "x_1={}", desmos::list(step.times.iter().copied()));
-            let _ = writeln!(
-                out,
-                "y_1={}",
-                desmos::list(samples.iter().map(|omega| omega.estimated))
-            );
-            let _ = writeln!(
-                out,
-                "z_1={}",
-                desmos::list(samples.iter().map(|omega| omega.raw))
-            );
-        }
+        let _ = writeln!(out, "T={times}");
+        let _ = writeln!(out, "W={}", desmos::list(samples().map(|omega| omega.estimated)));
+        let _ = writeln!(out, "R={}", desmos::list(samples().map(|omega| omega.raw)));
+        let _ = writeln!(out, "N={step_numbers}");
     }
 
     out
