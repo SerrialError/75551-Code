@@ -169,7 +169,7 @@ pub async fn collect(
     // Belt and suspenders: make sure nothing is still driving before printing.
     set_all(left.borrow_mut().as_mut(), right.borrow_mut().as_mut(), 0.0);
 
-    print_desmos(&steps);
+    desmos::print_paced(&desmos_blocks(&steps)).await;
 }
 
 /// Holds `volts` on every motor for `config.hold`, buffering a
@@ -216,11 +216,6 @@ async fn run_step(
         sleep(config.sample_interval).await;
     }
     samples
-}
-
-/// Prints what [`desmos_blocks`] formatted.
-fn print_desmos(steps: &[Step]) {
-    print!("{}", desmos_blocks(steps));
 }
 
 /// The collected steps as Desmos list literals: one steady-state block for

@@ -184,7 +184,7 @@ where
     })
     .await;
 
-    print!("{}", desmos_blocks(&log, config.wheel_units_per_meter));
+    crate::desmos::print_paced(&desmos_blocks(&log, config.wheel_units_per_meter)).await;
 
     result
 }
