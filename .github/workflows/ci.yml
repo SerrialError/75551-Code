@@ -6,10 +6,12 @@ on:
   pull_request:
   workflow_dispatch:
 
-# A force-push while a run is in flight should cancel the stale run.
+# On a PR, a force-push while a run is in flight should cancel the stale run.
+# Branch pushes queue instead, so back-to-back commits each get a result
+# (GitHub keeps only one pending run per group, so a burst still skips some).
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   CARGO_TERM_COLOR: always
