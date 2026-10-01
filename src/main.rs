@@ -25,7 +25,7 @@ mod velocity_differential;
 use velocity_differential::{MotorGroupVelocity, VelocityDifferential, VelocityDifferentialConfig};
 
 mod sysid;
-use sysid::SysIdConfig;
+use sysid::{MotorGroup, SysIdConfig};
 
 /// Set to `true` to run the feedforward system-identification collector
 /// (`sysid::collect`) instead of the normal competition code. It drives a
@@ -187,9 +187,18 @@ async fn main(peripherals: Peripherals) {
     // System-identification collector: raw-voltage staircase, no drivetrain
     // model or IMU needed. Runs to completion, prints Desmos lists, then exits.
     if RUN_SYSID {
+        // Each side is fitted as one motor: one set of constants per side.
         sysid::collect(
-            left.clone(),
-            right.clone(),
+            &[
+                MotorGroup {
+                    name: "left",
+                    motors: left.clone(),
+                },
+                MotorGroup {
+                    name: "right",
+                    motors: right.clone(),
+                },
+            ],
             Gearset::Blue,
             &SysIdConfig {
                 gear_ratio: 0.75,
