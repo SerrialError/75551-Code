@@ -90,7 +90,21 @@ pub fn list(values: impl IntoIterator<Item = f64>) -> String {
     out
 }
 
-/// A list of points: `[(0.0000,1.0000),(0.0100,1.5000)]`.
+/// A list of integers, without decimal places: `[1,1,2]`. For indices, where
+/// the trailing `.0000` would only bloat the dump.
+pub fn int_list(values: impl IntoIterator<Item = usize>) -> String {
+    let mut out = String::from("[");
+    for (index, value) in values.into_iter().enumerate() {
+        if index > 0 {
+            out.push(',');
+        }
+        let _ = write!(out, "{value}");
+    }
+    out.push(']');
+    out
+}
+
+/// A list of points:`[(0.0000,1.0000),(0.0100,1.5000)]`.
 pub fn points(points: impl IntoIterator<Item = (f64, f64)>) -> String {
     let mut out = String::from("[");
     for (index, (x, y)) in points.into_iter().enumerate() {
