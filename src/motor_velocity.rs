@@ -22,7 +22,6 @@
 use std::{cell::RefCell, f64::consts::PI, rc::Rc};
 
 use vexide::{
-    math::Direction,
     prelude::sleep,
     smart::{
         motor::{Gearset, Motor},
@@ -32,7 +31,7 @@ use vexide::{
 };
 
 use crate::{
-    sensor::{TimestampedPosition, MOTOR_RAW_POSITION_RESPECTS_DIRECTION},
+    sensor::TimestampedPosition,
     velocity_estimator::VelocityEstimator,
 };
 
@@ -108,13 +107,7 @@ impl MotorVelocityTracker {
                         results[index] = None;
                         continue;
                     };
-                    let mut rpm = estimators[index].update(ticks, timestamp);
-                    if !MOTOR_RAW_POSITION_RESPECTS_DIRECTION
-                        && matches!(motor.direction(), Ok(Direction::Reverse))
-                    {
-                        rpm = -rpm;
-                    }
-                    results[index] = Some(rpm);
+                    results[index] = Some(estimators[index].update(ticks, timestamp));
                 }
             }
         });

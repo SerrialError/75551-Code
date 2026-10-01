@@ -42,13 +42,6 @@ const RUN_SYSID: bool = true;
 /// how well the velocity loop tracked it.
 const LOG_PROFILE: bool = false;
 
-/// Set to `true` to run the one-shot hardware diagnostic
-/// (`sensor::probe_direction`) against the first left-side motor instead of the
-/// normal competition code. It reports whether `raw_position()` honors the
-/// direction flag and the measured ticks per internal revolution, then exits.
-/// Flip back to `false` afterwards.
-const RUN_PROBE: bool = false;
-
 struct Robot {
     drivetrain:
         Drivetrain<VelocityDifferential<MotorFeedforward, Pid, MotorGroupVelocity>, WheeledTracking>,
@@ -161,7 +154,7 @@ impl Compete for Robot {
 async fn main(peripherals: Peripherals) {
     let forwards_enc = RotationSensor::new(peripherals.port_1, Direction::Forward);
     let sideways_enc = RotationSensor::new(peripherals.port_2, Direction::Forward);
-    let mut left_motors = [
+    let left_motors = [
         Motor::new(peripherals.port_10, Gearset::Blue, Direction::Reverse),
         Motor::new(peripherals.port_20, Gearset::Blue, Direction::Reverse),
     ];
@@ -169,14 +162,6 @@ async fn main(peripherals: Peripherals) {
         Motor::new(peripherals.port_11, Gearset::Blue, Direction::Forward),
         Motor::new(peripherals.port_19, Gearset::Blue, Direction::Forward),
     ];
-
-    // Hardware diagnostic: probe one motor for the direction/ticks constants,
-    // then exit. Runs before the motors are shared, so it never contends for a
-    // borrow. No drivetrain model or IMU needed.
-    if RUN_PROBE {
-        let _ = sensor::probe_direction(&mut left_motors[0]).await;
-        return;
-    }
 
     // Shared ownership of each side's motors: the sysid collector and the
     // drivetrain's background velocity trackers both drive these through the
