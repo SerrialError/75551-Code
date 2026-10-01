@@ -20,7 +20,6 @@ use vexide::{
 ///
 /// If `false`, callers must negate the estimator's output for motors configured
 /// [`Direction::Reverse`](vexide::smart::motor::Direction::Reverse).
-// TODO: verify on hardware with `probe_direction`.
 pub const MOTOR_RAW_POSITION_RESPECTS_DIRECTION: bool = true;
 
 /// A source of a device's raw encoder position tagged with the Brain's clock

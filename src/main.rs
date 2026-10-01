@@ -32,7 +32,7 @@ use sysid::{MotorGroup, SysIdConfig};
 /// forward-then-reverse voltage staircase and, when done, prints the data as
 /// Desmos list literals; copy each block into Desmos to fit `Ks`, `Kv`, and
 /// `Ka` (see `sysid.rs`). Flip back to `false` afterwards.
-const RUN_SYSID: bool = false;
+const RUN_SYSID: bool = true;
 
 /// Set to `true` to log the motion-profile replay in autonomous. The robot
 /// drives the same path either way; the logged run additionally samples the
@@ -47,7 +47,7 @@ const LOG_PROFILE: bool = false;
 /// normal competition code. It reports whether `raw_position()` honors the
 /// direction flag and the measured ticks per internal revolution, then exits.
 /// Flip back to `false` afterwards.
-const RUN_PROBE: bool = true;
+const RUN_PROBE: bool = false;
 
 struct Robot {
     drivetrain:
@@ -162,12 +162,12 @@ async fn main(peripherals: Peripherals) {
     let forwards_enc = RotationSensor::new(peripherals.port_1, Direction::Forward);
     let sideways_enc = RotationSensor::new(peripherals.port_2, Direction::Forward);
     let mut left_motors = [
-        Motor::new(peripherals.port_7, Gearset::Blue, Direction::Forward),
-        Motor::new(peripherals.port_8, Gearset::Blue, Direction::Reverse),
+        Motor::new(peripherals.port_10, Gearset::Blue, Direction::Reverse),
+        Motor::new(peripherals.port_20, Gearset::Blue, Direction::Reverse),
     ];
     let right_motors = [
-        Motor::new(peripherals.port_17, Gearset::Blue, Direction::Reverse),
-        Motor::new(peripherals.port_18, Gearset::Blue, Direction::Reverse),
+        Motor::new(peripherals.port_11, Gearset::Blue, Direction::Forward),
+        Motor::new(peripherals.port_19, Gearset::Blue, Direction::Forward),
     ];
 
     // Hardware diagnostic: probe one motor for the direction/ticks constants,
